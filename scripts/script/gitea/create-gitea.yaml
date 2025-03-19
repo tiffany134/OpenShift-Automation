@@ -1,0 +1,74 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: gitea # Change this value if you want a different namespace name
+  labels:
+    name: gitea # Change this value to match metadata.name
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gitea
+  namespace: gitea
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gitea
+  template:
+    metadata:
+      labels:
+        app: gitea
+    spec:
+      serviceAccountName: gitea-sa
+      containers:
+        - name: gitea
+          image: ${REGISTRY}/gitea/gitea:1.21.7
+          ports:
+            - containerPort: 3000
+              name: gitea
+          volumeMounts:
+            - mountPath: /data
+              name: gitea-pvc
+      volumes:
+        - name: gitea-pvc
+          persistentVolumeClaim:
+            claimName: gitea-pvc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: gitea-pvc
+  namespace: gitea
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gitea
+  namespace: gitea
+spec:
+  selector:
+    app: gitea
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 3000
+---
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: gitea
+  namespace: gitea
+spec:
+  to:
+    kind: Service
+    name: gitea
+    weight: 100
+  port:

@@ -1,0 +1,76 @@
+---
+version: 3
+images:
+  base_image:
+    name: registry.redhat.io/ansible-automation-platform-24/ee-supported-rhel9:latest
+dependencies:
+  python_interpreter:
+    package_system: python3.9
+    python_path: /usr/bin/python3.9
+  ansible_core:
+    # Require minimum of 2.15 to get ansible-inventory --limit option
+    package_pip: ansible-core>=2.15.0rc2,<2.16
+  ansible_core:
+    package_pip: dnspython==2.7.0
+  ansible_runner:
+    package_pip: ansible-runner
+  galaxy: |
+    ---
+    collections:
+      - name: ansible.posix
+      - name: community.general
+      - name: kubernetes.core
+        #      - name: community.vmware
+      - name: ansible.windows
+      - name: kubevirt.core
+      - name: ovirt.ovirt
+  system: |
+    git-core [platform:rpm]
+    #python3.9.18-devel [platform:rpm compile]
+    libcurl-devel [platform:rpm compile]
+    krb5-devel [platform:rpm compile]
+    krb5-workstation [platform:rpm]
+    git-lfs [platform:rpm]
+    sshpass [platform:rpm]
+    rsync [platform:rpm]
+    unzip [platform:rpm]
+    podman-remote [platform:rpm]
+    cmake [platform:rpm compile]
+    gcc [platform:rpm compile]
+    gcc-c++ [platform:rpm compile]
+    make [platform:rpm compile]
+    openssl-devel [platform:rpm compile]
+  python: |
+    dnspython
+    git+https://github.com/ansible/ansible-sign
+    ncclient
+    paramiko
+    pykerberos
+    pyOpenSSL
+    pypsrp[kerberos,credssp]
+    pywinrm[kerberos,credssp]
+    toml
+    pexpect>=4.5
+    python-daemon
+    pyyaml
+    six
+    receptorctl
+options:
+  # avoid: "/output/scripts/assemble: line 75: /usr/bin/dnf: No such file or directory"
+  package_manager_path: /usr/bin/microdnf
+additional_build_steps:
+  prepend_builder:
+    - ENV PKGMGR_OPTS="--nodocs --setopt=install_weak_deps=0 --setopt=rhocp-4.16-for-rhel-9-x86_64-rpms.enabled=true"
+  prepend_final:
+    - ENV PKGMGR_OPTS="--nodocs --setopt=install_weak_deps=0 --setopt=rhocp-4.16-for-rhel-9-x86_64-rpms.enabled=true"
+  append_base:
+    - RUN $PYCMD -m pip install -U pip
+  append_final:
+    - COPY --from=quay.io/ansible/receptor:devel /usr/bin/receptor /usr/bin/receptor
+    - RUN mkdir -p /var/run/receptor
+    - RUN git lfs install --system
+    # SymLink `python` -> `python3.11`
+    #- RUN alternatives --install /usr/bin/python python /usr/bin/python3.11 311
+    - RUN microdnf install bind-utils -y
+    - RUN pip3.9 install dnspython
+

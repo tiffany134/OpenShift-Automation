@@ -1,0 +1,34 @@
+
+ansible-builder build -v3 -f execution-environment.yml -t quay.io/irislee/ocp-day1:v3-39
+----------------------------------------------------------
+
+tar xvf ansible-navigator-rpm-9.4-min.tar
+cd ansible-navigator-rpm-9.4
+
+yum localinstall ./* --allowerasing
+
+mount /dev/sr0 /mnt
+
+vi /etc/yum.repos.d/dvd.repo
+
+[BaseOS]
+name=BaseOS
+baseurl=file:///mnt/BaseOS
+enabled=1
+gpgcheck=0
+
+[AppStream]
+name=AppStream
+baseurl=file:///mnt/AppStream
+enabled=1
+gpgcheck=0
+
+
+ssh-keygen
+ssh-copy-id root@172.20.11.120
+
+podman load  -i /root/install_source/day1-ee.tar
+
+
+cp main.yml ocp_bastion_installer/defaults/main.yml
+ansible-navigator run --eei quay.io/irislee/ocp-day1:v3-39 -i inventory -mstdout install.yml
