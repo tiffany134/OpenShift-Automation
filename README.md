@@ -38,18 +38,18 @@ podman save
 
 ```
   * rpm checkt list (rpm 包清單):
-    - []: 
-    - []: 
-    - []: 
+    - [ ]: 
+    - [ ]: 
+    - [ ]: 
 
 6. Download the basic command(CLI tools) required (下載所需的基本指令工具(CLI))
 ```
 
 ```
   * CLI checkt list (指令工具清單):
-    - []: 
-    - []: 
-    - []: 
+    - [ ]: 
+    - [ ]: 
+    - [ ]: 
 
 
 7. Use the oc-mirror command to pull the required image to the local machine (使用 oc-mirror 指令將所需的鏡像拉取到本機)
@@ -57,9 +57,9 @@ podman save
 
 ```
   * image checkt list (鏡像清單):
-    - []: openshift images
-    - []: operator images
-    - []: additional images
+    - [ ]: openshift images
+    - [ ]: operator images
+    - [ ]: additional images
     
 
 8. Use git clone to pull the OpenShift Automation git repo (使用 git clone 將 OpenShift Automation 的 git repo 拉取下來)
@@ -77,9 +77,9 @@ podman save
 
 ```
   * tar checkt list (tar包清單):
-    - []: 
-    - []: 
-    - []: 
+    - [ ]: 
+    - [ ]: 
+    - [ ]: 
 
 ### Disconnect installation process (離線安裝流程)
 
@@ -130,9 +130,9 @@ podman save
 
        ```
        * Content should be included in install config (install config 包含內容):
-         - []: pull secret
-         - []: ssh key
-         - []: CA
+         - [ ]: pull secret
+         - [ ]: ssh key
+         - [ ]: CA
     4. Generate ignition file (產生 ignition 檔案)
        ```
 
