@@ -149,17 +149,23 @@ wget ['url of the specific version']
 8. Use the oc-mirror command to pull the required image to the local machine (使用 oc-mirror 指令將所需的鏡像拉取到本機)
    1. Get info of essential operator 取得常用 Operator 之資訊
      - Get operator channel info 取得 operator channel 資訊
-      ``` podman login -u ['username 使用者名稱'] -p ['password密碼'] registry.redhat.io
+      ``` 
+      podman login -u ['username 使用者名稱'] -p ['password密碼'] registry.redhat.io
       ```
-      ```oc-mirror list operaotrs --catalogs --version=4.XX
       ```
-      ```oc-mirror list operators --catalog=registry.redhat.io/redhat/redhat-operator-index:4.XX > package.out
+      oc-mirror list operaotrs --catalogs --version=4.XX
+      ```
+      ```
+      oc-mirror list operators --catalog=registry.redhat.io/redhat/redhat-operator-index:4.XX > package.out
       ```
      - Examine and select the operator you wish to download in package.out
-      ```oc-mirror list operators --catalog=registry.redhat.io/redhat/redhat-operator-index:4.XX --package=['name of the operator']
+      ```
+      oc-mirror list operators --catalog=registry.redhat.io/redhat/redhat-operator-index:4.XX --package=['name of the operator']
       ```
      - Look up the operator package version of specific channel 查找指定的 channel 內的 package version
-      ```oc-mirror list operators 
+      ```
+      oc-mirror list operators 
+      ```
   * image check list (鏡像清單):
     - [openshift images]:
          - registry.redhat.io/ubi8/ubi:latest
