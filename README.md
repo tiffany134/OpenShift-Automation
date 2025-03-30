@@ -462,38 +462,45 @@ https://access.redhat.com/labs/ocpouic/?upgrade_path=4.16%20to%204.18
        6. Mirror-registry 把 operator 檔案上傳到 registry
           #說明機制
 
-  6. Network Configuration Settings 設定節點網路，讓節點被解析成功
-       #說明機制
-  7. Call coreos-installer via curl to execute the coreos install command (透過 curl 的方式呼叫 coreos-installer 執行 coreos install 指令)
+7. Network Configuration Settings 設定節點網路，讓節點被解析成功
+   
+   #說明機制
+   
+8. Call coreos-installer via curl to execute the coreos install command (透過 curl 的方式呼叫 coreos-installer 執行 coreos install 指令)
      ```
      coreos-installer install ...
      ```
-  8. Export kubeconfig for connection operation (匯出 kubeconfig 進行連線)
-     ``` export KUBECONFIG=/root/ocp4/auth/kubeconfig 
+9. Export kubeconfig for connection operation (匯出 kubeconfig 進行連線)
+     ```
+     export KUBECONFIG=/root/ocp4/auth/kubeconfig 
      ```
      >> Please note that the location of the kubeconfig file may vary depending on where you created the ocp4 directory. 請注意，kubeconfig 檔案的位置可能會因您建立 ocp4 目錄的位置而有所不同。
      >> Please note that this action should be executed on bastion!
 
-  9. Check the node health and decide whether to approve csr based on the installation architecture (檢查節點健康狀況，並根據安裝架構決定是否要通過 csr)
-     * standard architecture (標準架構):
-       #說明動作: 需要 csr approve需要 csr approve    
-     * Compact Nodes architecture (三節點架構):
-       #說明動作: 不需要 csr approve，因為 worker 會被加入 master
-  10. Setting up OpenShift authentication and delete the kubeadmin user (設定身分認證並刪除 kubeadmin 用戶)
-     ```
-
-     ```
-  11. Set the corresponding CSI storage interface (設定對應的 CSI 儲存介面)
-     * nfs csi as example (以 nfs csi 為例):
-     # 貼上 github 連結，說明外接存儲會依照需求有所不同與額外設定，請參照 readme
-  12. Set the infra node configuration according to the installation architecture (根據安裝架構設定 infra 節點配置)
+10. Check the node health and decide whether to approve csr based on the installation architecture (檢查節點健康狀況，並根據安裝架構決定是否要通過 csr)
+    * standard architecture (標準架構):
+      #說明動作: 需要 csr approve需要 csr approve
+      ```
+      oc get csr -o go-template='{{range .items}}{{if not .status}}{{.metadata.name}}{{"\n"}}{{end}}{{end}}' | xargs oc adm certificate approve
+      ```
+    * Compact Nodes architecture (三節點架構):
+      #說明動作: 不需要 csr approve，因為 worker 會被加入 master
+11. Setting up OpenShift authentication and delete the kubeadmin user (設定身分認證並刪除 kubeadmin 用戶)
+    ```
+    
+    ```
+12. Set the corresponding CSI storage interface (設定對應的 CSI 儲存介面)
+    * nfs csi as example (以 nfs csi 為例):
+    
+    #貼上 github 連結，說明外接存儲會依照需求有所不同與額外設定，請參照 readme
+13. Set the infra node configuration according to the installation architecture (根據安裝架構設定 infra 節點配置)
      * standard architecture (標準架構):
        #可能需要上 taint，有可能日誌監控等重要服務必須上在這邊
      * Compact Nodes architecture (三節點架構):
        #不適用
    #這邊要問 Iris 這邊是不是要加上他寫的 script 與指令，並做說明
-  13. Install gitea as a GitOps source repository (安裝 gitea 做為 GitOps 來源庫)
+14. Install gitea as a GitOps source repository (安裝 gitea 做為 GitOps 來源庫)
      ```
      
      ```
-  14. Import the EaaS git repo and run the corresponding Operator environment installation (匯入 EaaS git repo 並執行對應的 Operator 環境安裝)
+15. Import the EaaS git repo and run the corresponding Operator environment installation (匯入 EaaS git repo 並執行對應的 Operator 環境安裝)
