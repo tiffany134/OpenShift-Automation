@@ -412,7 +412,7 @@ https://access.redhat.com/labs/ocpouic/?upgrade_path=4.16%20to%204.18
    podman load -i ['tar file name 包起來的 tar 檔名稱'].tar
    ```
 
-4. Inventory
+4. Create Inventory
    ```
    vim inventory
    
@@ -433,43 +433,43 @@ https://access.redhat.com/labs/ocpouic/?upgrade_path=4.16%20to%204.18
    ``` 
    ansible-navigator run --eei ['ee image name'] -i inventory -mstdout install.yml-i inventory
    ```
-     1. Setting up bastion server (設定 bastion 機)
-        
-     2. Setting up DNS server (設定 DNS 服務)
-        #說明機制
-     3. Setting up HAproxy as Load Balancer (將 HAproxy 設定為負載平衡器)
-        #說明機制
-     4. Install mirror registry (安裝 mirror registry)
-        #說明機制
-     5. Setting up the OpenShift installation file (設定 OpenShift 安裝檔)
-        ```
-   
-        ```
-       1. Setting up httpd server and net-tool tool (建立 httpd 服務器和 net-tool 工具)
-          #說明機制
-       2. Check and unpack the openshift-install command and the oc command (檢查並解開 openshift-install 指令和    oc 指令)
-          #說明機制
-       3. Create an installation directory and configure the install config configuration content (建立安裝目錄並   設定 install config 配置內容)
-          #說明機制
-          * Content should be included in install config (install config 包含內容):
-            - [ ]: pull secret
-            - [ ]: ssh key
-            - [ ]: CA
-       4. Generate ignition file (產生 ignition 檔案)
-          #說明機制
-       5. Import the generated ignition file into the httpd server and grant corresponding permissions (將產生的    ignition 檔案匯入 httpd 服務器給予對應權限)
-          #說明機制
-       6. Mirror-registry 把 operator 檔案上傳到 registry
-          #說明機制
+  1. Setting up bastion server (設定 bastion 機)
+  2. Setting up DNS server (設定 DNS 服務)
+     - Provide hostname resolution service提供主機名稱解析服務
+  3. Setting up HAproxy as Load Balancer (將 HAproxy 設定為負載平衡器)
+     - Distribute API and app traffic 分流 API 與應用程式流量
+  4. Install mirror registry (安裝 mirror registry)
+     - Deploy offline image registry 安裝連線鏡像倉儲服務
+  5. Setting up the OpenShift installation file (設定 OpenShift 安裝檔)
+    1. Setting up httpd server and net-tool tool (建立 httpd 服務器和 net-tool 工具)
+       -  Provide web and network tools for troubleshooting 架設網頁服務與網路排錯工具
+    2. Check and unpack the openshift-install command and the oc command (檢查並解開 openshift-install 指令和 oc 指令)
+       - Prepare install and CLI tools 準備核心指令工具使用
+    3. Create an installation directory and configure the install config configuration content (建立安裝目錄並設定 install config 配置內容)
+       - Create install dir and config 建立安裝目錄與設定檔
+         * Content should be included in install config (install config 包含內容):
+           - [pull secret]: please download your own pull secret by logging to [this link](<https://console.redhat.com/openshift/create/local>)
+           - [ssh key]: id_rsa.pub </root/.ssh/id_rsa.pub>
+           - [CA]: rootCA.pem </['the path installed registry'/quay-rootCA/rootCA.pem]>
+    4. Generate ignition file (產生 ignition 檔案)
+       - Generate boot config for nodes 產出節點啟動引導設定
+    5. Import the generated ignition file into the httpd server and grant corresponding permissions (將產生的 ignition 檔案匯入 httpd 服務器給予對應權限)
+       - Import config and allow access 匯入設定檔，並更動其存取權限為 644
+    6. Mirror-registry 把 operator 檔案上傳到 registry
+       - Push Operators to local registry 上傳 Operators 至私人倉儲
 
-7. Network Configuration Settings 設定節點網路，讓節點被解析成功
-   
-   #說明機制
-   
-8. Call coreos-installer via curl to execute the coreos install command (透過 curl 的方式呼叫 coreos-installer 執行 coreos install 指令)
+  6. Network Configuration Settings for nodes
+     - Set up node network to ensure successful domain name resolution 設定節點網路，讓節點被解析成功
+  7. Call coreos-installer via curl to execute the coreos install command (透過 curl 的方式呼叫 coreos-installer 執行 coreos install 指令)
      ```
-     coreos-installer install ...
+     curl http://['bastion ip']:['port']/['bootstrap/master/worker'].sh
+
+     # The command below will be automatically executed after executing curl 以下指令在 curl 執行後會自行執行
+     coreos-installer install /dev/['disk name 磁碟名稱'] -I http://['bastion ip']:['port']/['bootstrap/master/worker'].ign --insecure-ignition -n
+
+     init 0 or poweroff
      ```
+     >> If your nodes are installed on VM, please remeber to eject ISO before power-on 若節點為虛擬機，請記得於開機前退出映像檔
 9. Export kubeconfig for connection operation (匯出 kubeconfig 進行連線)
      ```
      export KUBECONFIG=/root/ocp4/auth/kubeconfig 
@@ -484,21 +484,51 @@ https://access.redhat.com/labs/ocpouic/?upgrade_path=4.16%20to%204.18
       oc get csr -o go-template='{{range .items}}{{if not .status}}{{.metadata.name}}{{"\n"}}{{end}}{{end}}' | xargs oc adm certificate approve
       ```
     * Compact Nodes architecture (三節點架構):
-      #說明動作: 不需要 csr approve，因為 worker 會被加入 master
+      - 不需要 csr approve，因為 worker 會被加入 master
 11. Setting up OpenShift authentication and delete the kubeadmin user (設定身分認證並刪除 kubeadmin 用戶)
-    ```
-    
-    ```
+     ```
+     htpasswd -c -B -b ['/path/to/user.htpasswd']['username']['password']
+
+     oc create secret generic htpass-secret --from-file=htpasswd=['path_to_users.htpasswd'] -n openshift-config
+     
+     # Modify oauth.yaml 
+     vim oauth.yaml
+
+     apiVersion: config.openshift.io/v1
+     kind: OAuth
+     metadata:
+       name: cluster
+     spec:
+       identityProviders:
+       - name: my_htpasswd_provider
+         mappingMethod: claim 
+         type: HTPasswd
+         htpasswd:
+           fileData:
+             name: htpass-secret
+
+     # Apply modified oauth.yaml
+     oc apply -f </path/to/CR>
+
+     # Attempt to login
+     oc login -u ['username'] -p 
+     oc whoami
+
+     # Add user to cluster-admin group
+     oc adm policy add-cluster-role-to-user cluster-admin ['USERNAME']
+
+     # Remove default user -- kubeadmin & update secret
+     htpasswd -D users.htpasswd ['username']
+     oc create secret generic htpass-secret --from-file=htpasswd=users.htpasswd --dry-run=client -o yaml -n openshift-config | oc replace -f -
+     ```
 12. Set the corresponding CSI storage interface (設定對應的 CSI 儲存介面)
-    * nfs csi as example (以 nfs csi 為例):
-    
-    #貼上 github 連結，說明外接存儲會依照需求有所不同與額外設定，請參照 readme
+     * nfs csi as example (以 nfs csi 為例):
+       - 外接存儲會依照需求有所不同與額外設定，請參照[此處](<https://github.com/kubernetes-csi/csi-driver-nfs/tree/master?tab=readme-ov-file>) 
 13. Set the infra node configuration according to the installation architecture (根據安裝架構設定 infra 節點配置)
      * standard architecture (標準架構):
-       #可能需要上 taint，有可能日誌監控等重要服務必須上在這邊
+       - Need to apply taint, as important services like logging and monitoring may need to run on this node 需要上 taint，有可能日誌監控等重要服務必須上在這邊
      * Compact Nodes architecture (三節點架構):
-       #不適用
-   #這邊要問 Iris 這邊是不是要加上他寫的 script 與指令，並做說明
+       - Not applicable 不適用
 14. Install gitea as a GitOps source repository (安裝 gitea 做為 GitOps 來源庫)
      ```
      
