@@ -475,7 +475,7 @@ https://access.redhat.com/labs/ocpouic/?upgrade_path=4.16%20to%204.18
      export KUBECONFIG=/root/ocp4/auth/kubeconfig 
      ```
      >> Please note that the location of the kubeconfig file may vary depending on where you created the ocp4 directory. 請注意，kubeconfig 檔案的位置可能會因您建立 ocp4 目錄的位置而有所不同。
-     >> Please note that this action should be executed on bastion!
+     >> Please note that this action should be executed on bastion! 請留意此動作需於 bastion 機上執行
 
 10. Check the node health and decide whether to approve csr based on the installation architecture (檢查節點健康狀況，並根據安裝架構決定是否要通過 csr)
     * standard architecture (標準架構):
