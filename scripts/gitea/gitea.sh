@@ -1,4 +1,18 @@
-REGISTRY=bastion.ocp.ansible.lab:8443
+#!/bin/bash
+
+# sh gitea.sh
+# sh gitea.sh <REGISTRY>/<reponame>
+
+# 以下為執行shell範例
+# ImageContentSourcePolicy將docker.io指向至mirror registry
+# sh gitea.sh
+
+# 指定images registry
+# sh gitea.sh bastion.ocp.ansible.lab:8443/ocp416
+
+
+#REGISTRY=bastion.ocp.ansible.lab:8443
+REGISTRY="${1:-docker.io}"
 
 # export KUBECONFIG
 export KUBECONFIG=/root/ocp4/auth/kubeconfig

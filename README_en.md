@@ -233,7 +233,7 @@ https://access.redhat.com/labs/ocpouic/?upgrade_path=4.16%20to%204.18
          - cluster-observability-operator
          - cluster-logging
          - loki-operator
-         - tempo-operator
+         - tempo-product
          - opentelemetry-product
        - Storage
          - trident-operator
@@ -246,7 +246,6 @@ https://access.redhat.com/labs/ocpouic/?upgrade_path=4.16%20to%204.18
          - openshift-gitops-operator
          - advanecd-cluster-management 
     - [additional images]: 
-         - VDDK
          - quay.io/stevewu/net-tools:latest
          - quay.io/containerdisks/fedora:latest
          - quay.io/containerdisks/centos:7-2009
@@ -418,20 +417,23 @@ https://access.redhat.com/labs/ocpouic/?upgrade_path=4.16%20to%204.18
    
    ['機器 fqdn']=['機器 ip']
    ```
+   Example:
+   ```
+   bastion.ocp.ansible.lab ansible_host=172.20.11.120
+   ```
+
 
 5. Playbook (install.yml)
    ```
    - hosts: all
      remote_user: root
-     vars_files:
-     - env.yml
      roles:
      - ocp_bastion_installer
    ```
 
 6. Use ansible to run automated configuration scripts (使用 ansible 運行自動化設定配置腳本)
    ``` 
-   ansible-navigator run --eei ['ee image name'] -i inventory -mstdout install.yml-i inventory
+   ansible-navigator run --eei ['ee image name'] -i inventory -mstdout install.yml
    ```
   1. Setting up bastion server (設定 bastion 機)
   2. Setting up DNS server (設定 DNS 服務)
@@ -462,10 +464,10 @@ https://access.redhat.com/labs/ocpouic/?upgrade_path=4.16%20to%204.18
      - Set up node network to ensure successful domain name resolution 設定節點網路，讓節點被解析成功
   7. Call coreos-installer via curl to execute the coreos install command (透過 curl 的方式呼叫 coreos-installer 執行 coreos install 指令)
      ```
-     curl http://['bastion ip']:['port']/['bootstrap/master/worker'].sh
+     curl http://['bastion ip']:8080/['bootstrap/master/worker'].sh |bash
 
      # The command below will be automatically executed after executing curl 以下指令在 curl 執行後會自行執行
-     coreos-installer install /dev/['disk name 磁碟名稱'] -I http://['bastion ip']:['port']/['bootstrap/master/worker'].ign --insecure-ignition -n
+     coreos-installer install /dev/sda -I http://['bastion ip']:8080/['bootstrap/master/worker'].ign --insecure-ignition -n
 
      init 0 or poweroff
      ```

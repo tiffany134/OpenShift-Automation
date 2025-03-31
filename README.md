@@ -170,7 +170,7 @@
          - cluster-observability-operator
          - cluster-logging
          - loki-operator
-         - tempo-operator
+         - tempo-product
          - opentelemetry-product
        - Storage
          - trident-operator
@@ -183,7 +183,6 @@
          - openshift-gitops-operator
          - advanecd-cluster-management 
     - [additional images]: 
-       - VDDK
        - quay.io/stevewu/net-tools:latest
        - quay.io/containerdisks/fedora:latest
        - quay.io/containerdisks/centos:7-2009
@@ -383,144 +382,129 @@
    yum localinstall ansible-navigator-rpm-9.4/* --allowerasing 
    ```
 
-4. 產生 ssh-key 至欲操作 ansible 之主機，並從 tar 檔中載入容器映像檔到 Podman 的本地鏡像庫
+4. 於 bastion 產生 ssh-key，並設定免密登入
    ```bash
    ssh-keygen
    ```
    ```bash
-   ssh-copy-id ['username']@['target machine's ip'] 
+   ssh-copy-id root@['bastion ip'] 
    ```
+5. 從 tar 檔中載入容器映像檔到 Podman 的本地鏡像庫
    ```bash
    podman load -i ['包起來的 ee tar 檔名稱'].tar
    ```
    > 參考事前準備工作第 5 步 'podman save -o ['包起來的 tar 檔名稱'].tar ['你的 ee 映像檔名稱']' tar 檔名稱
 
-5. 創建 Ansible Inventory
+6. 創建 Ansible Inventory
    ```bash
    vim inventory
    
-   ['機器 fqdn']=['機器 ip']
+   ['bastion fqdn']=['bastion ip']
+   ```
+   Example: ( role > inventory )
+   ```
+   bastion.ocp.ansible.lab ansible_host=172.20.11.120
    ```
 
-6. 創建 install.yml playbook
+7. 創建 install.yml playbook
+
+   Example: ( role > install.yml )
    ```yaml
    - hosts: all
      remote_user: root
-     vars_files:
-     - env.yml
      roles:
      - ocp_bastion_installer
    ```
 
-7. 使用 ansible 運行自動化設定配置腳本 (roles > ocp_bastion_installer > tasks > main.yml)
+8. 使用 ansible 運行自動化設定配置腳本 (roles > ocp_bastion_installer > tasks > main.yml)
    ```bash
-   ansible-navigator run --eei ['ee image name'] -i inventory -mstdout install.yml-i inventory
+   ansible-navigator run --eei ['ee image name'] -i inventory -mstdout install.yml
    ```
-  1. 設定 bastion 機
-  2. 設定 DNS 服務
-     - 提供主機名稱解析服務
-  3. 將 HAproxy 設定為負載平衡器
-     - 分流 API 與應用程式流量
-  4. 安裝 mirror registry
-     - 安裝連線鏡像倉儲服務
-  5. 設定 OpenShift 安裝檔
-    i. 建立 httpd 服務器和 net-tool 工具
-       -  架設網頁服務與網路排錯工具
-    ii. 檢查並解開 openshift-install 指令和 oc 指令
-       - 準備核心指令工具使用
-    iii. 建立安裝目錄並設定 install config 配置內容
-       - 建立安裝目錄與設定檔
-         - install config 包含內容:
-           - [x] pull secret: please download your own pull secret by logging to [this link](<https://console.redhat.com/openshift/create/local>)
-           - [x] ssh key: id_rsa.pub </root/.ssh/id_rsa.pub>
-           - [x] CA: rootCA.pem </['the path installed registry'/quay-rootCA/rootCA.pem]>
-    iv. 產生 ignition 檔案
-       - 產出節點啟動引導設定
-    v. 將產生的 ignition 檔案匯入 httpd 服務器給予對應權限
-       - 匯入設定檔，並更動其存取權限為 644
-    vi. 把 operator 檔案上傳到 registry
-       - 上傳 Operators 至私人倉儲
-    vii. 節點的網路配置設定
-       - 設定節點網路，讓節點被解析成功
+   1. 設定 bastion 機
+   2. 設定 DNS 服務
+      - 提供主機名稱解析服務
+   3. 將 HAproxy 設定為負載平衡器
+      - 分流 API 與應用程式流量
+   4. 安裝 mirror registry
+      - 安裝連線鏡像倉儲服務
+   5. 設定 OpenShift 安裝檔
+      1. 建立 httpd 服務器和 net-tool 工具
+         -  架設網頁服務與網路排錯工具
+      2. 檢查並解開 openshift-install 指令和 oc 指令
+         - 準備核心指令工具使用
+      3. 建立安裝目錄並設定 install config 配置內容
+         - 建立安裝目錄與設定檔
+           - install config 包含內容:
+             - [x] pull secret: mirro
+             - [x] ssh key: id_rsa.pub </root/.ssh/id_rsa.pub>
+             - [x] CA: rootCA.pem </['the path installed registry'/quay-rootCA/rootCA.pem]>
+      4. 產生 ignition 檔案
+         - 產出節點啟動引導設定
+      5. 將產生的 ignition 檔案匯入 httpd 服務器給予對應權限
+         - 匯入設定檔，並更動其存取權限為 644
+      6. 把 operator 檔案上傳到 registry
+         - 上傳 Operators 至私人倉儲
+      7. 節點的網路配置設定
+         - 設定節點網路，讓節點被解析成功
 
-8. 透過 curl 的方式呼叫 coreos-installer 執行 coreos install 指令
+9. 透過 curl 的方式呼叫 coreos-installer 執行 coreos install 指令
    ```bash
-   curl http://['bastion ip']:['port']/['bootstrap/master/worker'].sh
+   curl http://['bastion ip']:8080/['bootstrap/master/worker'].sh
 
    # The command below will be automatically executed after executing curl 以下指令在 curl 執行後會自行執行
-   coreos-installer install /dev/['disk name 磁碟名稱'] -I http://['bastion ip']:['port']/['bootstrap/master/worker'].ign --insecure-ignition -n
+   coreos-installer install /dev/sda -I http://['bastion ip']:8080/['bootstrap/master/worker'].ign --insecure-ignition -n
+
+   # 完成後重啟主機
    init 0 or poweroff
    ```
    > 若節點為虛擬機，請記得於開機前退出映像檔
 
-9. 匯出 kubeconfig 進行連線
-   ```bash
-   export KUBECONFIG=/root/ocp4/auth/kubeconfig 
-   ```
-   > 請注意，kubeconfig 檔案的位置可能會因您建立 ocp4 目錄的位置而有所不同。
-   > 請留意此動作需於 bastion 機上執行!
+10. 匯出 kubeconfig 進行連線
+    ```bash
+    export KUBECONFIG=/root/ocp4/auth/kubeconfig 
+    ```
+    > 請注意，kubeconfig 檔案的位置可能會因您建立 ocp4 目錄的位置而有所不同。
+    > 請留意此動作需於 bastion 機上執行!
 
-10. 檢查節點健康狀況，並根據安裝架構決定是否要通過 csr
-   - 標準架構:
-     說明動作: 需要 csr approve
+11. 檢查節點健康狀況，並根據安裝架構決定是否要通過 csr
+   - 標準架構: 需要 csr approve
      ```bash
      oc get csr -o go-template='{{range .items}}{{if not .status}}{{.metadata.name}}{{"\n"}}{{end}}{{end}}' | xargs oc adm certificate approve
      ```
-   - 三節點架構:
-     * 不需要 csr approve，因為 worker 會被加入 master
+   - 三節點架構: 不需要 csr approve，因為 worker 會被加入 master
 
 ### 安裝後配置流程
 
 1. Setting up OpenShift authentication and delete the kubeadmin user (設定身分認證並刪除 kubeadmin 用戶)
      ```bash
-     htpasswd -c -B -b ['/path/to/user.htpasswd']['username']['password']
-
-     oc create secret generic htpass-secret --from-file=htpasswd=['path_to_users.htpasswd'] -n openshift-config
-     
-     # Modify oauth.yaml 
-     vim oauth.yaml
-
-     apiVersion: config.openshift.io/v1
-     kind: OAuth
-     metadata:
-       name: cluster
-     spec:
-       identityProviders:
-       - name: my_htpasswd_provider
-         mappingMethod: claim 
-         type: HTPasswd
-         htpasswd:
-           fileData:
-             name: htpass-secret
-
-     # Apply modified oauth.yaml
-     oc apply -f </path/to/CR>
-
-     # Attempt to login
-     oc login -u ['username'] -p 
-     oc whoami
-
-     # Add user to cluster-admin group
-     oc adm policy add-cluster-role-to-user cluster-admin ['USERNAME']
-
-     # Remove default user -- kubeadmin & update secret
-     htpasswd -D users.htpasswd ['username']
-     oc create secret generic htpass-secret --from-file=htpasswd=users.htpasswd --dry-run=client -o yaml -n openshift-config | oc replace -f -
+     # 執行 script 設置 OpenShift authentication
+     sh script/authentication/authentication.sh
      ```
-     
-2. Set the corresponding CSI storage interface (設定對應的 CSI 儲存介面)
+2. 關閉預設catalog source
+   ```bash
+   sh script/disable-marketplace.sh
+   ```     
+3. Set the corresponding CSI storage interface (設定對應的 CSI 儲存介面)
    - nfs csi as example (以 nfs csi 為例):
      - 外接存儲會依照需求有所不同與額外設定，請參照[此處](<https://github.com/kubernetes-csi/csi-driver-nfs/tree/master?tab=readme-ov-file>)
 
-3. Set the infra node configuration according to the installation architecture (根據安裝架構設定 infra 節點配置)
-   - standard architecture (標準架構):
-     - Need to apply taint, as important services like logging and monitoring may need to run on this node 需要上 taint，有可能日誌監控等重要服務必須上在這邊
-   - Compact Nodes architecture (三節點架構):
-     - Not applicable 不適用
-    
-4. Install gitea as a GitOps source repository (安裝 gitea 做為 GitOps 來源庫)
+4. Set the infra node configuration according to the installation architecture (根據安裝架構設定 infra 節點配置)
+   - standard architecture (標準架構): 需要上 taint，有可能日誌監控等重要服務必須上在這邊
+     ```bash
+     # 執行 script 設置 infra node 及 monitoring components
+     # sh script/infra/infra.sh <clusterName>.<baseDomain> standard
+     sh script/infra/infra.sh ocp.ansible.lab standard
      ```
-     
+   - Compact Nodes architecture (三節點架構):
+     ```bash
+     # 執行 script 設置 monitoring components
+     # sh script/infra/infra.sh <clusterName>.<baseDomain> compact
+     sh script/infra/infra.sh ocp.ansible.lab compact
+     ```
+    
+5. Install gitea as a GitOps source repository (安裝 gitea 做為 GitOps 來源庫)
+     ```bash
+     sh gitea.sh
      ```
 
-5. Import the EaaS git repo and run the corresponding Operator environment installation (匯入 EaaS git repo 並執行對應的 Operator 環境安裝)
+6. Import the EaaS git repo and run the corresponding Operator environment installation (匯入 EaaS git repo 並執行對應的 Operator 環境安裝)
