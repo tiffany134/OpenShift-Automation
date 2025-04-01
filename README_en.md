@@ -62,6 +62,8 @@ Preparations before entering the customer environment
     9. Choose Memory and CPU settings. The minimal requirement for the node should be 16384 MB of Memory, and 8 core of CPUs to properly finish installing OpenShift. 選擇記憶體與核心數。順利完成安裝的最低規格為 8 核心、16384 MB 的記憶體。
     10. Create disk image for VM. The minimal requirements for disk should not be lower than 80 GB; or you had format a disk storage for your VM, you may select the second option to customize. 創建虛擬機存儲空間。最低規格不得低於 80 GB﹔若你有另外創建的存儲空間，請於第二個選項設定與配置。
     11. Finally, you may examine the configuration of your virtual machine, and please set the network selection below as "Bridge device" and enter its name. Click "Finish" button to run the installation process. 最後，請檢視您的虛擬機設定，並將網路選項設定為橋接裝置，並輸入其名稱。按下完成按鈕進入安裝程序。
+    12. Bring up the VM you just built, and click the light bulb icon on the upper-left. Choose "Boot Options" option, and adjust boot device order. Please click the SATA CDROM1 box and prioritize it. 啟動剛剛建立的虛擬機，然後點擊左上角的燈泡圖示。選擇「開機選項」，並調整開機設備順序。請點擊 SATA CDROM1 方框，並將其設為優先順序
+    13. Boot the VM, and you may install RHEL as the usual process. 啟動虛擬機後，您可以按照一般流程安裝 RHEL
 
 2. Register your local machine with your Red Hat partner account 註冊目前使用的的機器 
    ```
