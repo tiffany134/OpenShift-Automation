@@ -19,8 +19,10 @@
 在進入客戶環境前的準備事項
 
 0. 本機環境準備
+  - 準備一台可對外連線的 RHEL 主機
 
 1. 將 OpenShift Automation github repo fork 到自己的 repo 中
+  - #TODO 補個圖怎麼 fork
 
 2. 註冊目前使用的本地機器
    ```bash
@@ -43,7 +45,7 @@
      ```
    - 將 execution-environment.yml 下載到這個資料夾
      ```bash
-     wget https://raw.githubusercontent.com/CCChou/OpenShift-Automation/refs/heads/main/ansibleexecution-environment.yml
+     wget https://raw.githubusercontent.com/CCChou/OpenShift-Automation/refs/heads/main/ansible/execution-environment.yml
      ```
    - 建構 ee(execution-environment) 容器鏡像
      ```bash
@@ -200,7 +202,7 @@
 
 9. 使用 git clone 將你 fork 的 OpenShift Automation git repo 拉取下來
    ```bash
-   git clone https://github.com/CCChou/OpenShift-Automation.git
+   git clone \[Forked Git URL\]
    ```
 
 10. 依客戶環境需求修改 OpenShift Automation 內的配置 (調整 role > ocp_bastion_installer > default > main.yml 內的配置)
@@ -333,7 +335,7 @@
       ```
    3. 啟動 libvirtd 服務
       ```bash 
-      systemctl enable --now libvirt
+      systemctl enable --now libvirtd
       ```
    4. 檢查 libvirtd 狀態
       ```bash
@@ -407,6 +409,7 @@
    > 參考事前準備工作第 5 步 'podman save -o ['包起來的 tar 檔名稱'].tar ['你的 ee 映像檔名稱']' tar 檔名稱
 
 6. 創建 Ansible Inventory
+  #TODO 從範本調整
    ```bash
    vim inventory
    
@@ -418,7 +421,7 @@
    ```
 
 7. 創建 install.yml playbook
-
+  #TODO 從範本調整
    Example: ( role > install.yml )
    ```yaml
    - hosts: all
@@ -460,10 +463,9 @@
 
 9. 透過 curl 的方式呼叫 coreos-installer 執行 coreos install 指令
    ```bash
-   curl http://['bastion ip']:8080/['bootstrap/master/worker'].sh
-
    # The command below will be automatically executed after executing curl 以下指令在 curl 執行後會自行執行
-   coreos-installer install /dev/sda -I http://['bastion ip']:8080/['bootstrap/master/worker'].ign --insecure-ignition -n
+   # coreos-installer install /dev/sda -I http://['bastion ip']:8080/['bootstrap/master/worker'].ign --insecure-ignition -n
+   curl http://['bastion ip']:8080/['bootstrap/master/worker'].sh|bash
 
    # 完成後重啟主機
    init 0 or poweroff
