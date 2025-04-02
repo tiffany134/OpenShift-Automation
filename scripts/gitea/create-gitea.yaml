@@ -72,3 +72,8 @@ spec:
     name: gitea
     weight: 100
   port:
+    targetPort: http
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
+  wildcardPolicy: None
