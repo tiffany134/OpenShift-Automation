@@ -18,8 +18,7 @@
 
 在進入客戶環境前的準備事項
 
-0. 本機環境準備
-  - 準備一台可對外連線的 RHEL 主機
+0. 本機環境準備一台可對外連線的 RHEL 主機
 
 1. 將 OpenShift Automation github repo fork 到自己的 repo 中
   - #TODO 補個圖怎麼 fork
