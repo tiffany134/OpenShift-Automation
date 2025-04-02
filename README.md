@@ -63,7 +63,7 @@
      ```bash
      tar xf ansible-navigator-rpm-9.4-min.tar -C /root/rpm/downloadonly/aap-9.4
      ```
-     ![下載 rpm 包範例]()
+     ![下載 rpm 包範例](https://github.com/CCChou/OpenShift-Automation/blob/main/images/rpm_sample.png)
 
 7. 下載所需的基本指令工具(CLI)和系統檔案
    ```bash
@@ -78,7 +78,6 @@
     - oc mirror plugin: https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/ ***請選擇版號***
     - RHEL 開機用光碟 (REHL OS): https://access.redhat.com/downloads/content/rhel ***請選擇版號***
     - CoreOS 開機用光碟(rhcos): https://mirror.openshift.com/pub/openshift-v4/x86_64/dependencies/rhcos/ ***請選擇版號***
-    - 
     > 請注意，點擊下載連結進入上方提供的網址後，點選版本後即可下載。另外，openshift-install 與 openshift-client 需要為相同版號，且需要留意處理器架構是否與您的處理器相同。
 
 8. 使用 oc-mirror 指令將所需的鏡像拉取到本機
@@ -144,6 +143,7 @@
          - name: registry.redhat.io/rhel8/rhel-guest-image:latest
          - name: registry.redhat.io/rhel9/rhel-guest-image:latest
        ```
+       > 完整請參考 ( yaml > imageset-config.yaml)，請注意頻道和鏡像標籤
    5. 將鏡像從特定的 ImageSetConfiguration 中同步到磁碟
       - 執行 oc mirror 指令將指定 ImageSetConfiguration 中的鏡像同步到磁碟上
         ```bash
@@ -366,13 +366,22 @@
       ``` 
       virt-manager 
       ```
-   7. Click the button with monitor icon on the upper-left corner. Pick the first option and forward to next step 點左上角帶有螢幕的按鈕，並選擇第一個選項後進下一步
-   8. The following step is to choose the ISO for installing OS, yet the path where the ISO file is located has to be added. Please click the box "Browse" and you may see the "Locate ISO media volume" window. Click the plus icon on the lower-left corner to add a new pool. Name the pool and enter the path where the ISO file is and your are good to move on to the next step. 下一步要選擇安裝作業系統用的映像檔，但必須先新增 ISO 所在的路徑作為 pool。請點選 Browse 按鈕，你將會看見 Locate ISO media volume 視窗。點選左下角的加號按鈕，於彈出的視窗中為 pool 命名並選擇 ISO 存放的位置後，即可進入下一步。
-   9. Choose Memory and CPU settings. The minimal requirement for the node should be 16384 MB of Memory, and 8 core of CPUs to properly finish installing OpenShift. 選擇記憶體與核心數。順利完成安裝的最低規格為 8 核心、16384 MB 的記憶體。
-   10. Create disk image for VM. The minimal requirements for disk should not be lower than 80 GB; or you had format a disk storage for your VM, you may select the second option to customize. 創建虛擬機存儲空間。最低規格不得低於 80 GB﹔若你有另外創建的存儲空間，請於第二個選項設定與配置。
-   11. Finally, you may examine the configuration of your virtual machine, and please set the network selection below as "Bridge device" and enter its name. Click "Finish" button to run the installation process. 最後，請檢視您的虛擬機設定，並將網路選項設定為橋接裝置，並輸入其名稱。按下完成按鈕進入安裝程序。
-   12. Bring up the VM you just built, and click the light bulb icon on the upper-left. Choose "Boot Options" option, and adjust boot device order. Please click the SATA CDROM1 box and prioritize it. 啟動剛剛建立的虛擬機，然後點擊左上角的燈泡圖示。選擇「開機選項」，並調整開機設備順序。請點擊 SATA CDROM1 方框，並將其設為優先順序
-   13. Boot the VM, and you may install RHEL as the usual process. 啟動虛擬機後，您可以按照一般流程安裝 RHEL
+   7. 點左上角帶有螢幕的按鈕，並選擇第一個選項後進下一步
+      ![啟動 kvm](https://github.com/CCChou/OpenShift-Automation/blob/main/images/kvm-vii-start.png)
+   8. 下一步要選擇安裝作業系統用的映像檔，但必須先新增 ISO 所在的路徑作為 pool。請點選 Browse 按鈕，你將會看見 Locate ISO media volume 視窗。點選左下角的加號按鈕，於彈出的視窗中為 pool 命名並選擇 ISO 存放的位置後，即可進入下一步
+      ![建立 pool](https://github.com/CCChou/OpenShift-Automation/blob/main/images/kvm-viii-pool%26iso_1.png)
+      ![選擇 ISO](https://github.com/CCChou/OpenShift-Automation/blob/main/images/kvm-viii-pool%26iso_2.png)
+      ![確認位置後進入下一步](https://github.com/CCChou/OpenShift-Automation/blob/main/images/kvm-viii-pool&iso_3.png?raw=true)
+   9. 選擇記憶體與核心數。順利完成安裝的最低規格為 8 核心、16384 MB 的記憶體
+      ![選擇資源配置](https://github.com/CCChou/OpenShift-Automation/blob/main/images/kvm-ix-cpu&core.png?raw=true)
+   10. 創建虛擬機儲存空間。最低規格不得低於 80 GB﹔若你有另外創建的存儲空間，請於第二個選項設定與配置
+       ![選擇儲存配置](https://github.com/CCChou/OpenShift-Automation/blob/main/images/kvm-x-disk-storage.png?raw=true)
+   11. 最後，請檢視您的虛擬機設定，並將網路選項設定為橋接裝置，並輸入其名稱。按下完成按鈕進入安裝程序
+       ![設定橋接裝置](https://github.com/CCChou/OpenShift-Automation/blob/main/images/kvm-xi-config_check&nic.png?raw=true)
+   12. 啟動剛剛建立的虛擬機，然後點擊左上角的燈泡圖示。選擇「開機選項」，並調整開機設備順序。請點擊 SATA CDROM1 方框，並將其設為優先順序
+       ![啟動虛擬機](https://github.com/CCChou/OpenShift-Automation/blob/main/images/kvm-xii-boot_order.png?raw=true)
+   13. 啟動虛擬機後，您可以按照一般流程安裝 RHEL
+       ![安裝 RHEL](https://github.com/CCChou/OpenShift-Automation/blob/main/images/kvm-xiii-rhel_installation.png?raw=true)
 
 2. 解開所有準備好的 tar 包
    ```bash
@@ -477,20 +486,22 @@
 
 ### 安裝後配置流程
 
-1. Setting up OpenShift authentication and delete the kubeadmin user (設定身分認證並刪除 kubeadmin 用戶)
-     ```bash
-     # 執行 script 設置 OpenShift authentication
-     sh script/authentication/authentication.sh
-     ```
-2. 關閉預設catalog source
+1. 設定身分認證並刪除 kubeadmin 用戶
+   ```bash
+   # 執行 script 設置 OpenShift authentication
+   sh script/authentication/authentication.sh
+   ```
+
+2. 關閉預設 catalog source
    ```bash
    sh script/disable-marketplace.sh
    ```     
-3. Set the corresponding CSI storage interface (設定對應的 CSI 儲存介面)
+
+3. 設定對應的 CSI 儲存介面
    - nfs csi as example (以 nfs csi 為例):
      - 外接存儲會依照需求有所不同與額外設定，請參照[此處](<https://github.com/kubernetes-csi/csi-driver-nfs/tree/master?tab=readme-ov-file>)
 
-4. Set the infra node configuration according to the installation architecture (根據安裝架構設定 infra 節點配置)
+4. 根據安裝架構設定 infra 節點配置
    - standard architecture (標準架構): 需要上 taint，有可能日誌監控等重要服務必須上在這邊
      ```bash
      # 執行 script 設置 infra node 及 monitoring components
@@ -505,8 +516,8 @@
      ```
     
 5. Install gitea as a GitOps source repository (安裝 gitea 做為 GitOps 來源庫)
-     ```bash
-     sh gitea.sh
-     ```
+   ```bash
+   sh gitea.sh
+   ```
 
 6. Import the EaaS git repo and run the corresponding Operator environment installation (匯入 EaaS git repo 並執行對應的 Operator 環境安裝)
