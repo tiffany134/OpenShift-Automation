@@ -207,8 +207,12 @@
 10. 依客戶環境需求修改 OpenShift Automation 內的配置 (調整 role > ocp_bastion_installer > default > main.yml 內的配置)
     ```yaml
     ---
+    online: false
+
+    # compact or standard mode
+    mode: compact
+
     # 依個人需求啟動或關閉防火牆與 SELinux 等服務與功能
-    online: true
     firewalld_disable: true
     selinux_disable: true 
     
