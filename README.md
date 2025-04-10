@@ -182,7 +182,8 @@
          - self-node-remediation
          - cincinnati-operator
          - openshift-gitops-operator
-         - advanecd-cluster-management 
+         - advanced-cluster-management
+         - multicluster-engine
     - [additional images]: 
        - quay.io/stevewu/net-tools:latest
        - quay.io/containerdisks/fedora:latest
