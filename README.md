@@ -85,6 +85,9 @@
    1. 放 oc-mirror 可執行程式至指定目錄
       ```bash
       tar -zxvf oc-mirror.tar.gz -C /usr/local/bin/
+      ```
+      ```bash
+      chmod a+x /usr/local/bin/oc-mirror
       ``` 
    2. 配置允許可以 mirror 的鏡像憑證 Configuring credentials that allow images to be mirrored
       - 下載 pull secret 並儲存成 json 文件 https://console.redhat.com/openshift/downloads
