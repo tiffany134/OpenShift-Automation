@@ -98,7 +98,7 @@
       - 取得 operator 頻道資訊
         ```bash
         # version 請選擇要安裝的 OpenShift 版本
-        oc-mirror list operaotrs --catalogs --version=4.XX
+        oc-mirror list operators --catalogs --version=4.XX
         ```
         ```bash
         # image tag 請選擇要安裝的 OpenShift 版本
