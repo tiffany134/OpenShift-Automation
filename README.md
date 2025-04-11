@@ -21,7 +21,14 @@
 0. 本機環境準備一台可對外連線的 RHEL 主機
 
 1. 將 OpenShift Automation github repo fork 到自己的 repo 中
-  - #TODO 補個圖怎麼 fork
+  - 連線至 [OpenShift-Automation Repo](https://github.com/CCChou/OCP-Automation.git)，並點選 fork
+  ![Fork01](https://github.com/CCChou/OpenShift-Automation/blob/main/images/fork01.png?raw=true)
+
+  - 確認名稱沒有衝突後點選 Create fork
+  ![Fork02](https://github.com/CCChou/OpenShift-Automation/blob/main/images/fork02.png?raw=true)
+
+  - 成功 Fork 後可看到以下畫面，左上為目前 fork 出來的 repo 名稱以及關聯的源頭，右側 Code 點擊後則可以取得此 repo 後續用於 clone 的連結
+  ![Fork03](https://github.com/CCChou/OpenShift-Automation/blob/main/images/fork03.png?raw=true)
 
 2. 註冊目前使用的本地機器
    ```bash
