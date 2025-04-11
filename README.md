@@ -210,9 +210,9 @@
          - image: registry.k8s.io/sig-storage/nfsplugin:v4.11.0
          - image: registry.k8s.io/sig-storage/snapshot-controller:v8.2.0
 
-9. 使用 git clone 將你 fork 的 OpenShift Automation git repo 拉取下來
+9. 使用 git clone 將你 fork 的 OpenShift Automation git repo 拉取下來 (URL 可參考步驟一)
    ```bash
-   git clone \[Forked Git URL\]
+   git clone [Forked Git URL]
    ```
 
 10. 依客戶環境需求修改 OpenShift Automation 內的配置 (調整 role > ocp_bastion_installer > default > main.yml 內的配置)
