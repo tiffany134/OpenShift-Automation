@@ -119,7 +119,7 @@
       - 找指定的頻道內的 package 版本
         ```bash
         # image tag 請選擇要安裝的 OpenShift 版本
-        oc-mirror list operators -catalog=registry.redhat.io/redhat/redhat-operator-index:v4.XX --package=['operator 名稱'] --channel=['operator 頻道']
+        oc-mirror list operators --catalog=registry.redhat.io/redhat/redhat-operator-index:v4.XX --package=['operator 名稱'] --channel=['operator 頻道']
         ```
        > [Red Hat OpenShift Container Platform Operator Update Information Checker](https://access.redhat.com/labs/ocpouic/?upgrade_path=4.16%20to%204.18)
    4. 創建 imageSetConfiguration yaml 配置檔
