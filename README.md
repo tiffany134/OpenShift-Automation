@@ -7,7 +7,7 @@
 | v0.1 | 2025/03/28 | 首次更新 |
 
 
-## Reference
+## Related Projects
 - [Ansible Role for OpenShift Day1 Setup](https://github.com/CCChou/ocp_bastion_installer)
 - [OpenShift Environment as a Service](https://github.com/CCChou/OpenShift-EaaS-Practice)
 
@@ -78,14 +78,14 @@
    wget ['url of the specific version'] 
    ```
   * 指令工具及系統檔案清單:
-    - openshift-client: https://mirror.openshift.com/pub/openshift-v4/clients/ocp/ ***請選擇版號***
-    - openshift-install: https://mirror.openshift.com/pub/openshift-v4/clients/ocp/ ***請選擇版號***
-    - Butane config transpiler CLI: https://mirror.openshift.com/pub/openshift-v4/clients/butane/latest/ ***請選擇版號***
-    - helm v3: https://mirror.openshift.com/pub/openshift-v4/clients/helm/ ***請選擇版號***
-    - mirror-registry: https://mirror.openshift.com/pub/openshift-v4/clients/mirror-registry/ ***請選擇版號***
-    - oc mirror plugin: https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/ ***請選擇版號***
-    - RHEL 開機用光碟 (REHL OS): https://access.redhat.com/downloads/content/rhel ***請選擇版號***
-    - CoreOS 開機用光碟(rhcos): https://mirror.openshift.com/pub/openshift-v4/x86_64/dependencies/rhcos/ ***請選擇版號***
+    - [openshift-client](https://mirror.openshift.com/pub/openshift-v4/clients/ocp/)
+    - [openshift-install](https://mirror.openshift.com/pub/openshift-v4/clients/ocp/)
+    - [Butane config transpiler CLI](https://mirror.openshift.com/pub/openshift-v4/clients/butane/latest/)
+    - [helm v3](https://mirror.openshift.com/pub/openshift-v4/clients/helm/)
+    - [mirror-registry](https://mirror.openshift.com/pub/openshift-v4/clients/mirror-registry/)
+    - [oc mirror plugin](https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/)
+    - [RHEL 開機用光碟 (REHL OS)](https://access.redhat.com/downloads/content/rhel)
+    - [CoreOS 開機用光碟(rhcos)](https://mirror.openshift.com/pub/openshift-v4/x86_64/dependencies/rhcos/)
     > 請注意，點擊下載連結進入上方提供的網址後，點選版本後即可下載。另外，openshift-install 與 openshift-client 需要為相同版號，且需要留意處理器架構是否與您的處理器相同。
 
 8. 使用 oc-mirror 指令將所需的鏡像拉取到本機
@@ -97,7 +97,7 @@
       chmod a+x /usr/local/bin/oc-mirror
       ``` 
    2. 配置允許可以 mirror 的鏡像憑證 Configuring credentials that allow images to be mirrored
-      - 下載 pull secret 並儲存成 json 文件 https://console.redhat.com/openshift/downloads
+      - 到 [Red Hat Hybrid Cloud Console](https://console.redhat.com/openshift/downloads) 下載 pull secret 並儲存成 json 文件 
         ```bash
         cat /root/pull-secret > ~/.docker/config.json
         ```
@@ -121,7 +121,7 @@
         # image tag 請選擇要安裝的 OpenShift 版本
         oc-mirror list operators -catalog=registry.redhat.io/redhat/redhat-operator-index:v4.XX --package=['operator 名稱'] --channel=['operator 頻道']
         ```
-       > Red Hat OpenShift Container Platform Operator Update Information Checker https://access.redhat.com/labs/ocpouic/?upgrade_path=4.16%20to%204.18
+       > [Red Hat OpenShift Container Platform Operator Update Information Checker](https://access.redhat.com/labs/ocpouic/?upgrade_path=4.16%20to%204.18)
    4. 創建 imageSetConfiguration yaml 配置檔
        ```yaml
        apiVersion: mirror.openshift.io/v1alpha2
@@ -202,7 +202,7 @@
        - quay.io/containerdisks/centos-stream:9
        - docker.io/library/postgres:latest
        - docker.io/gitea/gitea:1.21.7
-       - nfs-csi https://github.com/kubernetes-csi/csi-driver-nfs
+       - [nfs-csi](https://github.com/kubernetes-csi/csi-driver-nfs)
          - image: registry.k8s.io/sig-storage/csi-resizer:v1.13.1
          - image: registry.k8s.io/sig-storage/csi-provisioner:v5.2.0
          - image: registry.k8s.io/sig-storage/csi-snapshotter:v8.2.0
