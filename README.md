@@ -65,11 +65,11 @@
 6. 下載所需的 rpm 包，並將其存成 tar 檔 (作業系統: RHEL 9.4)
    - 將 AAP 所需的 rpm 包下載到指定目錄
      ```bash
-     dnf install --enablerepo=ansible-automation-platform-2.4-for-rhel-9-x86_64-rpms --downloadonly --installroot=/root/rpm/rootdir --downloaddir=/root/rpm/downloadonly/aap-9.4 --releasever=9.4 ansible-navigator
+     dnf install --enablerepo=ansible-automation-platform-2.5-for-rhel-9-x86_64-rpms --downloadonly --installroot=/root/rpm/rootdir --downloaddir=/root/rpm/downloadonly/aap-9.4 --releasever=9.4 ansible-navigator
      ```
    - 將下載的 rpm 包打包成 tar 檔
      ```bash
-     tar xf ansible-navigator-rpm-9.4-min.tar -C /root/rpm/downloadonly/aap-9.4
+     tar cvf ansible-navigator-rpm-9.4-min.tar /root/rpm/downloadonly/aap-9.4
      ```
      ![下載 rpm 包範例](https://github.com/CCChou/OpenShift-Automation/blob/main/images/rpm_sample.png)
 
