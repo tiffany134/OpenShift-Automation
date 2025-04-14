@@ -19,6 +19,9 @@
 在進入客戶環境前的準備事項
 
 0. 本機環境準備一台可對外連線的 RHEL 主機
+   - 準備好 GitHub 帳號
+   - 主機 /etc/host 中設定解析 red hat registry
+   - 檢查 /etc/yum.repos.d/ 內使用預設 RHEL repo
 
 1. 將 OpenShift Automation github repo fork 到自己的 repo 中
    - 連線至 [OpenShift-Automation Repo](https://github.com/CCChou/OCP-Automation.git)，並點選 fork
@@ -45,10 +48,15 @@
    ```
 
 4. 使用 ansible-builder 建立 execution environment 鏡像
+   - 登入 podmam
+     ``` bash
+     podman login registry.redhat.io
+     ``` 
    - 創建存放檔案用的資料夾
      ``` bash
      mkdir ['自創路徑'] && cd  ['自創路徑']
      ```
+     > 路徑範例名稱: eeimage
    - 將 execution-environment.yml 下載到這個資料夾
      ```bash
      wget https://raw.githubusercontent.com/CCChou/OpenShift-Automation/refs/heads/main/ansible/execution-environment.yml
@@ -57,16 +65,18 @@
      ```bash
      ansible-builder build -v3 -f execution-environment.yml -t ['你的 ee 映像檔名稱']
      ```
+     > execution-environment 映像檔範例名稱: eeimage-yyyymmdd
 5. 使用 podman 指令將前一步驟建立好的 ee 鏡像轉成 tar 檔
    ```bash
    podman save -o ['包起來的 tar 檔名稱'].tar ['你的 ee 映像檔名稱']
    ```
 
-6. 下載所需的 rpm 包，並將其存成 tar 檔 (作業系統: RHEL 9.4)
+6. 下載所需的 rpm 包，並將其存成 tar 檔 (以下範例作業系統版本為 RHEL 9.4)
    - 將 AAP 所需的 rpm 包下載到指定目錄
      ```bash
      dnf install --enablerepo=ansible-automation-platform-2.5-for-rhel-9-x86_64-rpms --downloadonly --installroot=/root/rpm/rootdir --downloaddir=/root/rpm/downloadonly/aap-9.4 --releasever=9.4 ansible-navigator
      ```
+     > 請確認 releasever 需對應到您 REHL 的版本
    - 將下載的 rpm 包打包成 tar 檔
      ```bash
      tar cvf ansible-navigator-rpm-9.4-min.tar /root/rpm/downloadonly/aap-9.4
@@ -74,19 +84,30 @@
      ![下載 rpm 包範例](https://github.com/CCChou/OpenShift-Automation/blob/main/images/rpm_sample.png)
 
 7. 下載所需的基本指令工具(CLI)和系統檔案
-   ```bash
-   wget ['url of the specific version'] 
-   ```
-  * 指令工具及系統檔案清單:
-    - [openshift-client](https://mirror.openshift.com/pub/openshift-v4/clients/ocp/)
-    - [openshift-install](https://mirror.openshift.com/pub/openshift-v4/clients/ocp/)
+   - 到[Red Hat OpenShift Container Platform Update Graph](https://access.redhat.com/labs/ocpupgradegraph/update_path/)最新的穩定(stable)版本
+   - 下載對應版本工具:
+     ```bash
+     wget ['url of the specific version'] 
+     ```
+  * 指令工具及系統檔案清單(以 4.18 stable 的 amd64 架構為範例):
+    - 以下三個在對應 OpenShift 版號資料夾下:
+      - [openshift-client](https://mirror.openshift.com/pub/openshift-v4/clients/ocp/)
+        ![openshift-client](https://github.com/CCChou/OpenShift-Automation/blob/main/images/oc-client.png)
+      - [openshift-install](https://mirror.openshift.com/pub/openshift-v4/clients/ocp/)
+        ![openshift-install](https://github.com/CCChou/OpenShift-Automation/blob/main/images/oc-install.png)
+      - [oc mirror plugin](https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/)
+        ![oc-mirror](https://github.com/CCChou/OpenShift-Automation/blob/main/images/oc-mirror.png)
+      > 請注意，此三者需要為相同版號，且需要留意處理器架構是否與您的處理器相同。
     - [Butane config transpiler CLI](https://mirror.openshift.com/pub/openshift-v4/clients/butane/latest/)
+      ![butane cli](https://github.com/CCChou/OpenShift-Automation/blob/main/images/butane.png)
     - [helm v3](https://mirror.openshift.com/pub/openshift-v4/clients/helm/)
+      ![helm cli](https://github.com/CCChou/OpenShift-Automation/blob/main/images/helm-latest.png)
+      > helm v3 請使用 latest 版本。
     - [mirror-registry](https://mirror.openshift.com/pub/openshift-v4/clients/mirror-registry/)
-    - [oc mirror plugin](https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/)
+      ![mirror-registry](https://github.com/CCChou/OpenShift-Automation/blob/main/images/mirror-registry.png)
+      > mirror registry v1 請使用最新版本。
     - [RHEL 開機用光碟 (REHL OS)](https://access.redhat.com/downloads/content/rhel)
     - [CoreOS 開機用光碟(rhcos)](https://mirror.openshift.com/pub/openshift-v4/x86_64/dependencies/rhcos/)
-    > 請注意，點擊下載連結進入上方提供的網址後，點選版本後即可下載。另外，openshift-install 與 openshift-client 需要為相同版號，且需要留意處理器架構是否與您的處理器相同。
 
 8. 使用 oc-mirror 指令將所需的鏡像拉取到本機
    1. 放 oc-mirror 可執行程式至指定目錄
