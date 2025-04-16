@@ -50,7 +50,8 @@
 4. 使用 ansible-builder 建立 execution environment 鏡像
    - 登入 podmam
      ``` bash
-     podman login registry.redhat.io
+     mkdir ~/.docker
+     podman login registry.redhat.io --authfile=~/.docker/config.json
      ``` 
    - 創建存放檔案用的資料夾
      ``` bash
