@@ -467,7 +467,7 @@
 
 8. 使用 ansible 運行自動化設定配置腳本 (roles > ocp_bastion_installer > tasks > main.yml)
    ```bash
-   ansible-navigator run --eei ['ee image name'] -i inventory -mstdout install.yml
+   ansible-navigator run --eei ['ee image name'] --pp missing -i inventory -mstdout install.yml
    ```
    1. 設定 bastion 機
    2. 設定 DNS 服務
