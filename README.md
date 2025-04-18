@@ -497,7 +497,36 @@
       7. 節點的網路配置設定
          - 設定節點網路，讓節點被解析成功
 
-9. 透過 curl 的方式呼叫 coreos-installer 執行 coreos install 指令
+9. 設定節點網路連線
+    1. 請於重新開機後，執行下列指令以 root 身分進行設定
+       ```
+       sudo -i
+       ```
+    2. 呼叫 nmtui
+       ![呼叫nmtui]([https://github.com/CCChou/OpenShift-Automation/blob/main/images/kvm-viii-pool%26iso_1.png](https://github.com/CCChou/OpenShift-Automation/blob/56c6724fc10b6b1d468fef64973b09d0d49e2bbf/images/1-nmtui.png)
+
+    3. 選擇 Edit a connection
+       ![選擇選項一](https://github.com/CCChou/OpenShift-Automation/blob/56c6724fc10b6b1d468fef64973b09d0d49e2bbf/images/2-choose_first_option_to_edit_connection.png)
+
+    4. 選擇欲使用之網卡
+       ![選擇網卡](https://github.com/CCChou/OpenShift-Automation/blob/56c6724fc10b6b1d468fef64973b09d0d49e2bbf/images/3-choose_the_preferred_NiC.png)
+
+    5. 編輯網卡連線資訊，完成後請按右下角之 OK 按鈕
+       ![編輯連線](https://github.com/CCChou/OpenShift-Automation/blob/56c6724fc10b6b1d468fef64973b09d0d49e2bbf/images/4-edit_connection.png)
+
+    6. 選擇 Activate a connection
+       ![選擇選項二](https://github.com/CCChou/OpenShift-Automation/blob/56c6724fc10b6b1d468fef64973b09d0d49e2bbf/images/5-choose_second_option.png)
+
+    7. 重啟先前設定之網卡: 對網卡名稱連擊兩次回車鍵即可! 
+       ![上下網卡](https://github.com/CCChou/OpenShift-Automation/blob/56c6724fc10b6b1d468fef64973b09d0d49e2bbf/images/6-reactivate_connection.png)
+
+    8. 回到 nmtui 清單主頁面，點選 Quit 後輸入下方指令，以確認 Domain name 是否解析成功
+       ```
+       hostname
+       ```
+       ![解析檢查](https://github.com/CCChou/OpenShift-Automation/blob/56c6724fc10b6b1d468fef64973b09d0d49e2bbf/images/7-check_hostname.png)
+
+10. 透過 curl 的方式呼叫 coreos-installer 執行 coreos install 指令
    ```bash
    # The command below will be automatically executed after executing curl 以下指令在 curl 執行後會自行執行
    # coreos-installer install /dev/sda -I http://['bastion ip']:8080/['bootstrap/master/worker'].ign --insecure-ignition -n
@@ -508,14 +537,14 @@
    ```
    > 若節點為虛擬機，請記得於開機前退出映像檔
 
-10. 匯出 kubeconfig 進行連線
+11. 匯出 kubeconfig 進行連線
     ```bash
     export KUBECONFIG=/root/ocp4/auth/kubeconfig 
     ```
     > 請注意，kubeconfig 檔案的位置可能會因您建立 ocp4 目錄的位置而有所不同。
     > 請留意此動作需於 bastion 機上執行!
 
-11. 檢查節點健康狀況，並根據安裝架構決定是否要通過 csr
+12. 檢查節點健康狀況，並根據安裝架構決定是否要通過 csr
    - 標準架構: 需要 csr approve
      ```bash
      oc get csr -o go-template='{{range .items}}{{if not .status}}{{.metadata.name}}{{"\n"}}{{end}}{{end}}' | xargs oc adm certificate approve
