@@ -503,7 +503,7 @@
        sudo -i
        ```
     2. 呼叫 nmtui
-       ![呼叫nmtui]([https://github.com/CCChou/OpenShift-Automation/blob/main/images/kvm-viii-pool%26iso_1.png](https://github.com/CCChou/OpenShift-Automation/blob/56c6724fc10b6b1d468fef64973b09d0d49e2bbf/images/1-nmtui.png)
+       ![呼叫nmtui](https://github.com/CCChou/OpenShift-Automation/blob/56c6724fc10b6b1d468fef64973b09d0d49e2bbf/images/1-nmtui.png)
 
     3. 選擇 Edit a connection
        ![選擇選項一](https://github.com/CCChou/OpenShift-Automation/blob/56c6724fc10b6b1d468fef64973b09d0d49e2bbf/images/2-choose_first_option_to_edit_connection.png)
