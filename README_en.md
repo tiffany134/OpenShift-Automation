@@ -474,14 +474,44 @@ https://access.redhat.com/labs/ocpouic/?upgrade_path=4.16%20to%204.18
      init 0 or poweroff
      ```
      >> If your nodes are installed on VM, please remeber to eject ISO before power-on 若節點為虛擬機，請記得於開機前退出映像檔
-9. Export kubeconfig for connection operation (匯出 kubeconfig 進行連線)
+
+8. Configure Node Network Connection
+    1. After rebooting, execute the following command as the root user
+       ```
+       sudo -i
+       ```
+    2. Launch nmtui
+       ![launch nmtui](https://github.com/CCChou/OpenShift-Automation/blob/56c6724fc10b6b1d468fef64973b09d0d49e2bbf/images/1-nmtui.png)
+
+    3. Select "Edit a connection"
+       ![selection1](https://github.com/CCChou/OpenShift-Automation/blob/56c6724fc10b6b1d468fef64973b09d0d49e2bbf/images/2-choose_first_option_to_edit_connection.png)
+
+    4. Choose the network interface card (NIC) you want to use
+       ![selectNiC](https://github.com/CCChou/OpenShift-Automation/blob/56c6724fc10b6b1d468fef64973b09d0d49e2bbf/images/3-choose_the_preferred_NiC.png)
+
+    5. Edit the connection details of the selected NIC. Once completed, click the OK button in the bottom-right corner
+       ![edit connection](https://github.com/CCChou/OpenShift-Automation/blob/56c6724fc10b6b1d468fef64973b09d0d49e2bbf/images/4-edit_connection.png)
+
+    6. Select "Activate a connection"
+       ![selection2](https://github.com/CCChou/OpenShift-Automation/blob/56c6724fc10b6b1d468fef64973b09d0d49e2bbf/images/5-choose_second_option.png)
+
+    7. Reactivate the previously configured NIC: double press the Enter key on the NIC name! 
+       ![reactivateNiC](https://github.com/CCChou/OpenShift-Automation/blob/56c6724fc10b6b1d468fef64973b09d0d49e2bbf/images/6-reactivate_connection.png)
+
+    8. Return to the main menu of nmtui, click Quit, and enter the following command to verify whether the domain name resolves correctly:
+       ```
+       hostname
+       ```
+       ![fqdncheck](https://github.com/CCChou/OpenShift-Automation/blob/56c6724fc10b6b1d468fef64973b09d0d49e2bbf/images/7-check_hostname.png)
+
+10. Export kubeconfig for connection operation (匯出 kubeconfig 進行連線)
      ```
      export KUBECONFIG=/root/ocp4/auth/kubeconfig 
      ```
      >> Please note that the location of the kubeconfig file may vary depending on where you created the ocp4 directory. 請注意，kubeconfig 檔案的位置可能會因您建立 ocp4 目錄的位置而有所不同。
      >> Please note that this action should be executed on bastion! 請留意此動作需於 bastion 機上執行
 
-10. Check the node health and decide whether to approve csr based on the installation architecture (檢查節點健康狀況，並根據安裝架構決定是否要通過 csr)
+11. Check the node health and decide whether to approve csr based on the installation architecture (檢查節點健康狀況，並根據安裝架構決定是否要通過 csr)
     * standard architecture (標準架構):
       #說明動作: 需要 csr approve需要 csr approve
       ```
@@ -489,7 +519,7 @@ https://access.redhat.com/labs/ocpouic/?upgrade_path=4.16%20to%204.18
       ```
     * Compact Nodes architecture (三節點架構):
       - 不需要 csr approve，因為 worker 會被加入 master
-11. Setting up OpenShift authentication and delete the kubeadmin user (設定身分認證並刪除 kubeadmin 用戶)
+12. Setting up OpenShift authentication and delete the kubeadmin user (設定身分認證並刪除 kubeadmin 用戶)
      ```
      htpasswd -c -B -b ['/path/to/user.htpasswd']['username']['password']
 
@@ -525,16 +555,16 @@ https://access.redhat.com/labs/ocpouic/?upgrade_path=4.16%20to%204.18
      htpasswd -D users.htpasswd ['username']
      oc create secret generic htpass-secret --from-file=htpasswd=users.htpasswd --dry-run=client -o yaml -n openshift-config | oc replace -f -
      ```
-12. Set the corresponding CSI storage interface (設定對應的 CSI 儲存介面)
+13. Set the corresponding CSI storage interface (設定對應的 CSI 儲存介面)
      * nfs csi as example (以 nfs csi 為例):
        - 外接存儲會依照需求有所不同與額外設定，請參照[此處](<https://github.com/kubernetes-csi/csi-driver-nfs/tree/master?tab=readme-ov-file>) 
-13. Set the infra node configuration according to the installation architecture (根據安裝架構設定 infra 節點配置)
+14. Set the infra node configuration according to the installation architecture (根據安裝架構設定 infra 節點配置)
      * standard architecture (標準架構):
        - Need to apply taint, as important services like logging and monitoring may need to run on this node 需要上 taint，有可能日誌監控等重要服務必須上在這邊
      * Compact Nodes architecture (三節點架構):
        - Not applicable 不適用
-14. Install gitea as a GitOps source repository (安裝 gitea 做為 GitOps 來源庫)
+15. Install gitea as a GitOps source repository (安裝 gitea 做為 GitOps 來源庫)
      ```
      
      ```
-15. Import the EaaS git repo and run the corresponding Operator environment installation (匯入 EaaS git repo 並執行對應的 Operator 環境安裝)
+16. Import the EaaS git repo and run the corresponding Operator environment installation (匯入 EaaS git repo 並執行對應的 Operator 環境安裝)
