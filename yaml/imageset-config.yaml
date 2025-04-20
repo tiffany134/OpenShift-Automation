@@ -3,84 +3,81 @@ kind: ImageSetConfiguration
 archiveSize: 4
 storageConfig:                                                      
   local:
-    path: /root/install/ocp417/metadata
+    path: /root/install/ocp418/metadata
 mirror:
   platform:
     channels:
-    - name: stable-4.16
-      minVersion: 4.16.3
-      maxVersion: 4.16.3
+    - name: stable-4.18
+      minVersion: 4.18.6
+      maxVersion: 4.16.8
   operators:
   - catalog: registry.redhat.io/redhat/redhat-operator-index:v4.16
     packages:
     - name: kubevirt-hyperconverged
       channels:
       - name: stable
-        minVersion: 4.16.6
-        maxVersion: 4.16.6
+        minVersion: 4.18.1
+        maxVersion: 4.18.1
     - name: mtv-operator
       channels:
-      - name: release-v2.7
-        minVersion: 2.7.11
-        maxVersion: 2.7.11
+      - name: release-v2.8
+        minVersion: 2.8.1
+        maxVersion: 2.8.1
     - name: kubernetes-nmstate-operator
       channels:
       - name: stable
-        minVersion: 4.16.0-202502250034
-        maxVersion: 4.16.0-202502250034
+        minVersion: 4.18.0-202504090803
+        maxVersion: 4.18.0-202504090803
     - name: netobserv-operator
       channels:
       - name: stable
-        minVersion: 1.6.1
-        maxVersion: 1.6.1
+        minVersion: 1.8.1
+        maxVersion: 1.8.1
     - name: cluster-observability-operator
       channels:
       - name: stable
-        minVersion: 1.0.0
-        maxVersion: 1.0.0
+        minVersion: 1.1.0
+        maxVersion: 1.1.0
     - name: cluster-logging
       channels:
-      - name: stable-5.9
-        minVersion: 5.9.12
-        maxVersion: 5.9.12
       - name: stable-6.2
-        minVersion: 6.2.0
-        maxVersion: 6.2.0
+        minVersion: 6.2.1
+        maxVersion: 6.2.1
     - name: loki-operator
       channels:
-      - name: stable-5.9
-        minVersion: 5.9.4
-        maxVersion: 5.9.4
+      - name: stable-6.2
+        minVersion: 6.2.1
+        maxVersion: 6.2.1
     - name: tempo-product
       channels:
       - name: stable
-        minVersion: 0.15.3-1
-        maxVersion: 0.15.3-1
+        minVersion: 0.15.4-1
+        maxVersion: 0.15.4-1
     - name: opentelemetry-product
       channels:
       - name: stable
-        minVersion: 0.119.0-1
-        maxVersion: 0.119.0-1
+        minVersion: 0.119.0-2
+        maxVersion: 0.119.0-2
     - name: local-storage-operator
       channels:
       - name: stable
-        minVersion: 4.16.0-202407081937
-        maxVersion: 4.16.0-202407081937
+        minVersion: 4.18.0-202504090803
+        maxVersion: 4.18.0-202504090803
     - name: node-healthcheck-operator
-      channels:
-      - name: stable
-        minVersion: 0.8.1
-        maxVersion: 0.8.1
-    - name: node-maintenance-operator
-      channels:
-      - name: stable
-        minVersion: 5.3.0
-        maxVersion: 5.3.0
-    - name: self-node-remediation
       channels:
       - name: stable
         minVersion: 0.9.0
         maxVersion: 0.9.0
+    - name: node-maintenance-operator
+      channels:
+      - name: stable
+        minVersion: 5.4.0
+        maxVersion: 5.4.0
+    - name: self-node-remediation
+      channels:
+      - name: stable
+        minVersion: 0.10.0
+        maxVersion: 0.10.0
     - name: cincinnati-operator
       channels:
       - name: v1
@@ -89,13 +86,13 @@ mirror:
     - name: openshift-gitops-operator
       channels:
       - name: latest
-        minVersion: 1.15.1
-        maxVersion: 1.15.1
+        minVersion: 1.16.0
+        maxVersion: 1.16.0
     - name: advanced-cluster-management
       channels:
       - name: release-2.13
-        minVersion: 2.13.1
-        maxVersion: 2.13.1
+        minVersion: 2.13.2
+        maxVersion: 2.13.2
     - name: multicluster-engine
       channels:
       - name: stable-2.8

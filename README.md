@@ -67,6 +67,7 @@
      ansible-builder build -v3 -f execution-environment.yml -t ['你的 ee 映像檔名稱']
      ```
      > execution-environment 映像檔範例名稱: eeimage-yyyymmdd
+
 5. 使用 podman 指令將前一步驟建立好的 ee 鏡像轉成 tar 檔
    ```bash
    podman save -o ['包起來的 tar 檔名稱'].tar ['你的 ee 映像檔名稱']
@@ -90,27 +91,30 @@
      ```bash
      wget ['url of the specific version'] 
      ```
-  * 指令工具及系統檔案清單(以 4.18 stable 的 amd64 架構為範例):
-    - 以下三個在對應 OpenShift 版號資料夾下:
-      - [openshift-client](https://mirror.openshift.com/pub/openshift-v4/clients/ocp/)
-        ![openshift-client](https://github.com/CCChou/OpenShift-Automation/blob/main/images/oc-client.png)
-      - [openshift-install](https://mirror.openshift.com/pub/openshift-v4/clients/ocp/)
-        ![openshift-install](https://github.com/CCChou/OpenShift-Automation/blob/main/images/oc-install.png)
-      - [oc mirror plugin](https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/)
-        ![oc-mirror](https://github.com/CCChou/OpenShift-Automation/blob/main/images/oc-mirror.png)
-      > 請注意，此三者需要為相同版號，且需要留意處理器架構是否與您的處理器相同。
-    - [Butane config transpiler CLI](https://mirror.openshift.com/pub/openshift-v4/clients/butane/latest/)
-      ![butane cli](https://github.com/CCChou/OpenShift-Automation/blob/main/images/butane.png)
-    - [helm v3](https://mirror.openshift.com/pub/openshift-v4/clients/helm/)
-      ![helm cli](https://github.com/CCChou/OpenShift-Automation/blob/main/images/helm-latest.png)
-      > helm v3 請使用 latest 版本。
-    - [mirror-registry](https://mirror.openshift.com/pub/openshift-v4/clients/mirror-registry/)
-      ![mirror-registry](https://github.com/CCChou/OpenShift-Automation/blob/main/images/mirror-registry.png)
-      > mirror registry v1 請使用最新版本。
-    - [RHEL 開機用光碟 (REHL OS)](https://access.redhat.com/downloads/content/rhel)
-    - [CoreOS 開機用光碟(rhcos)](https://mirror.openshift.com/pub/openshift-v4/x86_64/dependencies/rhcos/)
+   * 指令工具及系統檔案清單(以 4.18 stable 的 amd64 架構為範例):
+     - 以下三個在對應 OpenShift 版號資料夾下:
+       - [openshift-client](https://mirror.openshift.com/pub/openshift-v4/clients/ocp/)
+         ![openshift-client](https://github.com/CCChou/OpenShift-Automation/blob/main/images/oc-client.png)
+       - [openshift-install](https://mirror.openshift.com/pub/openshift-v4/clients/ocp/)
+         ![openshift-install](https://github.com/CCChou/OpenShift-Automation/blob/main/images/oc-install. png)
+       - [oc mirror plugin](https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/)
+         ![oc-mirror](https://github.com/CCChou/OpenShift-Automation/blob/main/images/oc-mirror.png)
+       > 請注意，此三者需要為相同版號，且需要留意處理器架構是否與您的處理器相同。
+     - [Butane config transpiler CLI](https://mirror.openshift.com/pub/openshift-v4/clients/butane/latest/)
+       ![butane cli](https://github.com/CCChou/OpenShift-Automation/blob/main/images/butane.png)
+     - [helm v3](https://mirror.openshift.com/pub/openshift-v4/clients/helm/)
+       ![helm cli](https://github.com/CCChou/OpenShift-Automation/blob/main/images/helm-latest.png)
+       > helm v3 請使用 latest 版本。
+     - [mirror-registry](https://mirror.openshift.com/pub/openshift-v4/clients/mirror-registry/)
+       ![mirror-registry](https://github.com/CCChou/OpenShift-Automation/blob/main/images/mirror-registry. png)
+       > mirror registry v1 請使用最新版本。
+     - [RHEL 開機用光碟 (REHL OS)](https://access.redhat.com/downloads/content/rhel)
+     - [CoreOS 開機用光碟(rhcos)](https://mirror.openshift.com/pub/openshift-v4/x86_64/dependencies/rhcos/)
 
 8. 使用 oc-mirror 指令將所需的鏡像拉取到本機
+   > 使用 [Red Hat OpenShift Container Platform Operator Update Information Checker](https://access.redhacom/labs/ocpouic/?upgrade_path=4.16%20to%204.18) 查詢 operator channel 及 version
+
+   > 使用 [Red Hat OpenShift Container Platform Update Graph](https://access.redhat.com/labs/ocpupgradegraph/update_path/) 查詢 OCP channel 及 version
    1. 放 oc-mirror 可執行程式至指定目錄
       ```bash
       tar -zxvf oc-mirror.tar.gz -C /usr/local/bin/
@@ -118,66 +122,121 @@
       ```bash
       chmod a+x /usr/local/bin/oc-mirror
       ``` 
-   2. 配置允許可以 mirror 的鏡像憑證 Configuring credentials that allow images to be mirrored
+   2. 配置允許 mirror 的鏡像憑證
       - 到 [Red Hat Hybrid Cloud Console](https://console.redhat.com/openshift/downloads) 下載 pull secret 並儲存成 json 文件 
         ```bash
         cat /root/pull-secret > ~/.docker/config.json
         ```
+      - 如有其餘 Image Registry 憑證需新增
+        ```bash
+        podman login --authfile ~/.docker/config.json ${MIRROR_REGISTRY}
+        ```
    3. 取得常用 Operator 之資訊
-      - 取得 operator 頻道資訊
-        ```bash
-        # version 請選擇要安裝的 OpenShift 版本
-        oc-mirror list operators --catalogs --version=4.XX
-        ```
-        ```bash
-        # image tag 請選擇要安裝的 OpenShift 版本
-        oc-mirror list operators --catalog=registry.redhat.io/redhat/redhat-operator-index:v4.XX > package.out
-        ```
-      - 在上述匯出的 package.out 檔中檢查並你要下載的 operator
-        ```bash
-        # image tag 請選擇要安裝的 OpenShift 版本
-        oc-mirror list operators --catalog=registry.redhat.io/redhat/redhat-operator-index:v4.XX --package=['operator 名稱']
-        ```
-      - 找指定的頻道內的 package 版本
-        ```bash
-        # image tag 請選擇要安裝的 OpenShift 版本
-        oc-mirror list operators --catalog=registry.redhat.io/redhat/redhat-operator-index:v4.XX --package=['operator 名稱'] --channel=['operator 頻道']
-        ```
-       > [Red Hat OpenShift Container Platform Operator Update Information Checker](https://access.redhat.com/labs/ocpouic/?upgrade_path=4.16%20to%204.18)
-   4. 創建 imageSetConfiguration yaml 配置檔
+      1. 取得目標版本的可用目錄
+         ```bash
+         # version 請選擇要安裝的 OpenShift 版本
+         oc-mirror list operators --catalogs --version=4.XX
+         ```
+         以 4.18 為範例:
+         ```bash
+         oc-mirror list operators --catalogs --version=4.18
+         ```
+         輸出結果如下:
+         ```bash
+         Available OpenShift OperatorHub catalogs:
+         OpenShift 4.18:
+         registry.redhat.io/redhat/redhat-operator-index:v4.18
+         registry.redhat.io/redhat/certified-operator-index:v4.18
+         registry.redhat.io/redhat/community-operator-index:v4.18
+         registry.redhat.io/redhat/redhat-marketplace-index:v4.18
+         ```
+      2. 在選定的目錄中尋找可用的 operator 資訊
+         ```bash
+         # image tag 請選擇要安裝的 OpenShift 版本
+         oc-mirror list operators --catalog=registry.redhat.io/redhat/redhat-operator-index:v4.XX > package. out
+         ```
+         以 redhat-operator-index:4.18 為範例:
+         ```bash
+         oc-mirror list operators --catalog=registry.redhat.io/redhat/redhat-operator-index:v4.18 > package. out
+         ```
+         package. out 內容如下:
+         ```bash
+         NAME                                          DISPLAY NAME  DEFAULT CHANNEL
+         ···
+         cluster-logging                                             stable-6.2
+         cluster-observability-operator                              stable
+         ···
+         ```
+      3. 尋找所選 operator 的 channel 版本
+         ```bash
+         oc-mirror list operators --catalog=registry.redhat.io/redhat/redhat-operator-index:v4.XX --package=['operator 名稱']
+         ```
+         以 cluster-logging operator 為範例:
+         ```bash
+         oc-mirror list operators --catalog=registry.redhat.io/redhat/redhat-operator-index:v4.18 --package=cluster-logging
+         ```
+         輸出結果如下:
+         ```bash
+         NAME             DISPLAY NAME  DEFAULT CHANNEL
+         cluster-logging                stable-6.2
+
+         PACKAGE          CHANNEL     HEAD
+         cluster-logging  stable-6.1  cluster-logging.v6.1.5
+         cluster-logging  stable-6.2  cluster-logging.v6.2.1
+         ```
+      4. 找指定的頻道內的 package 版本
+         ```bash
+         oc-mirror list operators --catalog=registry.redhat.io/redhat/redhat-operator-index:v4.XX --package=['operator 名稱'] --channel=['operator 頻道']
+         ```
+         以 cluster-logging operator 為範例:
+         ```bash
+         oc-mirror list operators --catalog=registry.redhat.io/redhat/redhat-operator-index:v4.18 --package=cluster-logging --channel=stable-6.2
+         ```
+         輸出結果如下:
+         ```bash
+         VERSIONS
+         6.2.0
+         6.2.1
+         ```
+   4. 創建 mirror 目錄
+         ```bash
+         mkdir /root/install/ocp418
+         cd /root/install/ocp418
+         ```
+   5. 創建 imageSetConfiguration yaml 配置檔
        ```yaml
        apiVersion: mirror.openshift.io/v1alpha2
        kind: ImageSetConfiguration
        archiveSize: 4
        storageConfig:                                                      
          local:
-           path: /root/install/ocp416/metadata
+           path: /root/install/ocp418/metadata
        mirror:
          platform:
            channels:
-           - name: fast-4.16
-             minVersion: 4.16.3
-             maxVersion: 4.16.3
+           - name: stable-4.18
+             minVersion: 4.18.6
+             maxVersion: 4.16.8
            graph: true
          operators:
-         - catalog: registry.redhat.io/redhat/redhat-operator-index:v4.16
+         - catalog: registry.redhat.io/redhat/redhat-operator-index:v4.18
            packages:
            - name: cluster-logging
              channels:
-             - name: stable-5.9
-               minVersion: 5.9.4
-               maxVersion: 5.9.4
+             - name: stable-6.2
+               minVersion: 6.2.1
+               maxVersion: 6.2.1
            - name: loki-operator 
              channels:
-             - name: stable-5.9
-               minVersion: 5.9.4
-               maxVersion: 5.9.4
+             - name: stable-6.2
+               minVersion: 6.2.1
+               maxVersion: 6.2.1
          additionalImages:
          - name: registry.redhat.io/rhel8/rhel-guest-image:latest
          - name: registry.redhat.io/rhel9/rhel-guest-image:latest
        ```
        > 完整請參考 ( yaml > imageset-config.yaml)，請注意頻道和鏡像標籤
-   5. 將鏡像從特定的 ImageSetConfiguration 中同步到磁碟
+   6. 將鏡像從特定的 ImageSetConfiguration 中同步到磁碟
       - 執行 oc mirror 指令將指定 ImageSetConfiguration 中的鏡像同步到磁碟上
         ```bash
         oc-mirror --config=./imageset-config.yaml file://.
@@ -187,6 +246,8 @@
         ls
 
         mirror_seq1_000000.tar
+        mirror_seq1_000001.tar
+        ···
         ```
    * 鏡像清單:
      - [openshift images]:
@@ -216,7 +277,7 @@
          - openshift-gitops-operator
          - advanced-cluster-management
          - multicluster-engine
-    - [additional images]: 
+     - [additional images]: 
        - quay.io/stevewu/net-tools:latest
        - quay.io/containerdisks/fedora:latest
        - quay.io/containerdisks/centos:7-2009
@@ -438,6 +499,7 @@
    ```bash
    ssh-copy-id root@['bastion ip'] 
    ```
+
 5. 從 tar 檔中載入容器映像檔到 Podman 的本地鏡像庫
    ```bash
    podman load -i ['包起來的 ee tar 檔名稱'].tar
@@ -529,10 +591,10 @@
 10. 透過 curl 的方式呼叫 coreos-installer 執行 coreos install 指令
     ```bash
     # 以下指令在 curl 執行後 會自行執行
-    # coreos-installer install /dev/sda -I http://['bastion ip']:8080/['bootstrap/master/ worker'].ign --insecure-ignition -n
+    # coreos-installer install ['device'] -I http://['bastion ip']:8080/['bootstrap/master/worker'].ign --insecure-ignition -n
     curl http://['bastion ip']:8080/install.sh | bash -s - ['device'] ['role']
     ```
-    執行命令範例:
+    執行命令範例 (以 /dev/sda 及 worker 為例):
     ```
     curl http://172.20.11.120:8080/install.sh | bash -s - /dev/sda worker
     ```
@@ -550,11 +612,11 @@
     > 請留意此動作需於 bastion 機上執行!
 
 12. 檢查節點健康狀況，並根據安裝架構決定是否要通過 csr
-   - 標準架構: 需要 csr approve
-     ```bash
-     oc get csr -o go-template='{{range .items}}{{if not .status}}{{.metadata.name}}{{"\n"}}{{end}}{{end}}' | xargs oc adm certificate approve
-     ```
-   - 三節點架構: 不需要 csr approve，因為 worker 會被加入 master
+    - 標準架構: 需要 csr approve
+      ```bash
+      oc get csr -o go-template='{{range .items}}{{if not .status}}{{.metadata.name}}{{"\n"}}{{end}}{{end}}' | xargs oc adm certificate approve
+      ```
+    - 三節點架構: 不需要 csr approve，因為 worker 會被加入 master
 
 ### 安裝後配置流程
 
