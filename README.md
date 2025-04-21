@@ -589,18 +589,19 @@
        ![選擇選項一](https://github.com/CCChou/OpenShift-Automation/blob/56c6724fc10b6b1d468fef64973b09d0d49e2bbf/images/2-choose_first_option_to_edit_connection.png)
 
     4. 選擇欲使用之網卡
-       ![選擇網卡](https://github.com/CCChou/OpenShift-Automation/blob/56c6724fc10b6b1d468fef64973b09d0d49e2bbf/images/3-choose_the_preferred_NiC.png)
+       ![選擇網卡](https://github.com/CCChou/OpenShift-Automation/blob/350712014cfc03677daef5caee0072e6c8f9a375/images/3-choose_the_preferred_NiC.png)
 
     5. 編輯網卡連線資訊，完成後請按右下角之 OK 按鈕
-       ![編輯連線](https://github.com/CCChou/OpenShift-Automation/blob/56c6724fc10b6b1d468fef64973b09d0d49e2bbf/images/4-edit_connection.png)
+       ![編輯連線](https://github.com/CCChou/OpenShift-Automation/blob/350712014cfc03677daef5caee0072e6c8f9a375/images/4-edit_connection.png)
+       > 請注意! 若您的機器存有其他網卡，請*取消勾選*「不是提供給 OpenShift 使用」的網卡的 "Automatically connect" 選項! 並於 "Activate a connection" 選單中，將該張(或數張)網卡關閉。
 
-    6. 選擇 Activate a connection
+    7. 選擇 Activate a connection
        ![選擇選項二](https://github.com/CCChou/OpenShift-Automation/blob/56c6724fc10b6b1d468fef64973b09d0d49e2bbf/images/5-choose_second_option.png)
 
-    7. 重啟先前設定之網卡: 對網卡名稱連擊兩次回車鍵即可! 
+    8. 重啟先前設定之網卡: 對網卡名稱連擊兩次回車鍵即可! 
        ![上下網卡](https://github.com/CCChou/OpenShift-Automation/blob/56c6724fc10b6b1d468fef64973b09d0d49e2bbf/images/6-reactivate_connection.png)
 
-    8. 回到 nmtui 清單主頁面，點選 Quit 後輸入下方指令，以確認 Domain name 是否解析成功
+    9. 回到 nmtui 清單主頁面，點選 Quit 後輸入下方指令，以確認 Domain name 是否解析成功
        ```
        hostname
        ```
