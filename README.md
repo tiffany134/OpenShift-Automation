@@ -52,7 +52,6 @@
        ``` bash
        mkdir ['自創路徑'] && cd  ['自創路徑']
        ```
-       > [!TIP]
        > 路徑範例名稱: eeimage
      - 將 execution-environment.yml 下載到這個資料夾
        ```bash
@@ -62,7 +61,6 @@
        ```bash
        ansible-builder build -v3 -f execution-environment.yml -t ['你的 ee 映像檔名稱']
        ```
-       > [!TIP]
        > execution-environment 映像檔範例名稱: eeimage-yyyymmdd
      - 使用 podman 指令將前一步驟建立好的 ee 鏡像轉成 tar 檔
        ```bash
@@ -87,12 +85,12 @@
      ``` bash
      sh sciprts/get-tool.sh [openshift version] [rhel major version] [cpu architecture] [helm latest version] [mirror registry latest version]"
      ```
-     > 參數參考
-       openshift version: 4.18.7
-       rhel major version: rhel9
-       cpu architecture: amd64
-       helm latest version: 3.15.4
-       mirror registry latest version: 1.3.11
+     > 參數參考:
+     >  - openshift version: 4.18.7
+     >  - rhel major version: rhel9
+     >  - cpu architecture: amd64
+     >  - helm latest version: 3.15.4
+     >  - mirror registry latest version: 1.3.11
    * 指令工具及系統檔案清單(以 4.18 stable 的 amd64 架構為範例):
      - 以下三個在對應 OpenShift 版號資料夾下:
        - [openshift-client](https://mirror.openshift.com/pub/openshift-v4/clients/ocp/)
