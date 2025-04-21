@@ -96,7 +96,7 @@
        - [openshift-client](https://mirror.openshift.com/pub/openshift-v4/clients/ocp/)
          ![openshift-client](https://github.com/CCChou/OpenShift-Automation/blob/main/images/oc-client.png)
        - [openshift-install](https://mirror.openshift.com/pub/openshift-v4/clients/ocp/)
-         ![openshift-install](https://github.com/CCChou/OpenShift-Automation/blob/main/images/oc-install. png)
+         ![openshift-install](https://github.com/CCChou/OpenShift-Automation/blob/main/images/oc-install.png)
        - [oc mirror plugin](https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/)
          ![oc-mirror](https://github.com/CCChou/OpenShift-Automation/blob/main/images/oc-mirror.png)
        > 請注意，此三者需要為相同版號，且需要留意處理器架構是否與您的處理器相同。
@@ -112,9 +112,9 @@
      - [CoreOS 開機用光碟(rhcos)](https://mirror.openshift.com/pub/openshift-v4/x86_64/dependencies/rhcos/)
 
 6. 使用 oc-mirror 指令將所需的鏡像拉取到本機
-   > 使用 [Red Hat OpenShift Container Platform Operator Update Information Checker](https://access.redhacom/labs/ocpouic/?upgrade_path=4.16%20to%204.18) 查詢 operator channel 及 version
+   * 使用 [Red Hat OpenShift Container Platform Operator Update Information Checker](https://access.redhacom/labs/ocpouic/?upgrade_path=4.16%20to%204.18) 查詢 operator channel 及 version
 
-   > 使用 [Red Hat OpenShift Container Platform Update Graph](https://access.redhat.com/labs/ocpupgradegraph/update_path/) 查詢 OCP channel 及 version
+   * 使用 [Red Hat OpenShift Container Platform Update Graph](https://access.redhat.com/labs/ocpupgradegraph/update_path/) 查詢 OCP channel 及 version
    1. 放 oc-mirror 可執行程式至指定目錄
       ```bash
       tar -zxvf oc-mirror.tar.gz -C /usr/local/bin/
@@ -203,6 +203,7 @@
          mkdir /root/install/ocp418
          cd /root/install/ocp418
          ```
+         > 建議目錄可使用對應 OpenShift 版本，如 ocp418
    5. 創建 imageSetConfiguration yaml 配置檔
        ```yaml
        apiVersion: mirror.openshift.io/v1alpha2
@@ -294,9 +295,9 @@
          - image: registry.k8s.io/sig-storage/snapshot-controller:v8.2.0
 
 7. 使用 git clone 將你自動化相關的 git repo 拉取下來
-   [OpenShift-Automation Repo](https://github.com/CCChou/OCP-Automation.git)
-   [ocp_bastion_installer Repo](https://github.com/CCChou/ocp_bastion_installer.git)
-   [OpenShift-EaaS-Practice Repo](https://github.com/CCChou/OpenShift-EaaS-Practice.git)
+   * [OpenShift-Automation Repo](https://github.com/CCChou/OCP-Automation.git)
+   * [ocp_bastion_installer Repo](https://github.com/CCChou/ocp_bastion_installer.git)
+   * [OpenShift-EaaS-Practice Repo](https://github.com/CCChou/OpenShift-EaaS-Practice.git)
    ```bash
    git clone https://github.com/CCChou/OCP-Automation.git
 
