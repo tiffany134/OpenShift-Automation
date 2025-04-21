@@ -8,6 +8,7 @@ unset $4
 
 # 設定參數（可以在執行腳本時傳入）
 export BASTION_IP=$1
+export BAK_DIR="/etc/yum.repos.d/bak"
 export TARBALL_PATH=$(echo "${2:-/root/install_source/ansible-navigator-rpm-9.4-min.tar}")
 export TAR_DEST_PATH=$(echo "${3:-/root/install_source/ansible-navigator-rpm-9.4}")
 export EE_IMAGE_TAR=$(echo "${4:-eeimage}")
@@ -15,6 +16,10 @@ export EE_IMAGE_NAME=$(basename "$EE_IMAGE_TAR" .tar)
 
 # Mount DVD/image 掛光碟到機器上
 mount /dev/sr0 /mnt
+
+# 備份原有 repo
+mkdir -p "$BAK_DIR"
+mv "/etc/yum.repos.d"/*.repo "$BAK_DIR"/ 2>/dev/null
 
 # 建立 yum repository
 cat << EOF > /etc/yum.repos.d/dvd.repo

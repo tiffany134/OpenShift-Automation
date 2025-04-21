@@ -5,8 +5,6 @@ unset $2
 unset $3
 unset $4
 
-export VERSION_DATE=$(date +'%Y%m%d')
-
 export REGISTRY_USERNAME=$1
 export REGISTRY_PASSWORD=$2
 export EE_DIR=$(echo "${3:-eeimage}")

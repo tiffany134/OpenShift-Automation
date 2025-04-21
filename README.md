@@ -23,17 +23,7 @@
    - 主機 /etc/host 中設定解析 red hat registry
    - 檢查 /etc/yum.repos.d/ 內使用預設 RHEL repo
 
-1. 將 OpenShift Automation github repo fork 到自己的 repo 中
-   - 連線至 [OpenShift-Automation Repo](https://github.com/CCChou/OCP-Automation.git)，並點選 fork
-   ![Fork01](https://github.com/CCChou/OpenShift-Automation/blob/main/images/fork01.png?raw=true)
-
-   - 確認名稱沒有衝突後點選 Create fork
-   ![Fork02](https://github.com/CCChou/OpenShift-Automation/blob/main/images/fork02.png?raw=true)
-
-   - 成功 Fork 後可看到以下畫面，左上為目前 fork 出來的 repo 名稱以及關聯的源頭，右側 Code 點擊後則可以取得此 repo 後續用於 clone 的連結
-   ![Fork03](https://github.com/CCChou/OpenShift-Automation/blob/main/images/fork03.png?raw=true)
-
-2. 註冊目前使用的本地機器
+1. 註冊目前使用的本地機器
    ```bash
    subscription-manager register
    ```
@@ -42,38 +32,44 @@
    Password: ['你的 Red Hat 帳戶密碼']
    ```
 
-3. 在本地機器上安裝 ansible-builder 
+2. 在本地機器上安裝 ansible-builder 
    ```bash
    sudo dnf install --enablerepo=ansible-automation-platform-2.5-for-rhel-9-x86_64-rpms ansible-navigator
    ```
 
-4. 使用 ansible-builder 建立 execution environment 鏡像
-   - 登入 podmam
+3. 使用 ansible-builder 建立 execution environment 鏡像，並使用 podman 指令將前一步驟建立好的 ee 鏡像轉成 tar 檔
+   - 執行腳本建立 ee 鏡像
      ``` bash
-     mkdir ~/.docker
-     podman login registry.redhat.io --authfile=~/.docker/config.json
-     ``` 
-   - 創建存放檔案用的資料夾
-     ``` bash
-     mkdir ['自創路徑'] && cd  ['自創路徑']
+     sh sciprts/ansible/build_ee_image.sh [registry username] [registry password]
      ```
-     > 路徑範例名稱: eeimage
-   - 將 execution-environment.yml 下載到這個資料夾
-     ```bash
-     wget https://raw.githubusercontent.com/CCChou/OpenShift-Automation/refs/heads/main/ansible/execution-environment.yml
-     ```
-   - 建構 ee(execution-environment) 容器鏡像
-     ```bash
-     ansible-builder build -v3 -f execution-environment.yml -t ['你的 ee 映像檔名稱']
-     ```
-     > execution-environment 映像檔範例名稱: eeimage-yyyymmdd
+   - build_ee_image 腳本運行內容參考：
+     - 登入 podmam
+       ``` bash
+        mkdir ~/.docker
+        podman login registry.redhat.io --authfile=~/.docker/config.json
+        ``` 
+     - 創建存放檔案用的資料夾
+       ``` bash
+       mkdir ['自創路徑'] && cd  ['自創路徑']
+       ```
+       > [!TIP]
+       > 路徑範例名稱: eeimage
+     - 將 execution-environment.yml 下載到這個資料夾
+       ```bash
+       wget https://raw.githubusercontent.com/CCChou/OpenShift-Automation/refs/heads/main/ansible/execution-environment.yml
+       ```
+     - 建構 ee(execution-environment) 容器鏡像
+       ```bash
+       ansible-builder build -v3 -f execution-environment.yml -t ['你的 ee 映像檔名稱']
+       ```
+       > [!TIP]
+       > execution-environment 映像檔範例名稱: eeimage-yyyymmdd
+     - 使用 podman 指令將前一步驟建立好的 ee 鏡像轉成 tar 檔
+       ```bash
+       podman save -o ['包起來的 tar 檔名稱'].tar ['你的 ee 映像檔名稱']
+       ```
 
-5. 使用 podman 指令將前一步驟建立好的 ee 鏡像轉成 tar 檔
-   ```bash
-   podman save -o ['包起來的 tar 檔名稱'].tar ['你的 ee 映像檔名稱']
-   ```
-
-6. 下載所需的 rpm 包，並將其存成 tar 檔 (以下範例作業系統版本為 RHEL 9.4)
+4. 下載所需的 rpm 包，並將其存成 tar 檔 (以下範例作業系統版本為 RHEL 9.4)
    - 將 AAP 所需的 rpm 包下載到指定目錄
      ```bash
      dnf install --enablerepo=ansible-automation-platform-2.5-for-rhel-9-x86_64-rpms --downloadonly --installroot=/root/rpm/rootdir --downloaddir=/root/rpm/downloadonly/aap-9.4 --releasever=9.4 ansible-navigator
@@ -85,12 +81,18 @@
      ```
      ![下載 rpm 包範例](https://github.com/CCChou/OpenShift-Automation/blob/main/images/rpm_sample.png)
 
-7. 下載所需的基本指令工具(CLI)和系統檔案
+5. 下載所需的基本指令工具(CLI)和系統檔案
    - 到[Red Hat OpenShift Container Platform Update Graph](https://access.redhat.com/labs/ocpupgradegraph/update_path/)最新的穩定(stable)版本
-   - 下載對應版本工具:
-     ```bash
-     wget ['url of the specific version'] 
+   - 執行腳本下載對應版本工具
+     ``` bash
+     sh sciprts/get-tool.sh [openshift version] [rhel major version] [cpu architecture] [helm latest version] [mirror registry latest version]"
      ```
+     > 參數參考
+       openshift version: 4.18.7
+       rhel major version: rhel9
+       cpu architecture: amd64
+       helm latest version: 3.15.4
+       mirror registry latest version: 1.3.11
    * 指令工具及系統檔案清單(以 4.18 stable 的 amd64 架構為範例):
      - 以下三個在對應 OpenShift 版號資料夾下:
        - [openshift-client](https://mirror.openshift.com/pub/openshift-v4/clients/ocp/)
@@ -106,12 +108,12 @@
        ![helm cli](https://github.com/CCChou/OpenShift-Automation/blob/main/images/helm-latest.png)
        > helm v3 請使用 latest 版本。
      - [mirror-registry](https://mirror.openshift.com/pub/openshift-v4/clients/mirror-registry/)
-       ![mirror-registry](https://github.com/CCChou/OpenShift-Automation/blob/main/images/mirror-registry. png)
+       ![mirror-registry](https://github.com/CCChou/OpenShift-Automation/blob/main/images/mirror-registry.png)
        > mirror registry v1 請使用最新版本。
      - [RHEL 開機用光碟 (REHL OS)](https://access.redhat.com/downloads/content/rhel)
      - [CoreOS 開機用光碟(rhcos)](https://mirror.openshift.com/pub/openshift-v4/x86_64/dependencies/rhcos/)
 
-8. 使用 oc-mirror 指令將所需的鏡像拉取到本機
+6. 使用 oc-mirror 指令將所需的鏡像拉取到本機
    > 使用 [Red Hat OpenShift Container Platform Operator Update Information Checker](https://access.redhacom/labs/ocpouic/?upgrade_path=4.16%20to%204.18) 查詢 operator channel 及 version
 
    > 使用 [Red Hat OpenShift Container Platform Update Graph](https://access.redhat.com/labs/ocpupgradegraph/update_path/) 查詢 OCP channel 及 version
@@ -293,12 +295,19 @@
          - image: registry.k8s.io/sig-storage/nfsplugin:v4.11.0
          - image: registry.k8s.io/sig-storage/snapshot-controller:v8.2.0
 
-9. 使用 git clone 將你 fork 的 OpenShift Automation git repo 拉取下來 (URL 可參考步驟一)
+7. 使用 git clone 將你自動化相關的 git repo 拉取下來
+   [OpenShift-Automation Repo](https://github.com/CCChou/OCP-Automation.git)
+   [ocp_bastion_installer Repo](https://github.com/CCChou/ocp_bastion_installer.git)
+   [OpenShift-EaaS-Practice Repo](https://github.com/CCChou/OpenShift-EaaS-Practice.git)
    ```bash
-   git clone [Forked Git URL]
+   git clone https://github.com/CCChou/OCP-Automation.git
+
+   git clone https://github.com/CCChou/ocp_bastion_installer.git
+
+   git clone https://github.com/CCChou/OpenShift-EaaS-Practice.git
    ```
 
-10. 依客戶環境需求修改 OpenShift Automation 內的配置 (調整 role > ocp_bastion_installer > default > main.yml 內的配置)
+8. 依客戶環境需求修改 OpenShift Automation 內的配置 (調整 role > ocp_bastion_installer > default > main.yml 內的配置)
     ```yaml
     ---
     online: false
@@ -377,7 +386,7 @@
       ip: 172.20.11.59
     ```
 
-11. 將所有準備好的資源都 tar 起來準備放入客戶離線環境
+9. 將所有準備好的資源都 tar 起來準備放入客戶離線環境
     * tar checkt list (tar包清單):
       - [x] ansible-navigator
       - [x] ee.tar
@@ -402,6 +411,16 @@
       - [x] OpenShift disconnected installation tools
         - mirror registry for Red Hat OpenShift (mirror-registry)
         - OpenShift Client (oc) mirror plugin (oc-mirror)
+
+10. (optional)若需要自行研究更新維護，可將自動化相關 github repo fork 到自己的 repo 中
+   - 連線至 [OpenShift-Automation Repo](https://github.com/CCChou/OCP-Automation.git)，並點選 fork
+   ![Fork01](https://github.com/CCChou/OpenShift-Automation/blob/main/images/fork01.png?raw=true)
+
+   - 確認名稱沒有衝突後點選 Create fork
+   ![Fork02](https://github.com/CCChou/OpenShift-Automation/blob/main/images/fork02.png?raw=true)
+
+   - 成功 Fork 後可看到以下畫面，左上為目前 fork 出來的 repo 名稱以及關聯的源頭，右側 Code 點擊後則可以取得此 repo 後續用於 clone 的連結
+   ![Fork03](https://github.com/CCChou/OpenShift-Automation/blob/main/images/fork03.png?raw=true)
 
 ### 離線安裝流程
 
@@ -623,12 +642,12 @@
 1. 設定身分認證並刪除 kubeadmin 用戶
    ```bash
    # 執行 script 設置 OpenShift authentication
-   sh script/authentication/authentication.sh
+   sh scripts/authentication/authentication.sh
    ```
 
 2. 關閉預設 catalog source
    ```bash
-   sh script/disable-marketplace.sh
+   sh scripts/disable-marketplace.sh
    ```     
 
 3. 設定對應的 CSI 儲存介面
@@ -640,18 +659,18 @@
      ```bash
      # 執行 script 設置 infra node 及 monitoring components
      # sh script/infra/infra.sh <clusterName>.<baseDomain> standard
-     sh script/infra/infra.sh ocp.ansible.lab standard
+     sh scripts/infra/infra.sh ocp.ansible.lab standard
      ```
    - Compact Nodes architecture (三節點架構):
      ```bash
      # 執行 script 設置 monitoring components
      # sh script/infra/infra.sh <clusterName>.<baseDomain> compact
-     sh script/infra/infra.sh ocp.ansible.lab compact
+     sh scripts/infra/infra.sh ocp.ansible.lab compact
      ```
     
 5. Install gitea as a GitOps source repository (安裝 gitea 做為 GitOps 來源庫)
    ```bash
-   sh gitea.sh
+   sh scripts/gitea.sh
    ```
 
 6. Import the EaaS git repo and run the corresponding Operator environment installation (匯入 EaaS git repo 並執行對應的 Operator 環境安裝)
