@@ -490,15 +490,16 @@ https://access.redhat.com/labs/ocpouic/?upgrade_path=4.16%20to%204.18
        ![selectNiC](https://github.com/CCChou/OpenShift-Automation/blob/56c6724fc10b6b1d468fef64973b09d0d49e2bbf/images/3-choose_the_preferred_NiC.png)
 
     5. Edit the connection details of the selected NIC. Once completed, click the OK button in the bottom-right corner
-       ![edit connection](https://github.com/CCChou/OpenShift-Automation/blob/56c6724fc10b6b1d468fef64973b09d0d49e2bbf/images/4-edit_connection.png)
+       ![edit connection](https://github.com/CCChou/OpenShift-Automation/blob/350712014cfc03677daef5caee0072e6c8f9a375/images/4-edit_connection.png)
+       > Please note if your machine has additional network interfaces, please uncheck the "Automatically connect" option for the ones not intended for OpenShift use! Then, in the "Activate a connection" menu, deactivate those network interfaces.
 
-    6. Select "Activate a connection"
+    7. Select "Activate a connection"
        ![selection2](https://github.com/CCChou/OpenShift-Automation/blob/56c6724fc10b6b1d468fef64973b09d0d49e2bbf/images/5-choose_second_option.png)
 
-    7. Reactivate the previously configured NIC: double press the Enter key on the NIC name! 
+    8. Reactivate the previously configured NIC: double press the Enter key on the NIC name! 
        ![reactivateNiC](https://github.com/CCChou/OpenShift-Automation/blob/56c6724fc10b6b1d468fef64973b09d0d49e2bbf/images/6-reactivate_connection.png)
 
-    8. Return to the main menu of nmtui, click Quit, and enter the following command to verify whether the domain name resolves correctly:
+    9. Return to the main menu of nmtui, click Quit, and enter the following command to verify whether the domain name resolves correctly:
        ```
        hostname
        ```
