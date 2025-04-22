@@ -18,10 +18,11 @@ REGISTRY="${1:-docker.io}"
 export KUBECONFIG=/root/ocp4/auth/kubeconfig
 
 export REGISTRY=$REGISTRY
+export GITEA_VERSION=1.21.7
  
 envsubst < create-gitea.yaml |oc apply -f -
 envsubst < postgresql.yaml |oc apply -f -
 
-#要再改個
+# 建立 gitea 權限
 oc create sa gitea-sa
 oc adm policy add-scc-to-user anyuid -z gitea-sa
