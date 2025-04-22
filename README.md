@@ -611,13 +611,13 @@
 
 10. 透過 curl 的方式呼叫 coreos-installer 執行 coreos install 指令
     - 在各個主機內執行 coreos-installer 腳本
-    ```bash
-    # 以下指令在 curl 執行後 會自行執行
-    # coreos-installer install ['device'] -I http://['bastion ip']:8080/['bootstrap/master/worker'].ign --insecure-ignition -n
-    curl http://['bastion ip']:8080/install.sh | bash -s - ['device'] ['role']
-    ```
-    > 執行命令範例 (以 /dev/sda 及 worker 為例):
-    > curl http://172.20.11.120:8080/install.sh | bash -s - /dev/sda worker
+      ```bash
+      # 以下指令在 curl 執行後 會自行執行
+      # coreos-installer install ['device'] -I http://['bastion ip']:8080/['bootstrap/master/worker'].ign --insecure-ignition -n
+      curl http://['bastion ip']:8080/install.sh | bash -s - ['device'] ['role']
+      ```
+      > 執行命令範例 (以 /dev/sda 及 worker 為例):
+      > curl http://172.20.11.120:8080/install.sh | bash -s - /dev/sda worker
     
     - 完成後重啟主機
       ```bash
@@ -650,13 +650,19 @@
 2. 關閉預設 catalog source
    ```bash
    sh scripts/disable-marketplace.sh
-   ```     
+   ```
 
-3. 設定對應的 CSI 儲存介面
+3. 配置oc-mirror產生之資源
+   ```bash
+   oc apply -f /root/oc-mirror-workspace/results-1737685763/
+   ```
+   > 請注意，results-1737685763目錄名稱會依據mirror時間而有所不同。
+
+4. 設定對應的 CSI 儲存介面
    - nfs csi as example (以 nfs csi 為例):
      - 外接存儲會依照需求有所不同與額外設定，請參照[此處](<https://github.com/kubernetes-csi/csi-driver-nfs/tree/master?tab=readme-ov-file>)
 
-4. 根據安裝架構設定 infra 節點配置
+5. 根據安裝架構設定 infra 節點配置
    - standard architecture (標準架構): 需要上 taint，有可能日誌監控等重要服務必須上在這邊
      ```bash
      # 執行 script 設置 infra node 及 monitoring components
@@ -670,9 +676,9 @@
      sh scripts/infra/infra.sh ocp.ansible.lab compact
      ```
     
-5. Install gitea as a GitOps source repository (安裝 gitea 做為 GitOps 來源庫)
+6. Install gitea as a GitOps source repository (安裝 gitea 做為 GitOps 來源庫)
    ```bash
    sh scripts/gitea.sh
    ```
 
-6. Import the EaaS git repo and run the corresponding Operator environment installation (匯入 EaaS git repo 並執行對應的 Operator 環境安裝)
+7. Import the EaaS git repo and run the corresponding Operator environment installation (匯入 EaaS git repo 並執行對應的 Operator 環境安裝)
