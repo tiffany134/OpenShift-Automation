@@ -12,8 +12,8 @@ export EE_IMAGE_NAME=$(echo "${4:-eeimage}")
 export VERSION_DATE=$(date +'%Y%m%d')
 
 # 登入 registry.redhat.io
-mkdir ~/.docker
-podman login registry.redhat.io -u ${REGISTRY_USERNAME} -p ${REGISTRY_PASSWORD} --authfile=~/.docker/config.json
+mkdir /root/.docker
+podman login registry.redhat.io -u ${REGISTRY_USERNAME} -p ${REGISTRY_PASSWORD} --authfile=/root/.docker/config.json
 
 # 創建 ee image 創建路徑
 mkdir ${EE_DIR} && cd ${EE_DIR}
