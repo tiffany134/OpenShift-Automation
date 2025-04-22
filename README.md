@@ -83,7 +83,7 @@
    - 到[Red Hat OpenShift Container Platform Update Graph](https://access.redhat.com/labs/ocpupgradegraph/update_path/)最新的穩定(stable)版本
    - 執行腳本下載對應版本工具
      ``` bash
-     sh sciprts/get-tool.sh [openshift version] [rhel major version] [cpu architecture] [helm latest version] [mirror registry latest version]"
+     sh sciprts/bastion/get-tool.sh [openshift version] [rhel major version] [cpu architecture] [helm latest version] [mirror registry latest version]"
      ```
      > 參數參考:
      >  - openshift version: 4.18.7
@@ -112,7 +112,7 @@
      - [CoreOS 開機用光碟(rhcos)](https://mirror.openshift.com/pub/openshift-v4/x86_64/dependencies/rhcos/)
 
 6. 使用 oc-mirror 指令將所需的鏡像拉取到本機
-   * 使用 [Red Hat OpenShift Container Platform Operator Update Information Checker](https://access.redhacom/labs/ocpouic/?upgrade_path=4.16%20to%204.18) 查詢 operator channel 及 version
+   * 使用 [Red Hat OpenShift Container Platform Operator Update Information Checker](https://access.redhat.com/labs/ocpouic/?upgrade_path=4.16%20to%204.18) 查詢 operator channel 及 version
 
    * 使用 [Red Hat OpenShift Container Platform Update Graph](https://access.redhat.com/labs/ocpupgradegraph/update_path/) 查詢 OCP channel 及 version
    1. 放 oc-mirror 可執行程式至指定目錄
@@ -202,6 +202,8 @@
          ```bash
          mkdir /root/install/ocp418
          cd /root/install/ocp418
+
+         wget https://raw.githubusercontent.com/CCChou/OpenShift-Automation/refs/heads/main/yaml/imageset-config.yaml
          ```
          > 建議目錄可使用對應 OpenShift 版本，如 ocp418
    5. 創建 imageSetConfiguration yaml 配置檔
