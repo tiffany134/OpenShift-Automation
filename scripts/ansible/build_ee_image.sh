@@ -3,12 +3,15 @@
 unset $1
 unset $2
 unset $3
-unset $4
+unset $REG_PW
+
+read -s -p "registry password: " REG_PW
+echo
 
 export REGISTRY_USERNAME=$1
-export REGISTRY_PASSWORD=$2
-export EE_DIR=$(echo "${3:-eeimage}")
-export EE_IMAGE_NAME=$(echo "${4:-eeimage}")
+export REGISTRY_PASSWORD=$REG_PW
+export EE_DIR=$(echo "${2:-eeimage}")
+export EE_IMAGE_NAME=$(echo "${3:-eeimage}")
 export VERSION_DATE=$(date +'%Y%m%d')
 
 # 登入 registry.redhat.io
