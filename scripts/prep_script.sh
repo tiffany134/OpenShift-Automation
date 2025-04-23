@@ -1,22 +1,13 @@
 #!/bin/bash
-config_file="prep_config.conf"
+config_file="/root/OpenShift-Automation/scripts/prep_config.conf"
 
 # 檢查文件是否存在
-[[ ! -f "$config_file" ]] && { echo "ERROR：配置文件不存在"; exit 1; }
+if [[ ! -f "$config_file" ]]; then
+  echo "ERROR：配置文件不存在：$config_file" >&2
+  exit 1
+fi
 
-# 逐行讀取並解析
-while IFS= read -r line || [[ -n "$line" ]]; do
-  # 去除註解和空白
-  line_clean=$(echo "$line" | sed -e 's/#.*//' -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
-  # 跳過空行
-  [[ -z "$line_clean" ]] && continue
-  
-  # 分割鍵值並賦值
-  key=$(echo "$line_clean" | cut -d '=' -f 1 | xargs)
-  value=$(echo "$line_clean" | cut -d '=' -f 2- | xargs)
-  # 定義變量
-  declare -- "$key=$value"
-done < "$config_file"
+source "$config_file"
 
 # 主程式
 main(){
@@ -151,7 +142,7 @@ untar_oc_mirror(){
 
   chmod a+x /usr/bin/oc-mirror
 
-  cp /root/Openshift-Automation/yaml/imageset-config.yaml /root/install/ocp418
+  cp /root/OpenShift-Automation/yaml/imageset-config.yaml /root/install/ocp418
 
   echo "=== prep_script 腳本執行完成，請調整 /root/install/ocp418/imageset-config.yaml 配置後執行下個步驟 ==="
 }
