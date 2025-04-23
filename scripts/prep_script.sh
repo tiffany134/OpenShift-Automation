@@ -71,7 +71,7 @@ download_ansible(){
   dnf install --enablerepo="${AAP_REPO}" --downloadonly --installroot=/root/rpm/rootdir --downloaddir="${AAP_DIR}" --releasever="${RHEL_MINOR_VERSION}" ansible-navigator
 
   # 將 AAP RPM 包打包成 tar 檔
-  tar cvf ansible-navigator-rpm-${RHEL_MINOR_VERSION}-min.tar ${AAP_DIR} > /root/install_file
+  tar cvf /root/install_file/ansible-navigator-rpm-${RHEL_MINOR_VERSION}-min.tar ${AAP_DIR}
 }
 
 # 下載安裝所需工具
