@@ -9,9 +9,9 @@ mirror:
     channels:
     - name: stable-4.18
       minVersion: 4.18.6
-      maxVersion: 4.16.8
+      maxVersion: 4.18.8
   operators:
-  - catalog: registry.redhat.io/redhat/redhat-operator-index:v4.16
+  - catalog: registry.redhat.io/redhat/redhat-operator-index:v4.18
     packages:
     - name: kubevirt-hyperconverged
       channels:
