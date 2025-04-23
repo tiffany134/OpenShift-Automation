@@ -52,16 +52,16 @@ build_ee_image(){
     ansible-builder build -v3 -f execution-environment.yml -t ${EE_IMAGE_NAME}
   
     # 將 ee image 包成 tar 檔
-    podman save -o ${EE_IMAGE_NAME}-${VERSION_DATE}.tar ${EE_IMAGE_NAME} > /root/install_file
+    podman save -o /root/install_file/${EE_IMAGE_NAME}-${VERSION_DATE}.tar ${EE_IMAGE_NAME}
 
   else
     echo "下載 ee 鏡像並打包..."
 
     # 拉取 ee 鏡像
-    podman pull quay.io/rhtw/ee-bas-auto
+    podman pull quay.io/rhtw/ee-bas-auto:v1.0
     
     # 將 ee 鏡像包成 tar 檔
-    podman save -o ${EE_IMAGE_NAME}-${VERSION_DATE}.tar ee-bas-auto > /root/install_file
+    podman save -o /root/install_file/${EE_IMAGE_NAME}-${VERSION_DATE}.tar ee-bas-auto:v1.0
   fi
 }
 
