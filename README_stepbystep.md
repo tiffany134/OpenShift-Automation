@@ -1,16 +1,6 @@
-# OpenShift Automation
+# OpenShift Automation step by step
 
-在符合最多數化場景下執行 OpenShift 的 Day1 跟 Day2 安裝配置自動化
-
-| 版號 | 發布日期 | 異動內容 |
-| :----: | :----: | :---- |
-| v0.1 | 2025/03/28 | 首次更新 |
-
-
-## Related Projects
-- [Ansible Role for OpenShift Day1 Setup](https://github.com/CCChou/ocp_bastion_installer)
-- [OpenShift Environment as a Service](https://github.com/CCChou/OpenShift-EaaS-Practice)
-
+本次自動化實作的完整操作流程解析
 
 ## 安裝流程
 
@@ -41,17 +31,69 @@
 
    - 拉取自動化 git repo
      * [OpenShift-Automation Repo](https://github.com/CCChou/OpenShift-Automation.git)
+     * [ocp_bastion_installer Repo](https://github.com/CCChou/ocp_bastion_installer.git)
+     * [OpenShift-EaaS-Practice Repo](https://github.com/CCChou/OpenShift-EaaS-Practice.git)
      
      ```bash
      git clone https://github.com/CCChou/OpenShift-Automation.git
+
+     git clone https://github.com/CCChou/ocp_bastion_installer.git /root/OpenShift-Automation/roles
+
+     git clone https://github.com/CCChou/OpenShift-EaaS-Practice.git /root/OpenShift-Automation/gitops
      ```
 
-3. 下載 pull-secret ，取名 pull-secret 並放到 /root 目錄下
-   - 到 [Red Hat Hybrid Cloud Console](https://console.redhat.com/openshift/downloads) 下載 pull secret
+3. 下載 pull-secret 並配置允許拉取鏡像的憑證
+   - 到 [Red Hat Hybrid Cloud Console](https://console.redhat.com/openshift/downloads) 下載 pull secret 並儲存成 json 文件 
+   ```bash
+   mkdir /root/.docker
 
-4. 配置 prep_config.conf 內參數
-   - 使用 [Red Hat OpenShift Container Platform Update Graph](https://access.redhat.com/labs/ocpupgradegraph/update_path/) 查詢 OCP channel 及 version
+   cat /root/pull-secret | jq > /root/.docker/config.json
+   ```
 
+   - 如有其餘 Image Registry 憑證需新增
+   ```bash
+   podman login --authfile /root/.docker/config.json ${MIRROR_REGISTRY}
+   ```
+
+4. 在本地機器上安裝 ansible-builder 
+   ```bash
+   sudo dnf install --enablerepo=ansible-automation-platform-2.5-for-rhel-9-x86_64-rpms ansible-navigator
+   ```
+
+5. 使用 ansible-builder 建立 execution environment 鏡像，並使用 podman 指令將前一步驟建立好的 ee 鏡像轉成 tar 檔
+   - 創建存放檔案用的資料夾
+     ``` bash
+     mkdir ['自創路徑'] && cd  ['自創路徑']
+     ```
+     > 路徑範例名稱: eeimage
+   - 將 execution-environment.yml 下載到這個資料夾
+     ```bash
+     wget https://raw.githubusercontent.com/CCChou/OpenShift-Automation/refs/heads/main/ansible/execution-environment.yml
+     ```
+   - 建構 ee(execution-environment) 容器鏡像
+     ```bash
+     ansible-builder build -v3 -f execution-environment.yml -t ['你的 ee 映像檔名稱']
+     ```
+     > execution-environment 映像檔範例名稱: eeimage-yyyymmdd
+   - 使用 podman 指令將前一步驟建立好的 ee 鏡像轉成 tar 檔
+     ```bash
+     podman save -o ['包起來的 tar 檔名稱'].tar ['你的 ee 映像檔名稱']
+     ```
+
+6. 下載所需的 rpm 包，並將其存成 tar 檔 (以下範例作業系統版本為 RHEL 9.4)
+   - 將 AAP 所需的 rpm 包下載到指定目錄
+     ```bash
+     dnf install --enablerepo=ansible-automation-platform-2.5-for-rhel-9-x86_64-rpms --downloadonly --installroot=/root/rpm/rootdir --downloaddir=/root/rpm/downloadonly/aap-9.4 --releasever=9.4 ansible-navigator
+     ```
+     > 請確認 releasever 需對應到您 REHL 的版本
+   - 將下載的 rpm 包打包成 tar 檔
+     ```bash
+     tar cvf ansible-navigator-rpm-9.4-min.tar /root/rpm/downloadonly/aap-9.4
+     ```
+     ![下載 rpm 包範例](https://github.com/CCChou/OpenShift-Automation/blob/main/images/rpm_sample.png)
+
+7. 下載所需的基本指令工具(CLI)和系統檔案
+   - 到[Red Hat OpenShift Container Platform Update Graph](https://access.redhat.com/labs/ocpupgradegraph/update_path/)最新的穩定(stable)版本
    * 指令工具及系統檔案清單(以 4.18 stable 的 amd64 架構為範例):
      - 以下三個在對應 OpenShift 版號資料夾下:
        - [openshift-client](https://mirror.openshift.com/pub/openshift-v4/clients/ocp/)
@@ -72,48 +114,18 @@
      - [RHEL 開機用光碟 (REHL OS)](https://access.redhat.com/downloads/content/rhel)
      - [CoreOS 開機用光碟(rhcos)](https://mirror.openshift.com/pub/openshift-v4/x86_64/dependencies/rhcos/)
 
-   ``` bash
-   # prep_config.conf
-
-   # 版本日期
-   VERSION_DATE=$(date +'%Y%m%d')
-
-   # GIT 目錄路徑
-   OCP_INSTALLER_DIR=/root/Openshift-Automation/roles
-   GITOPS_DIR=/root/Openshift-Automation/gitops
-
-   # Ansible EE 鏡像配置
-   CUSTOM_EE=true
-   EE_YAML_PATH=/root/Openshift-Automation/ansible/execution-environment.yml
-   EE_DIR=eeimage
-   EE_IMAGE_NAME=eeimage
-
-   # AAP 資訊
-   AAP_REPO=ansible-automation-platform-2.5-for-rhel-9-x86_64-rpms
-   AAP_DIR=/root/rpm/downloadonly/aap-9.4
-   RHEL_MINOR_VERSION=9.4 # 運行的 rhel 完整版號
-
-   # 版本資訊
-   OCP_RELEASE=4.18.7 # OCP 的完整版本
-   RHEL_VERSION=rhel9 # rhel 的版本縮寫
-   ARCHITECTURE=amd64 # CPU 架構簡寫
-   HELM_VERSION=3.15.4 # helm 最新版本
-   MIRROR_REGISTRY_VERSION=1.3.11 # mirror registry 最新版本
-
-   # 安裝環境資訊
-   BASTION_FQDN= # Bastion 伺服器的域名
-   BASTION_IP= # Bastion 的 IP
-   ```
-   
-5. 執行 prep_script.sh
-   ```bash
-   sh /root/OpenShift-Automation/scripts/prep_script.sh
-   ```
-   
-6. 使用 oc-mirror 指令將所需的鏡像拉取到本機
+8. 使用 oc-mirror 指令將所需的鏡像拉取到本機
    * 使用 [Red Hat OpenShift Container Platform Operator Update Information Checker](https://access.redhat.com/labs/ocpouic/?upgrade_path=4.16%20to%204.18) 查詢 operator channel 及 version
 
-   1. 取得常用 Operator 之資訊
+   * 使用 [Red Hat OpenShift Container Platform Update Graph](https://access.redhat.com/labs/ocpupgradegraph/update_path/) 查詢 OCP channel 及 version
+   1. 放 oc-mirror 可執行程式至指定目錄
+      ```bash
+      tar -zxvf oc-mirror.tar.gz -C /usr/local/bin/
+      ```
+      ```bash
+      chmod a+x /usr/local/bin/oc-mirror
+      ``` 
+   2. 取得常用 Operator 之資訊
       1. 取得目標版本的可用目錄
          ```bash
          # version 請選擇要安裝的 OpenShift 版本
@@ -180,7 +192,15 @@
          6.2.0
          6.2.1
          ```
-   2. 修改 imageSetConfiguration yaml 配置檔
+   3. 創建 mirror 目錄
+         ```bash
+         mkdir /root/install/ocp418
+         cd /root/install/ocp418
+
+         wget https://raw.githubusercontent.com/CCChou/OpenShift-Automation/refs/heads/main/yaml/imageset-config.yaml
+         ```
+         > 建議目錄可使用對應 OpenShift 版本，如 ocp418
+   4. 修改 imageSetConfiguration yaml 配置檔
        ```yaml
        apiVersion: mirror.openshift.io/v1alpha2
        kind: ImageSetConfiguration
@@ -213,11 +233,9 @@
          - name: registry.redhat.io/rhel9/rhel-guest-image:latest
        ```
        > 完整請參考 ( yaml > imageset-config.yaml)，請注意頻道和鏡像標籤
-   3. 將鏡像從特定的 ImageSetConfiguration 中同步到磁碟
+   5. 將鏡像從特定的 ImageSetConfiguration 中同步到磁碟
       - 執行 oc mirror 指令將指定 ImageSetConfiguration 中的鏡像同步到磁碟上
         ```bash
-        cd /root/install/ocp418
-
         oc-mirror --config=./imageset-config.yaml file://.
         ```
       - 驗證是否已建鏡像 .tar 檔案
@@ -272,7 +290,7 @@
          - image: registry.k8s.io/sig-storage/nfsplugin:v4.11.0
          - image: registry.k8s.io/sig-storage/snapshot-controller:v8.2.0
 
-7. 依客戶環境需求修改 OpenShift Automation 內的配置 (調整 role > ocp_bastion_installer > default > main.yml 內的配置)
+9. 依客戶環境需求修改 OpenShift Automation 內的配置 (調整 role > ocp_bastion_installer > default > main.yml 內的配置)
     ```yaml
     ---
     online: false
@@ -351,11 +369,11 @@
       ip: 172.20.11.59
     ```
 
-8. 將所有準備好的資源都 tar 起來準備放入客戶離線環境
-   - 將 OpenShift Automation 目錄打包成 tar 檔
-   ```bash
-   tar cvf /root/install_file/openshift-automation.tar /root/OpenShift-Automation
-   ```
+10. 將所有準備好的資源都 tar 起來準備放入客戶離線環境
+    - 將 OpenShift Automation 目錄打包成 tar 檔
+      ```bash
+      tar cvf /root/install_file/openshift-automation.tar /root/OpenShift-Automation
+      ```
 
     * tar checkt list (tar包清單):
       - [x] ansible-navigator
@@ -471,17 +489,82 @@
    13. 啟動虛擬機後，您可以按照一般流程安裝 RHEL
        ![安裝 RHEL](https://github.com/CCChou/OpenShift-Automation/blob/main/images/kvm-xiii-rhel_installation.png?raw=true)
 
-2. 解開 OpenShift Automation 的 tar
+2. 解開所有準備好的 tar 包
    ```bash
    tar zxvf openshift-automation.tar -C ['解 tar 之路徑']
+
+   tar zxvf ansible-navigator-rpm-9.4-min.tar -C ['解 tar 之路徑']
    ```
 
-3. 執行 configure_and_run.sh 腳本
+3. 安裝所有 rpm 包
    ```bash
-   sh /root/OpenShift-Automation/scripts/bastion/configure_and_run.sh
+   yum localinstall ansible-navigator-rpm-9.4/* --allowerasing 
    ```
 
-4. 設定節點網路連線
+4. 於 bastion 產生 ssh-key，並設定免密登入
+   ```bash
+   ssh-keygen
+   ```
+   ```bash
+   ssh-copy-id root@['bastion ip'] 
+   ```
+
+5. 從 tar 檔中載入容器映像檔到 Podman 的本地鏡像庫
+   ```bash
+   podman load -i ['包起來的 ee tar 檔名稱'].tar
+   ```
+   > 參考事前準備工作第 5 步 'podman save -o ['包起來的 tar 檔名稱'].tar ['你的 ee 映像檔名稱']' tar 檔名稱
+
+6. 創建 Ansible Inventory
+   ```bash
+   vim inventory
+   
+   ['bastion fqdn']=['bastion ip']
+   ```
+   Example: ( role > inventory )
+   ```
+   bastion.ocp.ansible.lab ansible_host=172.20.11.120
+   ```
+
+7. 創建 install.yml playbook
+   ```yaml
+   - hosts: all
+     remote_user: root
+     roles:
+     - ocp_bastion_installer
+   ```
+   Example: ( role > install.yml )
+
+8. 使用 ansible 運行自動化設定配置腳本 (roles > ocp_bastion_installer > tasks > main.yml)
+   ```bash
+   ansible-navigator run --eei ['ee image name'] --pp missing -i inventory -mstdout install.yml
+   ```
+   1. 設定 bastion 機
+   2. 設定 DNS 服務
+      - 提供主機名稱解析服務
+   3. 將 HAproxy 設定為負載平衡器
+      - 分流 API 與應用程式流量
+   4. 安裝 mirror registry
+      - 安裝連線鏡像倉儲服務
+   5. 設定 OpenShift 安裝檔
+      1. 建立 httpd 服務器和 net-tool 工具
+         -  架設網頁服務與網路排錯工具
+      2. 檢查並解開 openshift-install 指令和 oc 指令
+         - 準備核心指令工具使用
+      3. 建立安裝目錄並設定 install config 配置內容
+         - 建立安裝目錄與設定檔
+           - install config 包含內容:
+             - [x] pull secret: mirro
+             - [x] ssh key: id_rsa.pub </root/.ssh/id_rsa.pub>
+             - [x] CA: rootCA.pem </['the path installed registry'/quay-rootCA/rootCA.pem]>
+      4. 產生 ignition 檔案
+         - 產出節點啟動引導設定
+      5. 將產生的 ignition 檔案匯入 httpd 服務器給予對應權限
+         - 匯入設定檔，並更動其存取權限為 644
+      6. 把 operator 檔案上傳到 registry
+         - 上傳 Operators 至私人倉儲
+
+9. 設定節點網路連線
     1. 請於重新開機後，執行下列指令以 root 身分進行設定
        ```
        sudo -i
@@ -511,7 +594,7 @@
        ```
        ![解析檢查](https://github.com/CCChou/OpenShift-Automation/blob/56c6724fc10b6b1d468fef64973b09d0d49e2bbf/images/7-check_hostname.png)
 
-5. 透過 curl 的方式呼叫 coreos-installer 執行 coreos install 指令
+10. 透過 curl 的方式呼叫 coreos-installer 執行 coreos install 指令
     - 在各個主機內執行 coreos-installer 腳本
       ```bash
       # 以下指令在 curl 執行後 會自行執行
@@ -527,14 +610,14 @@
       ```
       > 若節點為虛擬機，請記得於開機前退出映像檔
 
-6. 匯出 kubeconfig 進行連線
+11. 匯出 kubeconfig 進行連線
     ```bash
     export KUBECONFIG=/root/ocp4/auth/kubeconfig 
     ```
     > 請注意，kubeconfig 檔案的位置可能會因您建立 ocp4 目錄的位置而有所不同。
     > 請留意此動作需於 bastion 機上執行!
 
-7. 檢查節點健康狀況，並根據安裝架構決定是否要通過 csr
+12. 檢查節點健康狀況，並根據安裝架構決定是否要通過 csr
     - 標準架構: 需要 csr approve
       ```bash
       oc get csr -o go-template='{{range .items}}{{if not .status}}{{.metadata.name}}{{"\n"}}{{end}}{{end}}' | xargs oc adm certificate approve
