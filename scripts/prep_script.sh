@@ -68,7 +68,7 @@ build_ee_image(){
 download_ansible(){
   # 下載 AAP rpm
   echo "開始下載 AAP rpm..."
-  dnf install --enablerepo="${AAP_REPO}" --downloadonly --installroot=/root/rpm/rootdir --downloaddir="${AAP_DIR}" --releasever="${RHEL_MINOR_VERSION}" ansible-navigator
+  dnf install --enablerepo="${AAP_REPO}" --downloadonly --installroot=/root/rpm/rootdir --downloaddir="${AAP_DIR}" --releasever="${RHEL_MINOR_VERSION}" ansible-navigator -y
 
   # 將 AAP RPM 包打包成 tar 檔
   tar cvf /root/install_file/ansible-navigator-rpm-${RHEL_MINOR_VERSION}-min.tar ${AAP_DIR}
