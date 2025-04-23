@@ -32,8 +32,6 @@ main(){
 # 準備基本環境資訊
 env_prep(){
 
-  dnf install --enablerepo=${AAP_REPO} ansible-navigator
-
   # 定義需要檢查/創建的目錄列表（可以自行替換或擴展）
   CREATE_DIRS=(
     "/root/install_file"
@@ -75,7 +73,10 @@ git_clone(){
 build_ee_image(){
   if [[ "$CUSTOM_EE" = "true" ]]; then
     echo "創建客製化 ee 並打包..."
-      
+
+    # 安裝ansible-navigator
+    dnf install --enablerepo=${AAP_REPO} ansible-navigator
+    
     # 創建 ee image 創建路徑
     mkdir ${EE_DIR} && cd ${EE_DIR}
       
