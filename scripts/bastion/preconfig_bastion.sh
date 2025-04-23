@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# 清除前四個參數的環境變數
+# 清除前三個參數的環境變數
 unset $1
 unset $2
 unset $3
@@ -8,8 +8,8 @@ unset $3
 # 設定參數（可以在執行腳本時傳入）
 export TARBALL_PATH=$(echo "${1:-/root/install_source/ansible-navigator-rpm-9.4-min.tar}")
 export TAR_DEST_PATH=$(echo "${2:-/root/install_source/ansible-navigator-rpm-9.4}")
-export EE_IMAGE_TAR=$(echo "${3:-eeimage}")
-export EE_IMAGE_NAME=$(basename "$EE_IMAGE_TAR" .tar)
+export EE_IMAGE_TAR=$3
+export EE_IMAGE_NAME=$(basename "$EE_IMAGE_TAR".tar)
 
 # 解開所有準備好的 tar 包
 mkdir -p ${TAR_DEST_PATH}

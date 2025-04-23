@@ -1,6 +1,0 @@
-[submodule "roles/ocp_bastion_installer"]
-	path = roles/ocp_bastion_installer
-	url = https://github.com/CCChou/ocp_bastion_installer.git
-[submodule "gitops"]
-	path = gitops
-	url = https://github.com/CCChou/OpenShift-EaaS-Practice.git

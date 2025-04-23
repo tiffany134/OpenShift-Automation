@@ -24,7 +24,8 @@ main(){
   git_clone
   build_ee_image
   download_ansible
-  get_tool
+  get_tools
+  configre_aap_config
   untar_oc_mirror
 }
 
@@ -105,7 +106,7 @@ download_ansible(){
 }
 
 # 下載安裝所需工具
-get_tool(){
+get_tools(){
   echo "下載安裝工具..."
 
   # 下載 openshift client
@@ -133,6 +134,15 @@ get_tool(){
   echo "mirror registry 下載完成"
 }
 
+configre_aap_config(){
+
+# 設定 app inventory
+cat << EOF > ${OCP_INSTALLER_DIR}/inventory
+${BASTION_FQDN} ansible_host=${BASTION_IP}
+EOF
+
+}
+
 untar_oc_mirror(){
 
   # 將 oc-mirror 指令解開使用
@@ -141,6 +151,8 @@ untar_oc_mirror(){
   chmod a+x /usr/bin/oc-mirror
 
   cp /root/Openshift-Automation/yaml/imageset-config.yaml /root/install/ocp418
+
+  echo "=== prep_script 腳本執行完成，請調整 /root/install/ocp418/imageset-config.yaml 配置後執行下個步驟 ==="
 }
 
 main

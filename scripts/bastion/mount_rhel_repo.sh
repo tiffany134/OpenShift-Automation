@@ -1,10 +1,5 @@
 #!/bin/bash
 
-# 清除前四個參數的環境變數
-unset $1
-
-# 設定參數（可以在執行腳本時傳入）
-export BASTION_IP=$1
 export BAK_DIR="/etc/yum.repos.d/bak"
 
 # Mount DVD/image 掛光碟到機器上
