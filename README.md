@@ -35,13 +35,16 @@
 
 2. 安裝 git 並使用 git clone 將你自動化相關的 git repo 拉取下來
    - 安裝 git repo
-   ```bash
-   dnf install git
-   ```
+     ```bash
+     dnf install git
+     ```
 
    - 拉取自動化 git repo
      * [OpenShift-Automation Repo](https://github.com/CCChou/OpenShift-Automation.git)
      
+     ```bash
+     cd /root
+     ```
      ```bash
      git clone https://github.com/CCChou/OpenShift-Automation.git
      ```
@@ -297,7 +300,7 @@
     haproxy_configure: true
     
     # 鏡像庫配置
-    registry_configure: false
+    registry_configure: true
     mirrorRegistryDir: /root/install_source/mirror-registry.tar.gz
     quayRoot: /mirror-registry
     quayStorage: /mirror-registry/storage
@@ -311,15 +314,15 @@
     # 定義資源檔案之絕對路徑: 如公鑰、OCP 所需指令壓縮檔位置等
     sshKeyDir: /root/.ssh/id_rsa.pub
     ocpInstallDir: /root/install_source/openshift-install-rhel9-amd64.tar.gz
-    ocpClientDir: /root/install_source/openshift-client-linux-amd64-rhel9-4.16.26.tar.gz
+    ocpClientDir: /root/install_source/openshift-client-linux-amd64-rhel9-4.18.7.tar.gz
     # 連線安裝所需之 pull-secret 位置
     pullSecretDir: /root/install_source/pull-secret.txt
     
     # 從磁碟到鏡像的同步
-    mirror: false
+    mirror: true
     ocmirrorSource: /root/install_source/oc-mirror.rhel9.tar.gz
     imageSetFile: /root/install_source
-    reponame: ocp416
+    reponame: ocp418
     
     # 節點的基本設定 (將不需要的節點註解掉)
     bastion:
@@ -335,6 +338,7 @@
       ip: 172.20.11.52
     - name: master03
       ip: 172.20.11.53
+    # standard mode nodes
     infra:
     - name: infra01
       ip: 172.20.11.54
