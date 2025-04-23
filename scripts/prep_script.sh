@@ -84,7 +84,7 @@ build_ee_image(){
     podman pull quay.io/rhtw/ee-bas-auto:v1.0
     
     # 將 ee 鏡像包成 tar 檔
-    podman save -o /root/install_file/${EE_IMAGE_NAME}-${VERSION_DATE}.tar ee-bas-auto:v1.0
+    podman save -o /root/install_file/${EE_IMAGE_NAME}-v1.tar ee-bas-auto:v1.0
   fi
 }
 
