@@ -1,5 +1,5 @@
 # /bin/bash
-if [ "$#" -ne 4 ]; then
+if [ "$#" -ne 5 ]; then
     echo "usage: ./get-tool.sh [openshift version] [rhel major version] [cpu architecture] [helm latest version] [mirror registry latest version]"
     exit 1
 fi

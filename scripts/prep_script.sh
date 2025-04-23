@@ -20,21 +20,38 @@ done < "$config_file"
 
 # 主程式
 main(){
+  podman_login
   build_ee_image
   download_ansible
   get_tool
 }
 
+podman_login(){
+  declare -A registries=(
+    ["registry.redhat.io"]="${REGISTRY_REDHAT_USERNAME} ${REGISTRY_REDHAT_PASSWORD}"
+    ["quay.io"]="${QUAY_IO_USERNAME} ${QUAY_IO_PASSWORD}"
+  )
+
+  # 登入 registry.redhat.io 和 quay.io
+  mkdir /root/.docker
+  for registry_source in "${!registries[@]}"; do
+    # 提取用戶名和密碼
+    read -r REGISTRY_USERNAME REGISTRY_PASSWORD <<< "${registries[$registry_source]}"
+
+    # 執行登錄
+    echo "登入至 $registry_source..."
+    podman login "$registry_source" \
+      -u "$REGISTRY_USERNAME" \
+      -p "$REGISTRY_PASSWORD" \
+      --authfile=/root/.docker/config.json
+  done
+}
 
 # 創建自動化的 ee 鏡像並封裝成 tar 檔
 build_ee_image(){
   if [[ "$CUSTOM_EE" = "true" ]]; then
     echo "創建客製化 ee 並打包..."
-
-    # 登入 registry.redhat.io
-    mkdir ~/.docker
-    podman login registry.redhat.io -u ${REGISTRY_USERNAME} -p ${REGISTRY_PASSWORD} --authfile=~/.docker/config.json
-    
+      
     # 創建 ee image 創建路徑
     mkdir ${EE_DIR} && cd ${EE_DIR}
   
@@ -49,10 +66,11 @@ build_ee_image(){
   else
     echo "下載 ee 鏡像並打包..."
 
-    # TODO 使用 podman login and pull ee image
+    # 拉取 ee 鏡像
+    podman pull quay.io/rhtw/ee-bas-auto
     
-    # 將 ee image 包成 tar 檔
-    podman save -o ${EE_IMAGE_NAME}-${VERSION_DATE}.tar ${EE_IMAGE_NAME}
+    # 將 ee 鏡像包成 tar 檔
+    podman save -o ${EE_IMAGE_NAME}-${VERSION_DATE}.tar ee-bas-auto
   fi
 }
 
@@ -63,7 +81,6 @@ download_ansible(){
 
   # 將 AAP RPM 包打包成 tar 檔
   tar cvf ansible-navigator-rpm-${RHEL_MINOR_VERSION}-min.tar ${AAP_DIR}
-
 }
 
 # 下載安裝所需工具
