@@ -129,7 +129,7 @@ get_tools(){
 configre_aap_config(){
 
 # 設定 app inventory
-cat << EOF > ${OCP_INSTALLER_DIR}/inventory
+cat << EOF > ${OCP_INSTALLER_DIR}/../inventory
 ${BASTION_FQDN} ansible_host=${BASTION_IP}
 EOF
 
