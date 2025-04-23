@@ -20,31 +20,21 @@ done < "$config_file"
 
 # 主程式
 main(){
-  podman_login
+  env_prep
   build_ee_image
   download_ansible
   get_tool
+  untar_oc_mirror
 }
 
-podman_login(){
-  declare -A registries=(
-    ["registry.redhat.io"]="${REGISTRY_REDHAT_USERNAME} ${REGISTRY_REDHAT_PASSWORD}"
-    ["quay.io"]="${QUAY_IO_USERNAME} ${QUAY_IO_PASSWORD}"
-  )
+env_prep(){
 
-  # 登入 registry.redhat.io 和 quay.io
+  # 創建最終安裝檔案擺放位置
+  mkdir /root/install_file
+
+  # 將 pull secret 匯入到 config.json
   mkdir /root/.docker
-  for registry_source in "${!registries[@]}"; do
-    # 提取用戶名和密碼
-    read -r REGISTRY_USERNAME REGISTRY_PASSWORD <<< "${registries[$registry_source]}"
-
-    # 執行登錄
-    echo "登入至 $registry_source..."
-    podman login "$registry_source" \
-      -u "$REGISTRY_USERNAME" \
-      -p "$REGISTRY_PASSWORD" \
-      --authfile=/root/.docker/config.json
-  done
+  cat /root/pull-secret | jq > ~/.docker/config.json
 }
 
 # 創建自動化的 ee 鏡像並封裝成 tar 檔
@@ -62,7 +52,8 @@ build_ee_image(){
     ansible-builder build -v3 -f execution-environment.yml -t ${EE_IMAGE_NAME}
   
     # 將 ee image 包成 tar 檔
-    podman save -o ${EE_IMAGE_NAME}-${VERSION_DATE}.tar ${EE_IMAGE_NAME}
+    podman save -o ${EE_IMAGE_NAME}-${VERSION_DATE}.tar ${EE_IMAGE_NAME} > /root/install_file
+
   else
     echo "下載 ee 鏡像並打包..."
 
@@ -70,7 +61,7 @@ build_ee_image(){
     podman pull quay.io/rhtw/ee-bas-auto
     
     # 將 ee 鏡像包成 tar 檔
-    podman save -o ${EE_IMAGE_NAME}-${VERSION_DATE}.tar ee-bas-auto
+    podman save -o ${EE_IMAGE_NAME}-${VERSION_DATE}.tar ee-bas-auto > /root/install_file
   fi
 }
 
@@ -80,7 +71,7 @@ download_ansible(){
   dnf install --enablerepo="${AAP_REPO}" --downloadonly --installroot=/root/rpm/rootdir --downloaddir="${AAP_DIR}" --releasever="${RHEL_MINOR_VERSION}" ansible-navigator
 
   # 將 AAP RPM 包打包成 tar 檔
-  tar cvf ansible-navigator-rpm-${RHEL_MINOR_VERSION}-min.tar ${AAP_DIR}
+  tar cvf ansible-navigator-rpm-${RHEL_MINOR_VERSION}-min.tar ${AAP_DIR} > /root/install_file
 }
 
 # 下載安裝所需工具
@@ -88,28 +79,38 @@ get_tool(){
   echo "下載安裝工具..."
 
   # 下載 openshift client
-  wget https://mirror.openshift.com/pub/openshift-v4/clients/ocp/${OCP_RELEASE}/openshift-client-linux-${ARCHITECTURE}-${RHEL_VERSION}-${OCP_RELEASE}.tar.gz
+  wget https://mirror.openshift.com/pub/openshift-v4/clients/ocp/${OCP_RELEASE}/openshift-client-linux-${ARCHITECTURE}-${RHEL_VERSION}-${OCP_RELEASE}.tar.gz > /root/install_file
   echo "oc client 下載完成"
 
   # 下載 openshift install
-  wget https://mirror.openshift.com/pub/openshift-v4/clients/ocp/${OCP_RELEASE}/openshift-install-${RHEL_VERSION}-${ARCHITECTURE}.tar.gz
+  wget https://mirror.openshift.com/pub/openshift-v4/clients/ocp/${OCP_RELEASE}/openshift-install-${RHEL_VERSION}-${ARCHITECTURE}.tar.gz > /root/install_file
   echo "oc install 下載完成"
 
   # 下載 oc mirror
-  wget https://mirror.openshift.com/pub/openshift-v4/clients/ocp/${OCP_RELEASE}/oc-mirror.${RHEL_VERSION}.tar.gz
+  wget https://mirror.openshift.com/pub/openshift-v4/clients/ocp/${OCP_RELEASE}/oc-mirror.${RHEL_VERSION}.tar.gz > /root/install_file
   echo "oc mirror 下載完成"
 
   # 下載 butane
-  wget https://mirror.openshift.com/pub/openshift-v4/clients/butane/latest/butane-${ARCHITECTURE}
+  wget https://mirror.openshift.com/pub/openshift-v4/clients/butane/latest/butane-${ARCHITECTURE} > /root/install_file
   echo "butane 下載完成"
 
   # 下載 latest helm
-  wget https://developers.redhat.com/content-gateway/file/pub/openshift-v4/clients/helm/${HELM_VERSION}/helm-linux-${ARCHITECTURE}.tar.gz
+  wget https://developers.redhat.com/content-gateway/file/pub/openshift-v4/clients/helm/${HELM_VERSION}/helm-linux-${ARCHITECTURE}.tar.gz > /root/install_file
   echo "butane 下載完成"
 
   # 下載 latest mirror registry
-  wget https://developers.redhat.com/content-gateway/file/pub/openshift-v4/clients/mirror-registry/${MIRROR_REGISTRY_VERSION}/mirror-registry.tar.gz
+  wget https://developers.redhat.com/content-gateway/file/pub/openshift-v4/clients/mirror-registry/${MIRROR_REGISTRY_VERSION}/mirror-registry.tar.gz > /root/install_file
   echo "mirror registry 下載完成"
 }
+
+untar_oc_mirror(){
+
+  # 將 oc-mirror 指令解開使用
+  tar -zxvf /root/install_file/oc-mirror.tar.gz -C /usr/local/bin/
+
+  chmod a+x /usr/local/bin/oc-mirror
+
+}
+
 
 main
