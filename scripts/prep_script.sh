@@ -106,9 +106,9 @@ get_tool(){
 untar_oc_mirror(){
 
   # 將 oc-mirror 指令解開使用
-  tar -zxvf /root/install_file/oc-mirror.tar.gz -C /usr/local/bin/
+  tar -zxvf /root/install_file/oc-mirror.rhel9.tar.gz -C /usr/bin/
 
-  chmod a+x /usr/local/bin/oc-mirror
+  chmod a+x /usr/bin/oc-mirror
 
 }
 
