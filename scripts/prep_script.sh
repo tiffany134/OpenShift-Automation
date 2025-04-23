@@ -34,7 +34,7 @@ env_prep(){
 
   # 將 pull secret 匯入到 config.json
   mkdir /root/.docker
-  cat /root/pull-secret | jq > ~/.docker/config.json
+  cat /root/pull-secret | jq > /root/.docker/config.json
 }
 
 # 創建自動化的 ee 鏡像並封裝成 tar 檔
