@@ -38,9 +38,10 @@
    ```
 
 3. 使用 ansible-builder 建立 execution environment 鏡像，並使用 podman 指令將前一步驟建立好的 ee 鏡像轉成 tar 檔
-   - 執行腳本建立 ee 鏡像
+   - 執行腳本並輸入密碼以建立 ee 鏡像
      ``` bash
-     sh sciprts/ansible/build_ee_image.sh [registry username] [registry password]
+     sh sciprts/ansible/build_ee_image.sh [registry username]
+     registry password: [registry password]
      ```
    - build_ee_image 腳本運行內容參考：
      - 登入 podmam
