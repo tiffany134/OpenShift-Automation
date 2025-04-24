@@ -595,17 +595,14 @@
        ![解析檢查](https://github.com/CCChou/OpenShift-Automation/blob/56c6724fc10b6b1d468fef64973b09d0d49e2bbf/images/7-check_hostname.png)
 
 10. 透過 curl 的方式呼叫 coreos-installer 執行 coreos install 指令
-    - 在各個主機內執行 coreos-installer 腳本
+    - 在各個主機內執行 coreos-installer 腳本，執行順序 bootstrap > master > worker
       ```bash
-      # 以下指令在 curl 執行後 會自行執行
+      # 以下指令在 curl 執行後會自行執行，role 包含 bootstrap, master, worker
       # coreos-installer install ['device'] -I http://['bastion ip']:8080/['bootstrap/master/worker'].ign --insecure-ignition -n
 
       curl http://['bastion ip']:8080/install.sh | bash -s - ['device'] ['role']
       ```
-      > role: bootstrap, master, worker
-      > 執行順序 bootstrap > master > worker
-      > 執行命令範例 (以 /dev/sda 及 worker 為例):
-      > curl http://172.20.11.120:8080/install.sh | bash -s - /dev/sda worker
+      > 執行命令範例 (以 /dev/sda 及 worker 為例): curl http://172.20.11.120:8080/install.sh | bash -s - /dev/sda worker
     
     - 完成後重啟主機
       ```bash
