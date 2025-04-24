@@ -356,7 +356,7 @@
 8. 將所有準備好的資源都 tar 起來準備放入客戶離線環境
    - 將 OpenShift Automation 目錄打包成 tar 檔
    ```bash
-   tar czvf /root/install_file/openshift-automation.tar.gz -C /root/OpenShift-Automation
+   tar czvf /root/install_file/openshift-automation.tar.gz -C /root OpenShift-Automation
    ```
 
     * tar checkt list (tar包清單):
