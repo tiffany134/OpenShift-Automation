@@ -528,6 +528,8 @@
       # coreos-installer install ['device'] -I http://['bastion ip']:8080/['bootstrap/master/worker'].ign --insecure-ignition -n
       curl http://['bastion ip']:8080/install.sh | bash -s - ['device'] ['role']
       ```
+      > role: bootstrap, master, worker
+      > 執行順序 bootstrap > master > worker
       > 執行命令範例 (以 /dev/sda 及 worker 為例):
       > curl http://172.20.11.120:8080/install.sh | bash -s - /dev/sda worker
     
