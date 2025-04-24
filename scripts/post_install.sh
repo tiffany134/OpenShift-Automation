@@ -20,17 +20,25 @@ done < "$config_file"
 
 # 主程式
 main(){
-  ocp_authentication
   disable_marketplace
+  ocp_authentication
   infra_node_setup
+  create_gitea
+}
+
+disable_marketplace(){
+  KUBECONFIG=/root/ocp4/auth/kubeconfig
+
+  # 關閉預設 catalog source
+  oc patch OperatorHub cluster --type json -p '[{"op": "add", "path": "/spec/disableAllDefaultSources", "value": true}]'
 }
 
 ocp_authentication(){
   # 建立一個名為 htpass-secret 的 Secret 來儲存 htpasswd 檔案，帳密為ocpadmin P@ssw0rdocp
-  oc apply -f scripts/authentication/secret_htpasswd.yaml
+  oc apply -f yaml/authentication/secret_htpasswd.yaml
  
   # 將資源套用至預設 OAuth 配置以新增identity provider。
-  oc apply -f scripts/authentication/oauth.yaml
+  oc apply -f yaml/authentication/oauth.yaml
 
   # 賦予 ocpadmin 帳號 cluster-admin role
   oc adm policy add-cluster-role-to-user cluster-admin ocpadmin
@@ -39,17 +47,15 @@ ocp_authentication(){
   oc delete secret kubeadmin -n kube-system
 }
 
-disable_marketplace(){
-  # 關閉預設 catalog source
-  oc patch OperatorHub cluster --type json -p '[{"op": "add", "path": "/spec/disableAllDefaultSources", "value": true}]'
-}
-
 infra_node_setup(){
   if [ "$2" == "standard" ]; then
     # standard mode 時執行以下動作
 
     # 設定infra node mcp
     oc apply -f mcp_infra.yaml
+
+    # 設定 OCP FQDN
+    DOMAIN=$(oc get ingress.config.openshift.io cluster --template={{.spec.domain}} | sed -e "s/^apps.//")
 
     # 將 infra node role 改為 infra
     for i in {01..03}; do
@@ -64,19 +70,27 @@ infra_node_setup(){
     oc patch ingresscontroller/default -n openshift-ingress-operator --type=merge -p '{"spec":{"replicas":3,"nodePlacement": {"nodeSelector": {"matchLabels": {"node-role.kubernetes.io/infra": ""}},"tolerations": [{"key": "node-role.kubernetes.io/infra","operator": "Exists"}]}}}'
 
     # Moving monitoring components to infra node 並設定 PV
-    oc apply -f cm_cluster-monitoring-config-${INSTALL_MODE}.yaml
+    oc apply -f yaml/infra/cm_cluster-monitoring-config-${INSTALL_MODE}.yaml
 
   elif [ "$2" == "compact" ]; then
     # compact mode 時執行以下動作
 
     # monitoring components 設定 PV
-    oc apply -f cm_cluster-monitoring-config-${INSTALL_MODE}.yaml
+    oc apply -f yaml/infra/cm_cluster-monitoring-config-${INSTALL_MODE}.yaml
   else
     echo "模式配置錯誤"
     exit 1
   fi
 }
 
+create_gitea(){
+  # 配置鏡像參數
+  envsubst < create-gitea.yaml |oc apply -f -
+  envsubst < postgresql.yaml |oc apply -f -
 
+  # 建立 gitea 權限
+  oc create sa gitea-sa
+  oc adm policy add-scc-to-user anyuid -z gitea-sa
+}
 
 main

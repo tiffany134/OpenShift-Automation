@@ -51,6 +51,7 @@
 
 3. 下載 pull-secret ，取名 pull-secret 並放到 /root 目錄下
    - 到 [Red Hat Hybrid Cloud Console](https://console.redhat.com/openshift/downloads) 下載 pull secret
+     ![dowdload path](https://github.com/CCChou/OpenShift-Automation/blob/main/images/download_pullsecret.png)
 
 4. 配置 prep_config.conf 內參數
    - 使用 [Red Hat OpenShift Container Platform Update Graph](https://access.redhat.com/labs/ocpupgradegraph/update_path/) 查詢 OCP channel 及 version
@@ -475,10 +476,15 @@
    13. 啟動虛擬機後，您可以按照一般流程安裝 RHEL
        ![安裝 RHEL](https://github.com/CCChou/OpenShift-Automation/blob/main/images/kvm-xiii-rhel_installation.png?raw=true)
 
-2. 解開 OpenShift Automation 的 tar
-   ```bash
-   tar zxvf openshift-automation.tar.gz -C /root
-   ```
+2. 建立 install_source 目錄，解開 OpenShift Automation 的 tar
+   - 創建 install_source 目錄，把 install_file 內的 tar 檔放置到此目錄中
+     ```bash
+     mkdir /root/install_source
+     ```
+   - 把 OpenShift Automation 的 tar 解開
+     ```bash
+     tar zxvf /root/install_source/openshift-automation.tar.gz -C /root
+     ```
 
 3. 執行 configure_and_run.sh 腳本
    ```bash

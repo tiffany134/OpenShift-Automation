@@ -4,6 +4,7 @@
 unset $1
 unset $2
 unset $3
+unset $4
 
 # 設定參數（可以在執行腳本時傳入）
 export TARBALL_PATH="${1:-/root/install_source/ansible-navigator-rpm-9.4-min.tar}"
