@@ -65,6 +65,7 @@ git_clone(){
 
   git clone https://github.com/CCChou/ocp_bastion_installer.git ${OCP_INSTALLER_DIR}
 
+  mkdir ${GITOPS_DIR}
   git clone https://github.com/CCChou/OpenShift-EaaS-Practice.git ${GITOPS_DIR}
 
 }
