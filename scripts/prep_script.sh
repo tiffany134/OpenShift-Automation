@@ -50,7 +50,7 @@ env_prep(){
         if [ $? -eq 0 ]; then
             echo "創建成功"
         else
-            echo "創建失敗" > &2  # 將錯誤輸出到 stderr
+            echo "創建失敗" >&2  # 將錯誤輸出到 stderr
             exit 1                # 失敗時退出腳本
         fi
     fi
