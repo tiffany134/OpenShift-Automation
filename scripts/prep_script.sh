@@ -86,33 +86,11 @@ git_clone(){
 
 # 創建自動化的 ee 鏡像並封裝成 tar 檔
 build_ee_image(){
-  if [[ "$CUSTOM_EE" = "true" ]]; then
-    echo "創建客製化 ee 並打包..."
-
-    # 設定版本日期
-    VERSION_DATE=$(date +'%Y%m%d')
-
-    # 安裝ansible-navigator
-    dnf install --enablerepo=${AAP_REPO} ansible-navigator
+  # 拉取 ee 鏡像
+  podman pull quay.io/rhtw/ee-bas-auto:v1.0
     
-    # 創建 ee image 創建路徑
-    mkdir ${EE_DIR} && cd ${EE_DIR}
-      
-    # 創建 ee image
-    ansible-builder build -v3 -f ${EE_YAML_PATH} -t ${EE_IMAGE_NAME}
-  
-    # 將 ee image 包成 tar 檔
-    podman save -o /root/install_file/${EE_IMAGE_NAME}-${VERSION_DATE}.tar ${EE_IMAGE_NAME}
-
-  else
-    echo "下載 ee 鏡像並打包..."
-
-    # 拉取 ee 鏡像
-    podman pull quay.io/rhtw/ee-bas-auto:v1.0
-    
-    # 將 ee 鏡像包成 tar 檔
-    podman save -o /root/install_file/${EE_IMAGE_NAME}-v1.tar ee-bas-auto:v1.0
-  fi
+  # 將 ee 鏡像包成 tar 檔
+  podman save -o /root/install_file/${EE_IMAGE_NAME}-v1.tar ee-bas-auto:v1.0
 }
 
 # 下載 Ansible naigator 所需 rpm
