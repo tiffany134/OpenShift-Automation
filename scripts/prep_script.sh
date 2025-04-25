@@ -20,13 +20,27 @@ done < "$config_file"
 
 # 主程式
 main(){
+  backup_local_yum
   env_prep
   git_clone
   build_ee_image
   download_ansible
   get_tools
   configre_aap_config
+  configure_aap_main
   untar_oc_mirror
+}
+
+# 確保本地 yum 源
+backup_local_yum() {
+    
+  export REPO_DIR="/etc/yum.repos.d"
+  export BAK_DIR="$REPO_DIR/bak"
+
+  # 將原有 repo 文件移至備份目錄
+  mkdir -p "$BAK_DIR"
+  mv "$REPO_DIR"/*.repo "$BAK_DIR"/ 2>/dev/null
+
 }
 
 # 準備基本環境資訊
@@ -101,6 +115,7 @@ build_ee_image(){
   fi
 }
 
+# 下載 Ansible naigator 所需 rpm
 download_ansible(){
   # 下載 AAP rpm
   echo "開始下載 AAP rpm..."
@@ -139,15 +154,101 @@ get_tools(){
   echo "mirror registry 下載完成"
 }
 
+# 配置 AAP inventory 資訊
 configre_aap_config(){
 
 # 設定 app inventory
 cat << EOF > ${OCP_INSTALLER_DIR}/../inventory
-${BASTION_FQDN} ansible_host=${BASTION_IP}
+bastion.${CLUSTER_DOMAIN}.${BASE_DOMAIN} ansible_host=${BASTION_IP}
 EOF
 
 }
 
+# 配置 AAP main.yaml
+configure_aap_main(){
+  cp ${OCP_INSTALLER_DIR}/default/main.yml ${OCP_INSTALLER_DIR}/default/main.yml.bak
+
+cat << EOF > ${OCP_INSTALLER_DIR}/default/main.yml
+---
+online: false
+
+# compact or standard mode
+mode: ${INSTALL_MODE}
+
+# 依個人需求啟動或關閉防火牆與 SELinux 等服務與功能
+firewalld_disable: true
+selinux_disable: true 
+
+# 啟用或停用 DNS配置、網卡(NIC)名稱、DNS 上游伺服器位址
+dns_configure: true
+interface: ens33
+dns_upstream: 8.8.8.8
+
+# 是否 DNS 檢查
+dns_check: true
+dns_ip: ${BASTION_IP}
+
+# 是否啟用負載平衡配置
+haproxy_configure: true
+
+# 鏡像庫配置
+registry_configure: true
+mirrorRegistryDir: /root/install_source/mirror-registry.tar.gz
+quayRoot: /mirror-registry
+quayStorage: /mirror-registry/storage
+registryPassword: ${REGISTRY_PASSWORD}
+
+# OCP 相關配置
+# 定義叢集名稱
+clusterName: ${CLUSTER_DOMAIN}
+# 定義叢集基礎域名
+baseDomain: ${BASE_DOMAIN}
+# 定義資源檔案之絕對路徑: 如公鑰、OCP 所需指令壓縮檔位置等
+sshKeyDir: /root/.ssh/id_rsa.pub
+ocpInstallDir: /root/install_source/openshift-install-${RHEL_VERSION}-${ARCHITECTURE}.tar.gz
+ocpClientDir: /root/install_source/openshift-client-linux-${ARCHITECTURE}-${RHEL_VERSION}-${OCP_RELEASE}.tar.gz
+# 連線安裝所需之 pull-secret 位置
+pullSecretDir: /root/install_source/pull-secret.txt
+
+# 從磁碟到鏡像的同步
+mirror: true
+ocmirrorSource: /root/install_source/oc-mirror.${RHEL_VERSION}.tar.gz
+imageSetFile: /root/install_source
+reponame: ocp418
+
+# 節點的基本設定 (將不需要的節點註解掉)
+bastion:
+  name: bastion
+  ip: ${BASTION_IP}
+bootstrap:
+  name: bootstrap
+  ip: ${BOOTSTRAP_IP}
+master:
+- name: master01
+  ip: ${MASTER01_IP}
+- name: master02
+  ip: ${MASTER02_IP}
+- name: master03
+  ip: ${MASTER03_IP}
+# standard mode nodes
+infra:
+- name: infra01
+  ip: ${INFRA01_IP}
+- name: infra02
+  ip: ${INFRA02_IP}
+- name: infra03
+  ip: ${INFRA03_IP}
+worker: 
+- name: worker01
+  ip: ${WORKER01_IP}
+- name: worker02
+  ip: ${WORKER02_IP}
+- name: worker03
+  ip: ${WORKER03_IP}
+EOF
+}
+
+# 解開 oc mirror 指令
 untar_oc_mirror(){
 
   # 將 oc-mirror 指令解開使用
