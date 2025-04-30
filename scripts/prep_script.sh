@@ -48,7 +48,7 @@ env_prep(){
 
   # 定義需要檢查/創建的目錄列表（可以自行替換或擴展）
   CREATE_DIRS=(
-    "/root/install_file"
+    "/root/install_source"
     "/root/.docker"
     "/root/install/ocp418"
   )
@@ -81,6 +81,7 @@ git_clone(){
 
   mkdir ${GITOPS_DIR}
   git clone https://github.com/CCChou/OpenShift-EaaS-Practice.git ${GITOPS_DIR}
+  tar
 
 }
 
@@ -90,7 +91,7 @@ build_ee_image(){
   podman pull quay.io/rhtw/ee-bas-auto:v1.0
     
   # 將 ee 鏡像包成 tar 檔
-  podman save -o /root/install_file/${EE_IMAGE_NAME}-v1.tar ee-bas-auto:v1.0
+  podman save -o /root/install_source/${EE_IMAGE_NAME}-v1.tar ee-bas-auto:v1.0
 }
 
 # 下載 Ansible naigator 所需 rpm
@@ -100,7 +101,7 @@ download_ansible(){
   dnf install --enablerepo="${AAP_REPO}" --downloadonly --installroot=/root/rpm/rootdir --downloaddir="${AAP_DIR}" --releasever="${RHEL_MINOR_VERSION}" ansible-navigator -y
 
   # 將 AAP RPM 包打包成 tar 檔
-  tar cvf /root/install_file/ansible-navigator-rpm-${RHEL_MINOR_VERSION}-min.tar ${AAP_DIR}
+  tar cvf /root/install_source/ansible-navigator-rpm-${RHEL_MINOR_VERSION}-min.tar ${AAP_DIR}
 }
 
 # 下載安裝所需工具
@@ -108,27 +109,27 @@ get_tools(){
   echo "下載安裝工具..."
 
   # 下載 openshift client
-  wget https://mirror.openshift.com/pub/openshift-v4/clients/ocp/${OCP_RELEASE}/openshift-client-linux-${ARCHITECTURE}-${RHEL_VERSION}-${OCP_RELEASE}.tar.gz -P /root/install_file
+  wget https://mirror.openshift.com/pub/openshift-v4/clients/ocp/${OCP_RELEASE}/openshift-client-linux-${ARCHITECTURE}-${RHEL_VERSION}-${OCP_RELEASE}.tar.gz -P /root/install_source
   echo "oc client 下載完成"
 
   # 下載 openshift install
-  wget https://mirror.openshift.com/pub/openshift-v4/clients/ocp/${OCP_RELEASE}/openshift-install-${RHEL_VERSION}-${ARCHITECTURE}.tar.gz -P /root/install_file
+  wget https://mirror.openshift.com/pub/openshift-v4/clients/ocp/${OCP_RELEASE}/openshift-install-${RHEL_VERSION}-${ARCHITECTURE}.tar.gz -P /root/install_source
   echo "oc install 下載完成"
 
   # 下載 oc mirror
-  wget https://mirror.openshift.com/pub/openshift-v4/clients/ocp/${OCP_RELEASE}/oc-mirror.${RHEL_VERSION}.tar.gz -P /root/install_file
+  wget https://mirror.openshift.com/pub/openshift-v4/clients/ocp/${OCP_RELEASE}/oc-mirror.${RHEL_VERSION}.tar.gz -P /root/install_source
   echo "oc mirror 下載完成"
 
   # 下載 butane
-  wget https://mirror.openshift.com/pub/openshift-v4/clients/butane/latest/butane-${ARCHITECTURE} -P /root/install_file
+  wget https://mirror.openshift.com/pub/openshift-v4/clients/butane/latest/butane-${ARCHITECTURE} -P /root/install_source
   echo "butane 下載完成"
 
   # 下載 latest helm
-  wget https://developers.redhat.com/content-gateway/file/pub/openshift-v4/clients/helm/${HELM_VERSION}/helm-linux-${ARCHITECTURE}.tar.gz -P /root/install_file
+  wget https://developers.redhat.com/content-gateway/file/pub/openshift-v4/clients/helm/${HELM_VERSION}/helm-linux-${ARCHITECTURE}.tar.gz -P /root/install_source
   echo "butane 下載完成"
 
   # 下載 latest mirror registry
-  wget https://developers.redhat.com/content-gateway/file/pub/openshift-v4/clients/mirror-registry/${MIRROR_REGISTRY_VERSION}/mirror-registry.tar.gz -P /root/install_file
+  wget https://developers.redhat.com/content-gateway/file/pub/openshift-v4/clients/mirror-registry/${MIRROR_REGISTRY_VERSION}/mirror-registry.tar.gz -P /root/install_source
   echo "mirror registry 下載完成"
 }
 
@@ -230,7 +231,7 @@ EOF
 untar_oc_mirror(){
 
   # 將 oc-mirror 指令解開使用
-  tar -zxvf /root/install_file/oc-mirror.rhel9.tar.gz -C /usr/bin/
+  tar -zxvf /root/install_source/oc-mirror.rhel9.tar.gz -C /usr/bin/
 
   chmod a+x /usr/bin/oc-mirror
 

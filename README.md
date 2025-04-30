@@ -1,5 +1,7 @@
 # OpenShift Automation
 
+# WORK IN PROGRESS (版號 v0.x 不保證離線環境成功)
+
 在符合最多數化場景下執行 OpenShift 的 Day1 跟 Day2 安裝配置自動化
 
 | 版號 | 發布日期 | 異動內容 |
