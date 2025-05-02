@@ -282,6 +282,9 @@
        - quay.io/containerdisks/centos-stream:9
        - docker.io/library/postgres:latest
        - docker.io/gitea/gitea:1.21.7
+       - quay.io/minio/minio:latest
+       - quay.io/rhtw/tools
+       - quay.io/rhtw/gitops-envsub
        - [nfs-csi](https://github.com/kubernetes-csi/csi-driver-nfs)
          - image: registry.k8s.io/sig-storage/csi-resizer:v1.13.1
          - image: registry.k8s.io/sig-storage/csi-provisioner:v5.2.0
