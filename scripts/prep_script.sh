@@ -145,9 +145,9 @@ EOF
 
 # 配置 AAP main.yaml
 configure_aap_main(){
-  cp ${OCP_INSTALLER_DIR}/default/main.yml ${OCP_INSTALLER_DIR}/default/main.yml.bak
+  cp ${OCP_INSTALLER_DIR}/defaults/main.yml ${OCP_INSTALLER_DIR}/defaults/main.yml.bak
 
-cat << EOF > ${OCP_INSTALLER_DIR}/default/main.yml
+cat << EOF > ${OCP_INSTALLER_DIR}/defaults/main.yml
 ---
 online: false
 
