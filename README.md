@@ -21,7 +21,7 @@
 在進入客戶環境前的準備事項
 
 0. 本機環境準備一台可對外連線的 RHEL 主機
-   - 準備好 GitHub 帳號
+   - 準備好 GitHub 帳號(optional)
    - 主機 /etc/host 中設定解析 red hat registry
    - 檢查 /etc/yum.repos.d/ 內使用預設 RHEL repo
    - 在 root 下需要有足夠的空間(建議200GB)
