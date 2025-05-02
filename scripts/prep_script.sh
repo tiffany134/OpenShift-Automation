@@ -81,7 +81,7 @@ git_clone(){
 
   mkdir ${GITOPS_DIR}
   git clone https://github.com/CCChou/OpenShift-EaaS-Practice.git ${GITOPS_DIR}
-  tar
+  tar cvf /root/install_source/gitops.tar ${GITOPS_DIR}
 
 }
 

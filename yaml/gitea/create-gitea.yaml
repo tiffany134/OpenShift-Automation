@@ -27,6 +27,21 @@ spec:
           ports:
             - containerPort: 3000
               name: gitea
+          env:
+            - name: GITEA__security__INSTALL_LOCK
+              value: "true"
+            - name: GITEA__database__DB_TYPE
+              value: "postgres"
+            - name: GITEA__database__HOST
+              value: "postgres-db.gitea.svc.cluster.local:5432"
+            - name: GITEA__database__NAME
+              value: "gitea"
+            - name: GITEA__database__USER
+              value: "admin"
+            - name: GITEA__database__PASSWD
+              value: "admin"
+            - name: GITEA__database__SSL_MODE
+              value: "disable"
           volumeMounts:
             - mountPath: /data
               name: gitea-pvc
