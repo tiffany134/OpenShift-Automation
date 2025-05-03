@@ -97,7 +97,7 @@ build_ee_image(){
 
 # 下載 Ansible naigator 所需 rpm
 download_ansible(){
-  yum repolist
+  dnf repolist
   # 下載 AAP rpm
   echo "開始下載 AAP rpm..."
   dnf install --enablerepo="${AAP_REPO}" --downloadonly --installroot=/root/rpm/rootdir --downloaddir="${AAP_DIR}" --releasever="${RHEL_MINOR_VERSION}" ansible-navigator -y
