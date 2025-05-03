@@ -100,10 +100,10 @@ download_ansible(){
   dnf repolist
   # 下載 AAP rpm
   echo "開始下載 AAP rpm..."
-  dnf install --enablerepo="${AAP_REPO}" --downloadonly --installroot=/root/rpm/rootdir --downloaddir="${AAP_DIR}" --releasever="${RHEL_MINOR_VERSION}" ansible-navigator -y
+  dnf install --enablerepo="${AAP_REPO}" --downloadonly --installroot="${AAP_DIR}/rootdir" --downloaddir="${AAP_DIR}/ansible-navigator-rpm-${RHEL_MINOR_VERSION}" --releasever="${RHEL_MINOR_VERSION}" ansible-navigator -y
 
   # 將 AAP RPM 包打包成 tar 檔
-  tar cvf /root/install_source/ansible-navigator-rpm-${RHEL_MINOR_VERSION}-min.tar ${AAP_DIR}
+  tar cvf /root/install_source/ansible-navigator-rpm-${RHEL_MINOR_VERSION}.tar -C ${AAP_DIR} "ansible-navigator-rpm-${RHEL_MINOR_VERSION}"
 }
 
 # 下載安裝所需工具
@@ -138,10 +138,10 @@ get_tools(){
 # 配置 AAP inventory 資訊
 configre_aap_config(){
 
-# 設定 app inventory
-cat << EOF > ${OCP_INSTALLER_DIR}/../inventory
-bastion.${CLUSTER_DOMAIN}.${BASE_DOMAIN} ansible_host=${BASTION_IP}
-EOF
+  # 設定 app inventory
+  cat << EOF > ${OCP_INSTALLER_DIR}/../inventory
+  bastion.${CLUSTER_DOMAIN}.${BASE_DOMAIN} ansible_host=${BASTION_IP}
+  EOF
 
 }
 
@@ -178,6 +178,11 @@ mirrorRegistryDir: /root/install_source/mirror-registry.tar.gz
 quayRoot: /mirror-registry
 quayStorage: /mirror-registry/storage
 registryPassword: ${REGISTRY_PASSWORD}
+
+# NTP server
+ntp_server_configure: true
+# NTP client
+ntp_server_ip: ${BASTION_IP}
 
 # OCP 相關配置
 # 定義叢集名稱

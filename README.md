@@ -308,6 +308,11 @@
     quayRoot: /mirror-registry
     quayStorage: /mirror-registry/storage
     registryPassword: P@ssw0rd
+
+    # NTP server
+    ntp_server_configure: true
+    # NTP client
+    ntp_server_ip: 172.20.11.50
     
     # OCP 相關配置
     # 定義叢集名稱
@@ -360,9 +365,16 @@
 
 8. 將所有準備好的資源都 tar 起來準備放入客戶離線環境
    - 將 OpenShift Automation 目錄打包成 tar 檔
-   ```bash
-   tar czvf /root/install_file/openshift-automation.tar.gz -C /root OpenShift-Automation
-   ```
+     ```bash
+     tar czvf /root/openshift-automation.tar.gz -C /root OpenShift-Automation install_source gitops
+     ```
+
+    * checkt list (不在openshift-automation.tar.gz內):
+      - [x] mirror_seq
+      - [x] qcow2
+      - [x] ISO
+        - RHEL OS
+        - rhcos
 
     * tar checkt list (tar包清單):
       - [x] ansible-navigator
@@ -372,13 +384,7 @@
         - roles
         - scripts
       - [x] image
-        - nfs
-        - gitea
-      - [x] mirror_seq
-      - [x] qcow2
-      - [x] ISO
-        - RHEL OS
-        - rhcos
+        - csi images (如nfs、csm、trident)
       - [x] CLI tools
         - OpenShift command-line interface (oc)
         - Helm 3
@@ -478,14 +484,10 @@
    13. 啟動虛擬機後，您可以按照一般流程安裝 RHEL
        ![安裝 RHEL](https://github.com/CCChou/OpenShift-Automation/blob/main/images/kvm-xiii-rhel_installation.png?raw=true)
 
-2. 建立 install_source 目錄，解開 OpenShift Automation 的 tar
-   - 創建 install_source 目錄，把 install_file 內的 tar 檔放置到此目錄中
-     ```bash
-     mkdir /root/install_source
-     ```
+2. 解開 OpenShift Automation 的 tar
    - 把 OpenShift Automation 的 tar 解開
      ```bash
-     tar zxvf /root/install_source/openshift-automation.tar.gz -C /root
+     tar xzvf openshift-automation.tar.gz -C /root
      ```
 
 3. 執行 configure_and_run.sh 腳本
@@ -531,7 +533,7 @@
 
       curl http://['bastion ip']:8080/install.sh | bash -s - ['device'] ['role']
       ```
-      > 執行命令範例 (以 /dev/sda 及 worker 為例): curl http://172.20.11.120:8080/install.sh | bash -s - /dev/sda worker
+      > 執行命令範例 (以 /dev/sda 及 bootstrap 為例): curl http://172.20.11.120:8080/install.sh | bash -s - /dev/sda bootstrap
     
     - 完成後重啟主機
       ```bash
@@ -546,15 +548,14 @@
     > 請注意，kubeconfig 檔案的位置可能會因您建立 ocp4 目錄的位置而有所不同。
     > 請留意此動作需於 bastion 機上執行!
 
-7. 檢查節點健康狀況，並根據安裝架構決定是否要通過 csr
-    - 標準架構: 需要 csr approve
-      ```bash
-      oc get csr -o go-template='{{range .items}}{{if not .status}}{{.metadata.name}}{{"\n"}}{{end}}{{end}}' | xargs oc adm certificate approve
-      ```
-    - 三節點架構: 不需要 csr approve，因為 worker 會被加入 master
+7. 檢查節點健康狀況，並通過 csr
+   ```bash
+   oc get csr -o go-template='{{range .items}}{{if not .status}}{{.metadata.name}}{{"\n"}}{{end}}{{end}}' | xargs oc adm certificat  approve
+   ```
 
 ### 安裝後配置流程
 
+0. 校時 (離線環境下)
 1. 設定身分認證並刪除 kubeadmin 用戶
    ```bash
    # 執行 script 設置 OpenShift authentication
