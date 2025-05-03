@@ -1,5 +1,6 @@
 #!/bin/bash
-config_file="prep_config.conf"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+config_file="$SCRIPT_DIR/prep_config.conf"
 
 # 檢查文件是否存在
 [[ ! -f "$config_file" ]] && { echo "ERROR：配置文件不存在"; exit 1; }
@@ -96,6 +97,7 @@ build_ee_image(){
 
 # 下載 Ansible naigator 所需 rpm
 download_ansible(){
+  yum repolist
   # 下載 AAP rpm
   echo "開始下載 AAP rpm..."
   dnf install --enablerepo="${AAP_REPO}" --downloadonly --installroot=/root/rpm/rootdir --downloaddir="${AAP_DIR}" --releasever="${RHEL_MINOR_VERSION}" ansible-navigator -y
