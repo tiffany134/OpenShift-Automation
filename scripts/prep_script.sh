@@ -138,10 +138,10 @@ get_tools(){
 # 配置 AAP inventory 資訊
 configre_aap_config(){
 
-  # 設定 app inventory
-  cat << EOF > ${OCP_INSTALLER_DIR}/../inventory
-  bastion.${CLUSTER_DOMAIN}.${BASE_DOMAIN} ansible_host=${BASTION_IP}
-  EOF
+# 設定 app inventory
+cat << EOF > ${OCP_INSTALLER_DIR}/../inventory
+bastion.${CLUSTER_DOMAIN}.${BASE_DOMAIN} ansible_host=${BASTION_IP}
+EOF
 
 }
 
@@ -185,6 +185,7 @@ ntp_server_configure: true
 ntp_server_ip: ${BASTION_IP}
 
 # OCP 相關配置
+ocp_configure: true
 # 定義叢集名稱
 clusterName: ${CLUSTER_DOMAIN}
 # 定義叢集基礎域名
@@ -199,7 +200,7 @@ pullSecretDir: /root/install_source/pull-secret.txt
 # 從磁碟到鏡像的同步
 mirror: true
 ocmirrorSource: /root/install_source/oc-mirror.${RHEL_VERSION}.tar.gz
-imageSetFile: /root/install_source
+imageSetFile: /root/install_source/mirror
 reponame: ocp418
 
 # 節點的基本設定 (將不需要的節點註解掉)

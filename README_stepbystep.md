@@ -330,6 +330,7 @@
     ntp_server_ip: 172.20.11.50
 
     # OCP 相關配置
+    ocp_configure: true
     # 定義叢集名稱
     clusterName: ocp4
     # 定義叢集基礎域名
@@ -344,8 +345,8 @@
     # 從磁碟到鏡像的同步
     mirror: false
     ocmirrorSource: /root/install_source/oc-mirror.rhel9.tar.gz
-    imageSetFile: /root/install_source
-    reponame: ocp416
+    imageSetFile: /root/install_source/mirror
+    reponame: ocp418
     
     # 節點的基本設定 (將不需要的節點註解掉)
     bastion:
@@ -361,6 +362,7 @@
       ip: 172.20.11.52
     - name: master03
       ip: 172.20.11.53
+    # standard mode nodes
     infra:
     - name: infra01
       ip: 172.20.11.54
@@ -438,7 +440,7 @@
    enabled = 1
    ```
 
-1. 安裝 KVM 建立一個 RHEL Bastion server
+1. 安裝 KVM 建立一個 RHEL server
    1. 請確定已於本地 OS 下載欲安裝的虛擬機之 ISO 檔
    2. 按照下方指令下載所需要之 RPM 套件
       ```bash
@@ -502,13 +504,30 @@
 
    tar zxvf ansible-navigator-rpm-9.4-min.tar -C ['解 tar 之路徑']
    ```
-
-3. 安裝所有 rpm 包
    ```bash
-   yum localinstall ansible-navigator-rpm-9.4/* --allowerasing 
+   ls /root/install_source/
+   
+   ansible-navigator-rpm-9.4
+   ansible-navigator-rpm-9.4.tar
+   butane-amd64
+   ···
    ```
 
-4. 於 bastion 產生 ssh-key，並設定免密登入
+3. 將 mirror 檔案放至/root/install_source/mirror
+   ```bash
+   ls /root/install_source/mirror
+   
+   mirror_seq1_000000.tar
+   mirror_seq1_000001.tar
+   ···
+   ```
+
+4. 安裝所有 rpm 包
+   ```bash
+   yum localinstall /root/install_source/ansible-navigator-rpm-9.4/* --allowerasing --skip-broken
+   ```
+
+5. 於 bastion 產生 ssh-key，並設定免密登入
    ```bash
    ssh-keygen
    ```
@@ -516,13 +535,13 @@
    ssh-copy-id root@['bastion ip'] 
    ```
 
-5. 從 tar 檔中載入容器映像檔到 Podman 的本地鏡像庫
+6. 從 tar 檔中載入容器映像檔到 Podman 的本地鏡像庫
    ```bash
    podman load -i ['包起來的 ee tar 檔名稱'].tar
    ```
    > 參考事前準備工作第 5 步 'podman save -o ['包起來的 tar 檔名稱'].tar ['你的 ee 映像檔名稱']' tar 檔名稱
 
-6. 創建 Ansible Inventory
+7. 創建 Ansible Inventory
    ```bash
    vim inventory
    
@@ -533,7 +552,7 @@
    bastion.ocp.ansible.lab ansible_host=172.20.11.120
    ```
 
-7. 創建 install.yml playbook
+8. 創建 install.yml playbook
    ```yaml
    - hosts: all
      remote_user: root
@@ -542,7 +561,7 @@
    ```
    Example: ( role > install.yml )
 
-8. 使用 ansible 運行自動化設定配置腳本 (roles > ocp_bastion_installer > tasks > main.yml)
+9. 使用 ansible 運行自動化設定配置腳本 (roles > ocp_bastion_installer > tasks > main.yml)
    ```bash
    ansible-navigator run --eei ['ee image name'] --pp missing -i inventory -mstdout install.yml
    ```
@@ -571,7 +590,7 @@
       6. 把 operator 檔案上傳到 registry
          - 上傳 Operators 至私人倉儲
 
-9. 設定節點網路連線
+10. 設定節點網路連線
     1. 請於重新開機後，執行下列指令以 root 身分進行設定
        ```
        sudo -i
@@ -601,7 +620,7 @@
        ```
        ![解析檢查](https://github.com/CCChou/OpenShift-Automation/blob/56c6724fc10b6b1d468fef64973b09d0d49e2bbf/images/7-check_hostname.png)
 
-10. 透過 curl 的方式呼叫 coreos-installer 執行 coreos install 指令
+11. 透過 curl 的方式呼叫 coreos-installer 執行 coreos install 指令
     - 在各個主機內執行 coreos-installer 腳本，執行順序 bootstrap > master > worker
       ```bash
       # 以下指令在 curl 執行後會自行執行，role 包含 bootstrap, master, worker
@@ -617,14 +636,14 @@
       ```
       > 若節點為虛擬機，請記得於開機前退出映像檔
 
-11. 匯出 kubeconfig 進行連線
+12. 匯出 kubeconfig 進行連線
     ```bash
     export KUBECONFIG=/root/ocp4/auth/kubeconfig 
     ```
     > 請注意，kubeconfig 檔案的位置可能會因您建立 ocp4 目錄的位置而有所不同。
     > 請留意此動作需於 bastion 機上執行!
 
-12. 檢查節點健康狀況，並通過 csr
+13. 檢查節點健康狀況，並通過 csr
     ```bash
     oc get csr -o go-template='{{range .items}}{{if not .status}}{{.metadata.name}}{{"\n"}}{{end}}{{end}}' | xargs oc adm certificate approve
     ```

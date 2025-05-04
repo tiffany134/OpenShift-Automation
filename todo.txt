@@ -1,26 +1,14 @@
 prep: 
-1. Kilin dnf install aap 的雷，你們自己討論方案
-2. md5 check
-
-for file in mirror*.tar; do
-    if [ ! -f "${file}.md5" ]; then
-        md5sum "$file" > "${file}.md5"
-
-        if ! md5sum -c "${file}.md5" >> checkmd5_verify.log 2>&1; then
-          echo "ERROR: Checkmd5 verification failed for $file"
-          exit 1
-        fi
-    fi
-done
-
-3. 加 image: minio / tools / gitops-envsub
-4. install_file > install_source
+1. (OK) Kilin dnf install aap 的雷，你們自己討論方案
+2. (checkmd5_verify.sh，待補readme) md5 check
+3. (OK) 加 image: minio / tools / gitops-envsub
+4. (OK) install_file > install_source
 
 install: (aap 定版)
 1. 目錄結構畫圖，全部 tar 到 install_source
 2. check md5
 3. chronyd
-4. cp .ign fix bug
+4. (OK) cp .ign fix bug
 5. watch oc get csr -o go-template='{{range .items}}{{if not .status}}{{.metadata.name}}{{"\n"}}{{end}}{{end}}' | xargs -r oc adm certificate approve
 
 post:

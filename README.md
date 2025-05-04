@@ -315,6 +315,7 @@
     ntp_server_ip: 172.20.11.50
     
     # OCP 相關配置
+    ocp_configure: true
     # 定義叢集名稱
     clusterName: ocp4
     # 定義叢集基礎域名
@@ -329,7 +330,7 @@
     # 從磁碟到鏡像的同步
     mirror: true
     ocmirrorSource: /root/install_source/oc-mirror.rhel9.tar.gz
-    imageSetFile: /root/install_source
+    imageSetFile: /root/install_source/mirror
     reponame: ocp418
     
     # 節點的基本設定 (將不需要的節點註解掉)
@@ -426,7 +427,7 @@
    enabled = 1
    ```
 
-1. 安裝 KVM 建立一個 RHEL Bastion server
+1. 安裝 KVM 建立一個 RHEL server
    1. 請確定已於本地 OS 下載欲安裝的虛擬機之 ISO 檔
    2. 按照下方指令下載所需要之 RPM 套件
       ```bash
@@ -485,17 +486,25 @@
        ![安裝 RHEL](https://github.com/CCChou/OpenShift-Automation/blob/main/images/kvm-xiii-rhel_installation.png?raw=true)
 
 2. 解開 OpenShift Automation 的 tar
-   - 把 OpenShift Automation 的 tar 解開
-     ```bash
-     tar xzvf openshift-automation.tar.gz -C /root
-     ```
+   ```bash
+   tar xzvf openshift-automation.tar.gz -C /root
+   ```
 
-3. 執行 configure_and_run.sh 腳本
+3. 將 mirror 檔案放至/root/install_source/mirror
+   ```bash
+   ls -l /root/install_source/mirror
+   
+   mirror_seq1_000000.tar
+   mirror_seq1_000001.tar
+   ···
+   ```
+
+4. 執行 configure_and_run.sh 腳本
    ```bash
    sh /root/OpenShift-Automation/scripts/bastion/configure_and_run.sh
    ```
 
-4. 設定節點網路連線
+5. 設定節點網路連線
     1. 請於重新開機後，執行下列指令以 root 身分進行設定
        ```
        sudo -i
@@ -525,7 +534,7 @@
        ```
        ![解析檢查](https://github.com/CCChou/OpenShift-Automation/blob/56c6724fc10b6b1d468fef64973b09d0d49e2bbf/images/7-check_hostname.png)
 
-5. 透過 curl 的方式呼叫 coreos-installer 執行 coreos install 指令
+6. 透過 curl 的方式呼叫 coreos-installer 執行 coreos install 指令
     - 在各個主機內執行 coreos-installer 腳本，執行順序 bootstrap > master > worker
       ```bash
       # 以下指令在 curl 執行後會自行執行，role 包含 bootstrap, master, worker
@@ -541,14 +550,14 @@
       ```
       > 若節點為虛擬機，請記得於開機前退出映像檔
 
-6. 匯出 kubeconfig 進行連線
+7. 匯出 kubeconfig 進行連線
     ```bash
     export KUBECONFIG=/root/ocp4/auth/kubeconfig 
     ```
     > 請注意，kubeconfig 檔案的位置可能會因您建立 ocp4 目錄的位置而有所不同。
     > 請留意此動作需於 bastion 機上執行!
 
-7. 檢查節點健康狀況，並通過 csr
+8. 檢查節點健康狀況，並通過 csr
    ```bash
    oc get csr -o go-template='{{range .items}}{{if not .status}}{{.metadata.name}}{{"\n"}}{{end}}{{end}}' | xargs oc adm certificat  approve
    ```
