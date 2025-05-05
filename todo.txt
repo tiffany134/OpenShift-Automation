@@ -9,7 +9,7 @@ install: (aap 定版)
 2. check md5
 3. chronyd
 4. (OK) cp .ign fix bug
-5. watch oc get csr -o go-template='{{range .items}}{{if not .status}}{{.metadata.name}}{{"\n"}}{{end}}{{end}}' | xargs -r oc adm certificate approve
+5. watch "oc get csr -o go-template='{{range .items}}{{if not .status}}{{.metadata.name}}{{\"\n\"}}{{end}}{{end}}' | xargs -r oc adm certificate approve"
 
 post:
 1. gitea / argocd 設定到 /etc/host 跳板機
