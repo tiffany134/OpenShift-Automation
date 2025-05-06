@@ -1,22 +1,28 @@
 prep: 
-1. (OK) Kilin dnf install aap 的雷，你們自己討論方案
-2. (checkmd5_verify.sh，待補readme) md5 check
-3. (OK) 加 image: minio / tools / gitops-envsub
-4. (OK) install_file > install_source
+1. md5 check
+
+for file in mirror*.tar; do
+    if [ ! -f "${file}.md5" ]; then
+        md5sum "$file" > "${file}.md5"
+
+        if ! md5sum -c "${file}.md5" >> checkmd5_verify.log 2>&1; then
+          echo "ERROR: Checkmd5 verification failed for $file"
+          exit 1
+        fi
+    fi
+done
 
 install: (aap 定版)
 1. 目錄結構畫圖，全部 tar 到 install_source
 2. check md5
 3. chronyd
-4. (OK) cp .ign fix bug
-5. watch "oc get csr -o go-template='{{range .items}}{{if not .status}}{{.metadata.name}}{{\"\n\"}}{{end}}{{end}}' | xargs -r oc adm certificate approve"
+4. cp .ign fix bug
 
 post:
 1. gitea / argocd 設定到 /etc/host 跳板機
 2. 檢查 yum.repos.d
 
-1. catalogsource > name: redhat-operators
-2. netapp(25.02.1 - 418):
+1. netapp(25.02.1 - 418):
 
 wget trident_installer
 tar .tar
@@ -33,21 +39,7 @@ tridentctl create backend -f backend.json -n trident
 create storageClass > default annotation
 create volumeSnapshotClass
 
-3. gitea > postgres 自動化 app.ini
-/data/gitea/conf/app.ini
-
-[database]
-PATH = /data/gitea/gitea.db
-DB_TYPE = postgres
-HOST = postgres-db.gitea.svc.cluster.local
-NAME = gitea
-USER = admin
-PASSWD = admin
-LOG_SQL = false
-SCHEMA = 
-SSL_MODE = disable
-
-4. gitea api
+3. gitea api
 curl -X POST "http://yourusername:yourpassword@gitea-host/api/v1/admin/users/{username}/repos" \
      -H "Content-Type: application/json" \
      -d '{
@@ -56,7 +48,7 @@ curl -X POST "http://yourusername:yourpassword@gitea-host/api/v1/admin/users/{us
        "private": false,
        "auto_init": true 
      }'
-5. argocd 加 gitea hostname secret
+5. argocd 加 gitea hostname secret | Done
 6. git 流程自動化 (目錄不要放一起)
    git remote set-url origin [gitea_url]
    git config --global http.sslVerify false

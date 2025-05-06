@@ -55,7 +55,7 @@
    - 到 [Red Hat Hybrid Cloud Console](https://console.redhat.com/openshift/downloads) 下載 pull secret
      ![dowdload path](https://github.com/CCChou/OpenShift-Automation/blob/main/images/download_pullsecret.png)
 
-4. 配置 prep_config.conf 內參數
+4. 配置 prep_script.conf 內參數
    - 使用 [Red Hat OpenShift Container Platform Update Graph](https://access.redhat.com/labs/ocpupgradegraph/update_path/) 查詢 OCP channel 及 version
 
    * 指令工具及系統檔案清單(以 4.18 stable 的 amd64 架構為範例):
@@ -79,7 +79,7 @@
      - [CoreOS 開機用光碟(rhcos)](https://mirror.openshift.com/pub/openshift-v4/x86_64/dependencies/rhcos/)
 
    ``` bash
-   # prep_config.conf
+   # prep_script.conf
 
    # GIT 目錄路徑
    OCP_INSTALLER_DIR=/root/Openshift-Automation/roles
@@ -249,7 +249,6 @@
          - tempo-product
          - opentelemetry-product
        - Storage
-         - trident-operator
          - local-storage-operator
        - Day 2 Ops
          - node-healthcheck-operator
@@ -550,59 +549,40 @@
       ```
       > 若節點為虛擬機，請記得於開機前退出映像檔
 
-7. 匯出 kubeconfig 進行連線
-    ```bash
-    export KUBECONFIG=/root/ocp4/auth/kubeconfig 
-    ```
-    > 請注意，kubeconfig 檔案的位置可能會因您建立 ocp4 目錄的位置而有所不同。
-    > 請留意此動作需於 bastion 機上執行!
-
-8. 檢查節點健康狀況，並通過 csr
-   ```bash
-   oc get csr -o go-template='{{range .items}}{{if not .status}}{{.metadata.name}}{{"\n"}}{{end}}{{end}}' | xargs oc adm certificat  approve
-   ```
-
 ### 安裝後配置流程
 
 0. 校時 (離線環境下)
-1. 設定身分認證並刪除 kubeadmin 用戶
+
+1. 配置 post_install.conf 內參數
    ```bash
-   # 執行 script 設置 OpenShift authentication
-   sh scripts/authentication/authentication.sh
+   # post_install.conf
+
+   # 總共的節點數量(包含 master)
+   TOTAL_NODE_NUMBER=3
+
+   # 使用的 CSI
+   # nfs-csi: 預設沒有儲存的前提，僅適合一般 PoC
+   # trident: 使用 NetApp Storage CSI
+   CSI_MODULE=nfs-csi 
+
+   # 安裝模式: 
+   # standard: 叢集含有infra節點時
+   # compact:  叢集沒有infra節點，即compact mode 或 3+2 節點
+   INSTALL_MODE=compact
+   REGISTRY=bastion.ocp.ansible.lab:8443
+   GITEA_VERSION=1.21.7
    ```
 
-2. 關閉預設 catalog source
+2. 執行 post_install.sh 腳本
    ```bash
-   sh scripts/disable-marketplace.sh
+   sh /root/OpenShift-Automation/scripts/post_install.sh
    ```
 
-3. 配置oc-mirror產生之資源
+3. 設定 gitea 和 argocd 的連線解析
    ```bash
-   oc apply -f /root/oc-mirror-workspace/results-1737685763/
+   gitea-gitea-gitea.apps.${CLUSTER_DOMAIN}.${BASE_DOMAIN} ${BASTION_IP}
+   openshift-gitops-server-openshift-gitops.apps.${CLUSTER_DOMAIN}.${BASE_DOMAIN} ${BASTION_IP}
    ```
-   > 請注意，results-1737685763目錄名稱會依據mirror時間而有所不同。
+   > 請注意，CLUSTER_DOMAIN BASE_DOMAIN BASTION_IP 三個參數可以參考 prep_script.conf 內填入的參數
 
-4. 設定對應的 CSI 儲存介面
-   - nfs csi as example (以 nfs csi 為例):
-     - 外接存儲會依照需求有所不同與額外設定，請參照[此處](<https://github.com/kubernetes-csi/csi-driver-nfs/tree/master?tab=readme-ov-file>)
-
-5. 根據安裝架構設定 infra 節點配置
-   - standard architecture (標準架構): 需要上 taint，有可能日誌監控等重要服務必須上在這邊
-     ```bash
-     # 執行 script 設置 infra node 及 monitoring components
-     # sh script/infra/infra.sh <clusterName>.<baseDomain> standard
-     sh scripts/infra/infra.sh ocp.ansible.lab standard
-     ```
-   - Compact Nodes architecture (三節點架構):
-     ```bash
-     # 執行 script 設置 monitoring components
-     # sh script/infra/infra.sh <clusterName>.<baseDomain> compact
-     sh scripts/infra/infra.sh ocp.ansible.lab compact
-     ```
-    
-6. Install gitea as a GitOps source repository (安裝 gitea 做為 GitOps 來源庫)
-   ```bash
-   sh scripts/gitea.sh
-   ```
-
-7. Import the EaaS git repo and run the corresponding Operator environment installation (匯入 EaaS git repo 並執行對應的 Operator 環境安裝)
+4. Import the EaaS git repo and run the corresponding Operator environment installation (匯入 EaaS git repo 並執行對應的 Operator 環境安裝)

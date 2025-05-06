@@ -30,7 +30,7 @@ main(){
 approve_csr(){
   KUBECONFIG=/root/ocp4/auth/kubeconfig
 
-  TARGET_READY_COUNT=3
+  TARGET_READY_COUNT=${TOTAL_NODE_NUMBER}
   CHECK_INTERVAL=$((5 * 60)) # 每 5 分鐘檢查一次
   MAX_WAIT_SECONDS=$((30 * 60)) # 最長等待 30 分鐘
   START_TIME=$(date +%s)
@@ -95,11 +95,13 @@ ocp_authentication(){
 }
 
 infra_node_setup(){
+  mcp_infra_yaml=$(find /root/OpenShift-Automation/yaml/infra -type f -name "mcp_infra.yaml")
+
   if [ "$2" == "standard" ]; then
     # standard mode 時執行以下動作
 
     # 設定infra node mcp
-    oc apply -f mcp_infra.yaml
+    oc apply -f $mcp_infra_yaml
 
     # 設定 OCP FQDN
     DOMAIN=$(oc get ingress.config.openshift.io cluster --template={{.spec.domain}} | sed -e "s/^apps.//")
@@ -130,11 +132,13 @@ infra_node_setup(){
   fi
 }
 
-create_gitea(){
+create_gitea(){  
+  create_gtiea_yaml=$(find /root/OpenShift-Automation/yaml/gitea -type f -name "create-gitea.yaml")
+  postgresql_yaml=$(find /root/OpenShift-Automation/yaml/gitea -type f -name "postgresql.yaml")
+  
   # 配置鏡像參數
-  envsubst < create-gitea.yaml |oc apply -f -
-  envsubst < postgresql.yaml |oc apply -f -
-  envsubst < postgresql.yaml |oc apply -f -
+  envsubst < $create_gtiea_yaml |oc apply -f -
+  envsubst < $postgresql_yaml |oc apply -f -
 
   # 建立 gitea 權限
   oc create sa gitea-sa
