@@ -94,6 +94,18 @@ ocp_authentication(){
   oc delete secret kubeadmin -n kube-system
 }
 
+csi_installation(){
+
+    export OCP_DOMAIN=$(oc get ingress.config.openshift.io cluster --template={{.spec.domain}} | sed -e "s/^apps.//")
+    export OCP_VERSION=418
+
+    ./install_csi.sh $CSI_MODULE
+
+    wait
+    echo "CSI 及預設 storageclass 安裝完成"
+
+}
+
 infra_node_setup(){
   mcp_infra_yaml=$(find /root/OpenShift-Automation/yaml/infra -type f -name "mcp_infra.yaml")
 
