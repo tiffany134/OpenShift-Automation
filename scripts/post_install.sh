@@ -1,5 +1,5 @@
 #!/bin/bash
-config_file="post_config.conf"
+config_file="post_install.conf"
 
 # 檢查文件是否存在
 [[ ! -f "$config_file" ]] && { echo "ERROR：配置文件不存在"; exit 1; }
