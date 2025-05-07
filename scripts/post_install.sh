@@ -96,13 +96,22 @@ ocp_authentication(){
 
 csi_installation(){
 
-    export OCP_DOMAIN=$(oc get ingress.config.openshift.io cluster --template={{.spec.domain}} | sed -e "s/^apps.//")
-    export OCP_VERSION=418
+  export OCP_DOMAIN=$(oc get ingress.config.openshift.io cluster --template={{.spec.domain}} | sed -e "s/^apps.//")
+  export OCP_VERSION=418
+  export YAML_DIR="/root/OpenShift-Automation/yaml"
 
-    ./install_csi.sh $CSI_MODULE
+  # 檢查 csi.conf
+  if [ ! -f "csi.conf" ]; then
+    echo "ERROR：配置文件不存在！"
+    exit 1
+  fi
 
-    wait
-    echo "CSI 及預設 storageclass 安裝完成"
+  source ./csi.conf
+
+  ./install_csi.sh $CSI_MODULE
+
+  wait
+  echo "CSI 及預設 storageclass 安裝完成"
 
 }
 

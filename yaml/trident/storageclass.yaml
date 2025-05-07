@@ -1,0 +1,14 @@
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: ${TRIDENT_STORAGE_CLASS_NAME}
+  annotations:
+    storageclass.kubernetes.io/is-default-class: "true"
+provisioner: csi.trident.netapp.io
+mountOptions: ["rw", "nfsvers=3", "proto=tcp"]
+parameters:
+  backendType: "${BACKEND_TYPE}"
+  fsType: "nfs"
+  trident.netapp.io/replication: "true"
+allowVolumeExpansion: true
+volumeBindingMode: Immediate
