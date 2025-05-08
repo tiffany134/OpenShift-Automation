@@ -135,7 +135,7 @@ get_tools(){
   echo "mirror registry 下載完成"
 
   # 下載 trident installer
-  if [ -z "${TRIDENT_INSTALLER}" ]; then
+  if [ "$CSI_TYPE}" == "trident" ]; then
     wget https://github.com/NetApp/trident/releases/download/v${TRIDENT_INSTALLER}/trident-installer-${TRIDENT_INSTALLER}.tar.gz -P /root/install_source
     echo "trident installer 下載完成"
   fi
@@ -240,6 +240,45 @@ worker:
 - name: worker03
   ip: ${WORKER03_IP}
 EOF
+}
+
+patch_imageset_config(){
+  
+  # 下載 yq 套件
+  dnf install yq -y
+
+  case "$CIS_TYPE" in
+  nfs-csi)
+    # 追加多個 image 到 additionalImages 列表
+    yq eval '
+      .mirror.additionalImages += [
+      {"name": "registry.k8s.io/sig-storage/csi-resizer:v1.13.1"},
+      {"name": "registry.k8s.io/sig-storage/csi-provisioner:v5.2.0"},
+      {"name": "registry.k8s.io/sig-storage/csi-snapshotter:v8.2.0"},
+      {"name": "registry.k8s.io/sig-storage/livenessprobe:v2.15.0"},
+      {"name": "registry.k8s.io/sig-storage/nfsplugin:v4.11.0"},
+      {"name": "registry.k8s.io/sig-storage/snapshot-controller:v8.2.0"}
+    ]' /root/OpenShift-Automation/yaml/imageset-config.yaml -i    
+    ;;
+  trident)
+    yq eval '
+      .mirror.additionalImages += [
+      {"name": "docker.io/netapp/trident:25.02.1"},
+      {"name": "docker.io/netapp/trident-autosupport:25.02"},
+      {"name": "registry.k8s.io/sig-storage/csi-provisioner:v5.2.0"},
+      {"name": "registry.k8s.io/sig-storage/csi-attacher:v4.8.0"},
+      {"name": "registry.k8s.io/sig-storage/csi-resizer:v1.13.1"},
+      {"name": "registry.k8s.io/sig-storage/csi-snapshotter:v8.2.0"},
+      {"name": "registry.k8s.io/sig-storage/csi-node-driver-registrar"},
+      {"name": "docker.io/netapp/trident-operator:25.02.1"}
+    ]' /root/OpenShift-Automation/yaml/imageset-config.yaml -i     
+    ;;
+  *)
+    echo "用法: 請選擇正確的 CSI_TYPE"
+    exit 1
+    ;;
+  esac
+
 }
 
 # 解開 oc mirror 指令

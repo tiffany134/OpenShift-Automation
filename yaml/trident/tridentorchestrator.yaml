@@ -8,6 +8,6 @@ spec:
   imagePullPolicy: IfNotPresent
   windows: false
   cloudProvider: ""
-  imageRegistry: "bastion.${OCP_DOMAIN}:8443/ocp${OCP_VERSION}/netapp"
+  imageRegistry: "bastion.${OCP_DOMAIN}:8443/ocp${OCP_VERSION}/sig-storage"
   autosupportImage: "bastion.${OCP_DOMAIN}:8443/ocp${OCP_VERSION}/netapp/trident-autosupport:25.02"
   tridentImage: "bastion.${OCP_DOMAIN}:8443/ocp${OCP_VERSION}/netapp/trident:25.02.1"
