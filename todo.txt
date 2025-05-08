@@ -1,29 +1,4 @@
-prep: 
-
-install: (aap 定版)
-1. 目錄結構畫圖，全部 tar 到 install_source
-2. check md5
-3. chronyd
-4. cp .ign fix bug
-
-post:
-1. gitea / argocd 設定到 /etc/host 跳板機
-2. 檢查 yum.repos.d
-
-3. gitea api
-curl -X POST "http://yourusername:yourpassword@gitea-host/api/v1/admin/users/{username}/repos" \
-     -H "Content-Type: application/json" \
-     -d '{
-       "name": "gitops",
-	   "default_branch": "main",
-       "private": false,
-       "auto_init": true 
-     }'
-5. argocd 加 gitea hostname secret | Done
-6. git 流程自動化 (目錄不要放一起)
-   git remote set-url origin [gitea_url]
-   git config --global http.sslVerify false
-   git config --global user.email "XXX" user.name ""
-   git config --global user.name "XXX"
-   git push http://yourusername:yourpassword@gitea-host -u origin main
-7. EaaS 改 CCChou > gitea
+ 
+1. chronyd
+2. GitOps script
+3. README.md 更新
