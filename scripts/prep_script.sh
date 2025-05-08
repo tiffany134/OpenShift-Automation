@@ -29,6 +29,7 @@ main(){
   get_tools
   configre_aap_config
   configure_aap_main
+  patch_imageset_config
   untar_oc_mirror
 }
 
@@ -97,13 +98,21 @@ build_ee_image(){
 
 # 下載 Ansible naigator 所需 rpm
 download_ansible(){
-  dnf repolist
-  # 下載 AAP rpm
-  echo "開始下載 AAP rpm..."
-  dnf install --enablerepo="${AAP_REPO}" --downloadonly --installroot="${AAP_DIR}/rootdir" --downloaddir="${AAP_DIR}/ansible-navigator-rpm-${RHEL_MINOR_VERSION}" --releasever="${RHEL_MINOR_VERSION}" ansible-navigator -y
+  
+  # 檢查 tar 檔是否存在
+  if [ ! -f "ansible-navigator-rpm-${RHEL_MINOR_VERSION}.tar" ]; then
+    echo "文件 ansible-navigator-rpm-${RHEL_MINOR_VERSION}.tar 不存在，開始執行操作..."
 
-  # 將 AAP RPM 包打包成 tar 檔
-  tar cvf /root/install_source/ansible-navigator-rpm-${RHEL_MINOR_VERSION}.tar -C ${AAP_DIR} "ansible-navigator-rpm-${RHEL_MINOR_VERSION}"
+    dnf repolist
+    # 下載 AAP rpm
+    echo "開始下載 AAP rpm..."
+    dnf install --enablerepo="${AAP_REPO}" --downloadonly --installroot="${AAP_DIR}/rootdir" --downloaddir="${AAP_DIR}/ansible-navigator-rpm-${RHEL_MINOR_VERSION}" --releasever="${RHEL_MINOR_VERSION}" ansible-navigator -y
+
+    # 將 AAP RPM 包打包成 tar 檔
+    tar cvf /root/install_source/ansible-navigator-rpm-${RHEL_MINOR_VERSION}.tar -C ${AAP_DIR} "ansible-navigator-rpm-${RHEL_MINOR_VERSION}"
+  else
+    echo "文件 ansible-navigator-rpm-${RHEL_MINOR_VERSION}.tar 已存在，跳過操作。"
+  fi 
 }
 
 # 下載安裝所需工具
@@ -135,7 +144,7 @@ get_tools(){
   echo "mirror registry 下載完成"
 
   # 下載 trident installer
-  if [ "$CSI_TYPE}" == "trident" ]; then
+  if [ "${CSI_TYPE}" == "trident" ]; then
     wget https://github.com/NetApp/trident/releases/download/v${TRIDENT_INSTALLER}/trident-installer-${TRIDENT_INSTALLER}.tar.gz -P /root/install_source
     echo "trident installer 下載完成"
   fi

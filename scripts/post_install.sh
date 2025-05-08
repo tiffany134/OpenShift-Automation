@@ -90,8 +90,16 @@ ocp_authentication(){
   # 賦予 ocpadmin 帳號 cluster-admin role
   oc adm policy add-cluster-role-to-user cluster-admin ocpadmin
 
-  # 刪除 kubeadmin 
-  oc delete secret kubeadmin -n kube-system
+  # 檢查 htpasswd Secret 是否存在
+  if oc get secret htpass-secret -n openshift-config > /dev/null 2>&1; then
+    echo "Secret [htpass-secret] 已存在，刪除 kubeadmin。"
+
+    # 刪除 kubeadmin 
+    oc delete secret kubeadmin -n kube-system
+  else
+    echo "Secret [htpass-secret] 不存在，請確認是否建立 Secert。"
+    exit 1
+  fi
 }
 
 csi_installation(){
@@ -108,13 +116,11 @@ csi_installation(){
 }
 
 infra_node_setup(){
-  mcp_infra_yaml=$(find /root/OpenShift-Automation/yaml/infra -type f -name "mcp_infra.yaml")
-
   if [ "$2" == "standard" ]; then
     # standard mode 時執行以下動作
 
     # 設定infra node mcp
-    oc apply -f $mcp_infra_yaml
+    oc apply -f /root/OpenShift-Automation/yaml/infra/mcp_infra.yaml
 
     # 設定 OCP FQDN
     DOMAIN=$(oc get ingress.config.openshift.io cluster --template={{.spec.domain}} | sed -e "s/^apps.//")
@@ -145,17 +151,24 @@ infra_node_setup(){
   fi
 }
 
-create_gitea(){  
-  create_gtiea_yaml=$(find /root/OpenShift-Automation/yaml/gitea -type f -name "create-gitea.yaml")
-  postgresql_yaml=$(find /root/OpenShift-Automation/yaml/gitea -type f -name "postgresql.yaml")
+create_gitea(){ 
+  # 檢查 gitea pod 是否存在
+  GITEA_STATUS=$(oc get pod -l app=gitea -n gitea -ojsonpath='{.items[0].status.containerStatuses[0].ready}')
+
+  if [ $GITEA_STATUS == "true"]; then
+    echo "=== GITEA 已建立，請執行帳號登錄 ==="
+    exit 1
+  fi
   
   # 配置鏡像參數
-  envsubst < $create_gtiea_yaml |oc apply -f -
-  envsubst < $postgresql_yaml |oc apply -f -
+  envsubst < /root/OpenShift-Automation/yaml/gitea/create-gitea.yaml |oc apply -f -
+  envsubst < /root/OpenShift-Automation/yaml/gitea/postgresql.yaml |oc apply -f -
 
   # 建立 gitea 權限
   oc create sa gitea-sa
   oc adm policy add-scc-to-user anyuid -z gitea-sa
+
+  echo "=== GITEA 已建立，請執行帳號登錄 ==="
 }
 
 main
