@@ -133,6 +133,13 @@ get_tools(){
   # 下載 latest mirror registry
   wget https://developers.redhat.com/content-gateway/file/pub/openshift-v4/clients/mirror-registry/${MIRROR_REGISTRY_VERSION}/mirror-registry.tar.gz -P /root/install_source
   echo "mirror registry 下載完成"
+
+  # 下載 trident installer
+  if [ -z "${TRIDENT_INSTALLER}" ]; then
+    wget https://github.com/NetApp/trident/releases/download/v${TRIDENT_INSTALLER}/trident-installer-${TRIDENT_INSTALLER}.tar.gz -P /root/install_source
+    echo "trident installer 下載完成"
+  fi
+
 }
 
 # 配置 AAP inventory 資訊

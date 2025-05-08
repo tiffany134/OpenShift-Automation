@@ -56,6 +56,21 @@ nfs-csi(){
 
 # trident csi
 trident(){
+  
+  CSI_TYPE=$1
+
+  TRIDENT_TAR_FILE="/root/install_source/trident-installer-25.02.1.tar.gz"
+  TRIDENT_TARGET_DIR="/root/install_source/"
+
+  # 檢查文件是否存在，存在便解 tar
+  if [ -f "$TRIDENT_TAR_FILE" ]; then
+    echo "檢查到文件存在，開始解 tar..."
+    tar -zxvf "$TRIDENT_TAR_FILE" -C "$TRIDENT_TARGET_DIR"
+    echo "解 tar 完成！"
+  else
+    echo "ERROR：文件 $TRIDENT_TAR_FILE 不存在。"
+    exit 1 
+  fi
 
   # 創建 trident orchestrators crd
   envsubst < ${YAML_DIR}/$CSI_TYPE/tridentorchestrators-crd.yaml |oc apply -f -
@@ -72,7 +87,13 @@ trident(){
   fi
   
   # 創建 trident orchestrator
-  envsubst < ${YAML_DIR}/$CSI_TYPE/tridentorchestrator.yaml |oc apply -f -
+  if oc get tridentorchestrator trident -n "{$NFS_NAMESPACE}" &> /dev/null; then
+      echo "tridentorchestrator 已存在，跳過部署。"
+  else
+    envsubst < ${YAML_DIR}/$CSI_TYPE/tridentorchestrator.yaml |oc apply -f -
+  fi
+
+  cp -raf /root/install_source/trident-installer/tridentctl /usr/bin
 
   # 創建 trident backend
   tridentctl create backend -f ${YAML_DIR}/$CSI_TYPE/backend.json -n ${$TRIDENT_NAMESPACE}
@@ -87,6 +108,9 @@ trident(){
       echo "StorageClass 創建失敗！"
       exit 1
   fi
+  
+  # 創建 volumesnapshotclass
+  oc apply -f ${YAML_DIR}/$CSI_TYPE/volumesnapshotclass.yaml
 
 }
 

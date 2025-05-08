@@ -1,16 +1,4 @@
 prep: 
-1. md5 check
-
-for file in mirror*.tar; do
-    if [ ! -f "${file}.md5" ]; then
-        md5sum "$file" > "${file}.md5"
-
-        if ! md5sum -c "${file}.md5" >> checkmd5_verify.log 2>&1; then
-          echo "ERROR: Checkmd5 verification failed for $file"
-          exit 1
-        fi
-    fi
-done
 
 install: (aap 定版)
 1. 目錄結構畫圖，全部 tar 到 install_source
@@ -21,23 +9,6 @@ install: (aap 定版)
 post:
 1. gitea / argocd 設定到 /etc/host 跳板機
 2. 檢查 yum.repos.d
-
-1. netapp(25.02.1 - 418):
-
-wget trident_installer
-tar .tar
-apply tridentochXXpost.1.16.yaml
-create trident namespace
-create trident serviceaccount
-create trident rolebinding
-patch deployment image 位置
-使用 kustomization_post_1_25.yaml > 這段完全沒必要的感覺
-修改 tridentorchestrator CR 並 create
-cp -raf ./tridentctl /usr/bin > 看來還是要的
-建力 backend.yaml (or json)
-tridentctl create backend -f backend.json -n trident
-create storageClass > default annotation
-create volumeSnapshotClass
 
 3. gitea api
 curl -X POST "http://yourusername:yourpassword@gitea-host/api/v1/admin/users/{username}/repos" \

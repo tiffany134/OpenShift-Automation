@@ -100,14 +100,6 @@ csi_installation(){
   export OCP_VERSION=418
   export YAML_DIR="/root/OpenShift-Automation/yaml"
 
-  # 檢查 csi.conf
-  if [ ! -f "csi.conf" ]; then
-    echo "ERROR：配置文件不存在！"
-    exit 1
-  fi
-
-  source ./csi.conf
-
   ./install_csi.sh $CSI_MODULE
 
   wait

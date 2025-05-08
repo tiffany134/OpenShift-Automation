@@ -1,128 +1,121 @@
 apiVersion: mirror.openshift.io/v1alpha2
 kind: ImageSetConfiguration
 archiveSize: 4
-storageConfig:                                                      
+storageConfig:
   local:
     path: /root/install/ocp418/metadata
 mirror:
   platform:
     channels:
-    - name: stable-4.18
-      minVersion: 4.18.6
-      maxVersion: 4.18.8
+      - name: stable-4.18
+        minVersion: 4.18.6
+        maxVersion: 4.18.8
   operators:
-  - catalog: registry.redhat.io/redhat/redhat-operator-index:v4.18
-    packages:
-    - name: kubevirt-hyperconverged
-      channels:
-      - name: stable
-        minVersion: 4.18.1
-        maxVersion: 4.18.1
-    - name: mtv-operator
-      channels:
-      - name: release-v2.8
-        minVersion: 2.8.1
-        maxVersion: 2.8.1
-    - name: kubernetes-nmstate-operator
-      channels:
-      - name: stable
-        minVersion: 4.18.0-202504090803
-        maxVersion: 4.18.0-202504090803
-    - name: netobserv-operator
-      channels:
-      - name: stable
-        minVersion: 1.8.1
-        maxVersion: 1.8.1
-    - name: cluster-observability-operator
-      channels:
-      - name: stable
-        minVersion: 1.1.0
-        maxVersion: 1.1.0
-    - name: cluster-logging
-      channels:
-      - name: stable-6.2
-        minVersion: 6.2.1
-        maxVersion: 6.2.1
-    - name: loki-operator
-      channels:
-      - name: stable-6.2
-        minVersion: 6.2.1
-        maxVersion: 6.2.1
-    - name: tempo-product
-      channels:
-      - name: stable
-        minVersion: 0.15.4-1
-        maxVersion: 0.15.4-1
-    - name: opentelemetry-product
-      channels:
-      - name: stable
-        minVersion: 0.119.0-2
-        maxVersion: 0.119.0-2
-    - name: local-storage-operator
-      channels:
-      - name: stable
-        minVersion: 4.18.0-202504090803
-        maxVersion: 4.18.0-202504090803
-    - name: node-healthcheck-operator
-      channels:
-      - name: stable
-        minVersion: 0.9.0
-        maxVersion: 0.9.0
-    - name: node-maintenance-operator
-      channels:
-      - name: stable
-        minVersion: 5.4.0
-        maxVersion: 5.4.0
-    - name: self-node-remediation
-      channels:
-      - name: stable
-        minVersion: 0.10.0
-        maxVersion: 0.10.0
-    - name: cincinnati-operator
-      channels:
-      - name: v1
-        minVersion: 5.0.3
-        maxVersion: 5.0.3
-    - name: openshift-gitops-operator
-      channels:
-      - name: latest
-        minVersion: 1.16.0
-        maxVersion: 1.16.0
-    - name: advanced-cluster-management
-      channels:
-      - name: release-2.13
-        minVersion: 2.13.2
-        maxVersion: 2.13.2
-    - name: multicluster-engine
-      channels:
-      - name: stable-2.8
-        minVersion: 2.8.1
-        maxVersion: 2.8.1
-  - catalog: registry.redhat.io/redhat/community-operator-index:v4.16
-    packages:
-    - name: trident-operator
-      channels:
-      - name: stable
-        minVersion: 24.6.0
-        maxVersion: 24.6.0
+    - catalog: registry.redhat.io/redhat/redhat-operator-index:v4.18
+      packages:
+        - name: kubevirt-hyperconverged
+          channels:
+            - name: stable
+              minVersion: 4.18.1
+              maxVersion: 4.18.1
+        - name: mtv-operator
+          channels:
+            - name: release-v2.8
+              minVersion: 2.8.1
+              maxVersion: 2.8.1
+        - name: kubernetes-nmstate-operator
+          channels:
+            - name: stable
+              minVersion: 4.18.0-202504090803
+              maxVersion: 4.18.0-202504090803
+        - name: netobserv-operator
+          channels:
+            - name: stable
+              minVersion: 1.8.1
+              maxVersion: 1.8.1
+        - name: cluster-observability-operator
+          channels:
+            - name: stable
+              minVersion: 1.1.0
+              maxVersion: 1.1.0
+        - name: cluster-logging
+          channels:
+            - name: stable-6.2
+              minVersion: 6.2.1
+              maxVersion: 6.2.1
+        - name: loki-operator
+          channels:
+            - name: stable-6.2
+              minVersion: 6.2.1
+              maxVersion: 6.2.1
+        - name: tempo-product
+          channels:
+            - name: stable
+              minVersion: 0.15.4-1
+              maxVersion: 0.15.4-1
+        - name: opentelemetry-product
+          channels:
+            - name: stable
+              minVersion: 0.119.0-2
+              maxVersion: 0.119.0-2
+        - name: local-storage-operator
+          channels:
+            - name: stable
+              minVersion: 4.18.0-202504090803
+              maxVersion: 4.18.0-202504090803
+        - name: node-healthcheck-operator
+          channels:
+            - name: stable
+              minVersion: 0.9.0
+              maxVersion: 0.9.0
+        - name: node-maintenance-operator
+          channels:
+            - name: stable
+              minVersion: 5.4.0
+              maxVersion: 5.4.0
+        - name: self-node-remediation
+          channels:
+            - name: stable
+              minVersion: 0.10.0
+              maxVersion: 0.10.0
+        - name: cincinnati-operator
+          channels:
+            - name: v1
+              minVersion: 5.0.3
+              maxVersion: 5.0.3
+        - name: openshift-gitops-operator
+          channels:
+            - name: latest
+              minVersion: 1.16.0
+              maxVersion: 1.16.0
+        - name: advanced-cluster-management
+          channels:
+            - name: release-2.13
+              minVersion: 2.13.2
+              maxVersion: 2.13.2
+        - name: multicluster-engine
+          channels:
+            - name: stable-2.8
+              minVersion: 2.8.1
+              maxVersion: 2.8.1
   additionalImages:
-  - name: registry.redhat.io/ubi8/ubi:latest
-  - name: registry.redhat.io/ubi9/ubi:latest
-  - name: registry.redhat.io/rhel8/rhel-guest-image:latest
-  - name: registry.redhat.io/rhel9/rhel-guest-image:latest
-  - name: quay.io/stevewu/net-tools:latest
-  - name: quay.io/containerdisks/fedora:latest
-  - name: quay.io/containerdisks/centos:7-2009
-  - name: quay.io/containerdisks/centos-stream:8
-  - name: quay.io/containerdisks/centos-stream:9
-  - name: docker.io/library/postgres:latest
-  - name: docker.io/gitea/gitea:1.21.7
-  - name: quay.io/minio/minio:latest
-  - name: quay.io/rhtw/tools
-  - name: quay.io/rhtw/gitops-envsub
-  - name: registry.k8s.io/sig-storage/csi-resizer:v1.13.1
-  - name: registry.k8s.io/sig-storage/csi-provisioner:v5.2.0
-  - name: registry.k8s.io/sig-storage/csi-snapshotter:v8.2.0
-  - name: registry.k8s.io/sig-storage/livenessprobe:v2.15.0
-  - name: registry.k8s.io/sig-storage/nfsplugin:v4.11.0
-  - name: registry.k8s.io/sig-storage/snapshot-controller:v8.2.0
+    - name: registry.redhat.io/ubi8/ubi:latest
+    - name: registry.redhat.io/ubi9/ubi:latest
+    - name: registry.redhat.io/rhel8/rhel-guest-image:latest
+    - name: registry.redhat.io/rhel9/rhel-guest-image:latest
+    - name: quay.io/stevewu/net-tools:latest
+    - name: quay.io/containerdisks/fedora:latest
+    - name: quay.io/containerdisks/centos:7-2009
+    - name: quay.io/containerdisks/centos-stream:8
+    - name: quay.io/containerdisks/centos-stream:9
+    - name: docker.io/library/postgres:latest
+    - name: docker.io/gitea/gitea:1.21.7
+    - name: quay.io/minio/minio:latest
+    - name: quay.io/rhtw/tools
+    - name: quay.io/rhtw/gitops-envsub
+    - name: registry.k8s.io/sig-storage/csi-resizer:v1.13.1
+    - name: registry.k8s.io/sig-storage/csi-provisioner:v5.2.0
+    - name: registry.k8s.io/sig-storage/csi-snapshotter:v8.2.0
+    - name: registry.k8s.io/sig-storage/livenessprobe:v2.15.0
+    - name: registry.k8s.io/sig-storage/nfsplugin:v4.11.0
+    - name: registry.k8s.io/sig-storage/snapshot-controller:v8.2.0
