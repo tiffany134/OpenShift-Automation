@@ -21,12 +21,13 @@ done < "$config_file"
 # 主程式
 main(){
   define_global_env
-  create_git_directory
+  create_git_repo
   update_gitops_content
   push_git
   execute_gitops
 }
 
+# 設定全域環境變數
 define_global_env(){
 
   # OCP FQDN
@@ -41,9 +42,10 @@ define_global_env(){
 
 }
 
+# 創建 gitops repo
+create_git_repo(){
 
-create_git_directory(){
-
+  # 使用 gitea api 創建 repo
   curl -k -X POST "https://${GITEA_URL}/api/v1/admin/users/pocuser/repos" \
      -H "Content-Type: application/json" \
      -d '{
@@ -54,6 +56,7 @@ create_git_directory(){
      }'
 }
 
+# 更新 gitops repo 內的參數
 update_gitops_content(){
   
   tar xzvf /root/install_source/gitops.tar -C /root
@@ -66,10 +69,12 @@ update_gitops_content(){
   grep -rl --null 'quay.io' OpenShift-EaaS-Practice/ | \
     xargs -0 sed -i "s#quay.io#${REGISTRY_URL}#g"
   
+  # 變更預設 storageclass
   yq eval '.patches[].patch |= sub("value: \"gp3-csi\"", "value: \"\(env(${DEFAULT_SC}))\"")' \
     /root/OpenShift-EaaS-Practice/clusters/${GITOPS_CLUSTER_TRYE}/overlays/loki-configuration/kustomization.yaml
 }
 
+# 將本地 git 推送至 gitea
 push_git(){
 
   cd /root/OpenShift-EaaS-Practice/
@@ -83,10 +88,12 @@ push_git(){
 
 }
 
+# 執行 gitops 自動化腳本
 execute_gitops(){
   
   cd /root/OpenShift-EaaS-Practice/
-
+  
+  # 執行 bootstrap_gitea.sh 腳本
   .bootstrap/bootstrap_gitea.sh \
     https://${GITEA_REPO}/OpenShift-EaaS-Practice.git \
     ${GITOPS_CLUSTER_TRYE}  \

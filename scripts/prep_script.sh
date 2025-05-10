@@ -82,7 +82,6 @@ git_clone(){
   git clone https://github.com/CCChou/ocp_bastion_installer.git ${OCP_INSTALLER_DIR}
 
   git clone https://github.com/CCChou/OpenShift-EaaS-Practice.git
-  rm -rf OpenShift-EaaS-Practice/.git
   tar cvf /root/install_source/gitops.tar /root/OpenShift-EaaS-Practice
 
 }
