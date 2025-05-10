@@ -23,10 +23,12 @@ main(){
   approve_csr
   mirror_source_config
   ocp_authentication
+  csi_installation
   infra_node_setup
   create_gitea
 }
 
+# 驗證通過 CSR
 approve_csr(){
   KUBECONFIG=/root/ocp4/auth/kubeconfig
 
@@ -60,6 +62,7 @@ approve_csr(){
   done
 }
 
+# 配置 mirror 來源
 mirror_source_config(){
   # 關閉預設 catalog source
   oc patch OperatorHub cluster --type json -p '[{"op": "add", "path": "/spec/disableAllDefaultSources", "value": true}]'
@@ -80,6 +83,7 @@ mirror_source_config(){
   oc apply -f $redhat_operator_cs
 }
 
+# 建立 OCP 的認證機制
 ocp_authentication(){
   # 建立一個名為 htpass-secret 的 Secret 來儲存 htpasswd 檔案，帳密為ocpadmin P@ssw0rdocp
   oc apply -f yaml/authentication/secret_htpasswd.yaml
@@ -102,6 +106,7 @@ ocp_authentication(){
   fi
 }
 
+# 安裝 CSI 及創建預設 storageclass
 csi_installation(){
 
   export OCP_DOMAIN=$(oc get ingress.config.openshift.io cluster --template={{.spec.domain}} | sed -e "s/^apps.//")
@@ -115,6 +120,7 @@ csi_installation(){
 
 }
 
+# 配置 infra 節點
 infra_node_setup(){
   if [ "$2" == "standard" ]; then
     # standard mode 時執行以下動作
@@ -151,6 +157,7 @@ infra_node_setup(){
   fi
 }
 
+# 創建 gitea server
 create_gitea(){ 
   # 檢查 gitea pod 是否存在
   GITEA_STATUS=$(oc get pod -l app=gitea -n gitea -ojsonpath='{.items[0].status.containerStatuses[0].ready}')

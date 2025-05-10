@@ -82,30 +82,43 @@
    # prep_script.conf
 
    # GIT 目錄路徑
-   OCP_INSTALLER_DIR=/root/Openshift-Automation/roles
-   GITOPS_DIR=/root/Openshift-Automation/gitops
+   OCP_INSTALLER_DIR=/root/OpenShift-Automation/roles/ocp_bastion_installer
 
    # Ansible EE 鏡像配置
-   CUSTOM_EE=true
-   EE_YAML_PATH=/root/Openshift-Automation/ansible/execution-environment.yml
-   EE_DIR=eeimage
    EE_IMAGE_NAME=eeimage
 
    # AAP 資訊
    AAP_REPO=ansible-automation-platform-2.5-for-rhel-9-x86_64-rpms
-   AAP_DIR=/root/rpm/downloadonly/aap-9.4
-   RHEL_MINOR_VERSION=9.4 # 運行的 rhel 完整版號
+   AAP_DIR=/root/rpm
+   RHEL_MINOR_VERSION=9.4
 
    # 版本資訊
-   OCP_RELEASE=4.18.7 # OCP 的完整版本
-   RHEL_VERSION=rhel9 # rhel 的版本縮寫
-   ARCHITECTURE=amd64 # CPU 架構簡寫
-   HELM_VERSION=3.15.4 # helm 最新版本
-   MIRROR_REGISTRY_VERSION=1.3.11 # mirror registry 最新版本
+   OCP_RELEASE=4.18.8
+   RHEL_VERSION=rhel9
+   ARCHITECTURE=amd64
+   HELM_VERSION=3.15.4
+   MIRROR_REGISTRY_VERSION=1.3.11
+
+   # CSI 資訊
+   CSI_TYPE=nfs-csi # nfs-csi | trident
+   TRIDENT_INSTALLER= # trident installer 版本
 
    # 安裝環境資訊
-   BASTION_FQDN= # Bastion 伺服器的域名
-   BASTION_IP= # Bastion 的 IP
+   INSTALL_MODE=compact
+   CLUSTER_DOMAIN=
+   BASE_DOMAIN=
+   BASTION_IP=
+   BOOTSTRAP_IP=
+   MASTER01_IP=
+   MASTER02_IP=
+   MASTER03_IP=
+   INFRA01_IP=
+   INFRA02_IP=
+   INFRA03_IP=
+   WORKER01_IP=
+   WORKER02_IP=
+   WORKER03_IP=
+   REGISTRY_PASSWORD=P@ssw0rd
    ```
    
 5. 執行 prep_script.sh
@@ -269,13 +282,6 @@
        - quay.io/minio/minio:latest
        - quay.io/rhtw/tools
        - quay.io/rhtw/gitops-envsub
-       - [nfs-csi](https://github.com/kubernetes-csi/csi-driver-nfs)
-         - image: registry.k8s.io/sig-storage/csi-resizer:v1.13.1
-         - image: registry.k8s.io/sig-storage/csi-provisioner:v5.2.0
-         - image: registry.k8s.io/sig-storage/csi-snapshotter:v8.2.0
-         - image: registry.k8s.io/sig-storage/livenessprobe:v2.15.0
-         - image: registry.k8s.io/sig-storage/nfsplugin:v4.11.0
-         - image: registry.k8s.io/sig-storage/snapshot-controller:v8.2.0
 
 7. 依客戶環境需求修改 OpenShift Automation 內的配置 (調整 role > ocp_bastion_installer > default > main.yml 內的配置)
     ```yaml
@@ -380,8 +386,8 @@
       - [x] ansible-navigator
       - [x] ee.tar
       - [x] git (調整配置後)
-        - gitops
-        - roles
+        - OpenShift-EaaS-Practice
+        - ocp_bastion_installer
         - scripts
       - [x] image
         - csi images (如nfs、csm、trident)

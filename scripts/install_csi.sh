@@ -93,7 +93,9 @@ trident(){
     envsubst < ${YAML_DIR}/$CSI_TYPE/tridentorchestrator.yaml |oc apply -f -
   fi
 
+  # 讓 tridentctl CLI 可以執行
   cp -raf /root/install_source/trident-installer/tridentctl /usr/bin
+  chmod a+x /usr/bin/tridentctl
 
   # 創建 trident backend
   tridentctl create backend -f ${YAML_DIR}/$CSI_TYPE/backend.json -n ${$TRIDENT_NAMESPACE}

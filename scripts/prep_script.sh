@@ -81,9 +81,9 @@ git_clone(){
 
   git clone https://github.com/CCChou/ocp_bastion_installer.git ${OCP_INSTALLER_DIR}
 
-  mkdir ${GITOPS_DIR}
-  git clone https://github.com/CCChou/OpenShift-EaaS-Practice.git ${GITOPS_DIR}
-  tar cvf /root/install_source/gitops.tar ${GITOPS_DIR}
+  git clone https://github.com/CCChou/OpenShift-EaaS-Practice.git
+  rm -rf OpenShift-EaaS-Practice/.git
+  tar cvf /root/install_source/gitops.tar /root/OpenShift-EaaS-Practice
 
 }
 
@@ -251,14 +251,15 @@ worker:
 EOF
 }
 
+# 修改 imageset-config.yaml
 patch_imageset_config(){
   
   # 下載 yq 套件
   dnf install yq -y
 
+  # 追加多個 image 到 additionalImages 列表
   case "$CIS_TYPE" in
-  nfs-csi)
-    # 追加多個 image 到 additionalImages 列表
+  nfs-csi)    
     yq eval '
       .mirror.additionalImages += [
       {"name": "registry.k8s.io/sig-storage/csi-resizer:v1.13.1"},
