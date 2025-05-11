@@ -26,9 +26,23 @@ tar xvf ${TARBALL_PATH} -C ${TAR_DEST_PATH} --strip-components=1
 yum localinstall -y ${TAR_DEST_PATH}/* --allowerasing --skip-broken
 
 # 於 bastion 產生 ssh-key，並設定免密登入
-ssh-keygen -t rsa -N "" -f ~/.ssh/id_rsa <<< y
-cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
-chmod 600 ~/.ssh/authorized_keys
+if [ ! -f ~/.ssh/id_rsa ]; then
+  echo "尚未存在 SSH 金鑰，開始產生..."
+  ssh-keygen -t rsa -N "" -f ~/.ssh/id_rsa <<< y
+else
+  echo "已存在 SSH 金鑰，跳過產生"
+fi
+
+# 確保 id_rsa.pub 加入 authorized_keys 中
+pub_key=$(cat ~/.ssh/id_rsa.pub)
+if ! grep -qF "$pub_key" ~/.ssh/authorized_keys 2>/dev/null; then
+  echo "$pub_key" >> ~/.ssh/authorized_keys
+  chmod 600 ~/.ssh/authorized_keys
+  echo "已將公鑰加入 authorized_keys"
+else
+  echo "公鑰已存在於 authorized_keys，跳過"
+fi
+
 
 # 從 tar 檔中載入容器映像檔到 Podman 的本地鏡像庫
 podman load -i ${EE_IMAGE_TAR}
