@@ -1,6 +1,6 @@
 #!/bin/bash
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-config_file="$SCRIPT_DIR/prep_config.conf"
+config_file="$SCRIPT_DIR/prep_script.conf"
 
 # 檢查文件是否存在
 [[ ! -f "$config_file" ]] && { echo "ERROR：配置文件不存在"; exit 1; }
