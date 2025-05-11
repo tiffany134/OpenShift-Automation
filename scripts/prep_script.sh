@@ -197,7 +197,9 @@ registryPassword: ${REGISTRY_PASSWORD}
 # NTP server
 ntp_server_configure: true
 # NTP client
+ntp_client_configure: true
 ntp_server_ip: ${BASTION_IP}
+butaneDir: /root/install_source/butane-amd64
 
 # OCP 相關配置
 ocp_configure: true
