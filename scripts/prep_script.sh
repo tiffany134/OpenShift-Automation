@@ -255,8 +255,10 @@ patch_imageset_config(){
   
   # 下載 yq 套件
   #dnf install yq -y
-  sudo yum install python3-pip -y
-  pip3 install yq
+  #sudo yum install python3-pip -y
+  #pip3 install yq
+  curl -L https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -o /usr/local/bin/yq
+  chmod +x /usr/local/bin/yq
 
   # 追加多個 image 到 additionalImages 列表
   case "$CIS_TYPE" in
