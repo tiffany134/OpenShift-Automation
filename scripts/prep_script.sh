@@ -261,7 +261,7 @@ patch_imageset_config(){
   chmod +x /usr/local/bin/yq
 
   # 追加多個 image 到 additionalImages 列表
-  case "$CIS_TYPE" in
+  case "$CSI_TYPE" in
   nfs-csi)    
     yq eval '
       .mirror.additionalImages += [
