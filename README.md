@@ -591,4 +591,35 @@
    ```
    > 請注意，CLUSTER_DOMAIN BASE_DOMAIN BASTION_IP 三個參數可以參考 prep_script.conf 內填入的參數
 
-4. Import the EaaS git repo and run the corresponding Operator environment installation (匯入 EaaS git repo 並執行對應的 Operator 環境安裝)
+4. 進入 gitea UI，註冊管理員帳號管理員帳號
+   
+   方法一、透過指令獲得 gitea 連線 URL
+   ```bash
+   TODO: oc get route 指令
+   ```
+
+   方法二、透過 Web UI 進入 gitea URL
+   TODO: gitea 連線位置截圖
+
+   進入 gitea 後註冊帳號
+   TODO: gitea 帳號註冊截圖
+
+5. 配置 operators_install.conf 內參數
+   ```bash
+   # operators_install.conf
+
+   # GIT Repo 參數
+   GITEA_ADMIN=admin
+   GITEA_PASSWORD=P%40ssw0rd # 注意，如果用 @ 的話，因字元關係，須將 @ 換成 %40
+
+   # GITOPS 參數
+   GITOPS_CLUSTER_TRYE=standard-with-virt # standard | standard-with-virt | platform-with-gpu
+   OCP_ADMIN=ocpadmin
+   GIT_REVISION=main
+   ARGOCD_INSTALL_MODE=spoke # hub | spoke
+   ```
+
+6. 執行 operators_install.sh 腳本
+   ```bash
+   sh /root/OpenShift-Automation/scripts/operators_install.sh
+   ```
