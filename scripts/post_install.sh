@@ -1,5 +1,7 @@
 #!/bin/bash
-config_file="post_install.conf"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+config_file="$SCRIPT_DIR/post_install.conf"
+
 
 # 檢查文件是否存在
 [[ ! -f "$config_file" ]] && { echo "ERROR：配置文件不存在"; exit 1; }
