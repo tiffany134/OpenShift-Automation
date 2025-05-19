@@ -70,7 +70,7 @@ mirror_source_config(){
   oc patch OperatorHub cluster --type json -p '[{"op": "add", "path": "/spec/disableAllDefaultSources", "value": true}]'
 
   # 查找 redhat operator catalogsource
-  redhat_operator_cs=$(find /root/oc-mirror-workspace/ -maxdepth 2 -path "*/result-*" -type f -name "catalogSource-cs-redhat-operator-index.yaml")
+  redhat_operator_cs=$(find /root/oc-mirror-workspace/ -maxdepth 2 -path "*/results-*" -type f -name "catalogSource-cs-redhat-operator-index.yaml")
 
   # 檢查是否找到文件
   if [ -z "$redhat_operator_cs" ]; then
