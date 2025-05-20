@@ -19,6 +19,8 @@ while IFS= read -r line || [[ -n "$line" ]]; do
   declare -- "$key=$value"
 done < "$config_file"
 
+echo "INFO：operators_install.conf 配置檔確認完畢，開始執行 operators_install.sh"
+
 # 主程式
 main(){
   define_global_env
@@ -72,7 +74,7 @@ update_gitops_content(){
   
   # 變更預設 storageclass
   yq eval '.patches[].patch |= sub("value: \"gp3-csi\"", "value: \"\(env(${DEFAULT_SC}))\"")' \
-    /root/OpenShift-EaaS-Practice/clusters/${GITOPS_CLUSTER_TRYE}/overlays/loki-configuration/kustomization.yaml
+    /root/OpenShift-EaaS-Practice/clusters/${GITOPS_CLUSTER_TYPE}/overlays/loki-configuration/kustomization.yaml
 }
 
 # 將本地 git 推送至 gitea
@@ -97,7 +99,7 @@ execute_gitops(){
   # 執行 bootstrap_gitea.sh 腳本
   .bootstrap/bootstrap_gitea.sh \
     https://${GITEA_REPO}/OpenShift-EaaS-Practice.git \
-    ${GITOPS_CLUSTER_TRYE}  \
+    ${GITOPS_CLUSTER_TYPE}  \
     ${OCP_ADMIN} \
     ${GIT_REVISION} \
     ${ARGOCD_INSTALL_MODE} \

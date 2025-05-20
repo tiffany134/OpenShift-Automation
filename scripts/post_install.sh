@@ -130,15 +130,31 @@ csi_installation(){
   export OCP_DOMAIN=$(oc get ingress.config.openshift.io cluster --template={{.spec.domain}} | sed -e "s/^apps.//")
   export OCP_VERSION=418
   
-  ./install_csi.sh $CSI_MODULE
+  source /root/OpenShift-Automation/scripts/install_csi.sh
 
+  # 主程式入口
+  case "$CSI_MODULE" in
+    nfs-csi)
+      export STORAGE_CLASS_NAME=${NFS_STORAGE_CLASS_NAME}
+      nfs_csi
+      ;;
+    trident)
+      export STORAGE_CLASS_NAME=${TRIDENT_STORAGE_CLASS_NAME}
+      trident
+      ;;
+    *)
+      echo "INFO：用法: $0 {nfs-nsi|trident} [目錄]"
+      exit 1
+      ;;
+  esac
+  
   wait
 
   # 檢查 StorageClass 是否創建成功
-  if oc get storageclass ${TRIDENT_STORAGE_CLASS_NAME} &> /dev/null; then
-    echo "INFO：${TRIDENT_STORAGE_CLASS_NAME} 配置完成！CSI 及預設 storageclass 安裝完成！"
+  if oc get storageclass ${STORAGE_CLASS_NAME} &> /dev/null; then
+    echo "INFO： ${STORAGE_CLASS_NAME} 配置完成！CSI 及預設 storageclass 安裝完成！"
   else
-    echo "ERROR：StorageClass 創建失敗！"
+    echo "ERROR：CSI 及預設 StorageClass 創建失敗！"
     exit 1
   fi
 
@@ -151,6 +167,7 @@ infra_node_setup(){
 
   if [ "${INSTALL_MODE}}" == "standard" ]; then
     # standard mode 時執行以下動作
+    echo "INFO：配置 standard 模式"
 
     # 設定infra node mcp
     oc apply -f ${YAML_DIR}/infra/mcp_infra.yaml
@@ -172,6 +189,7 @@ infra_node_setup(){
 
   elif [ "${INSTALL_MODE}" == "compact" ]; then
     # compact mode 時執行以下動作
+    echo "INFO：配置 compact 模式"
 
     # monitoring components 設定 PV
     oc apply -f ${YAML_DIR}/infra/cm_cluster-monitoring-config-${INSTALL_MODE}.yaml
@@ -204,7 +222,7 @@ create_gitea(){
   oc adm policy add-scc-to-user anyuid -z gitea-sa
 
   echo "INFO：create_gitea 執行完成"
-  echo "INFO：post_install 腳本執行完成，GITEA 已建立，請執行帳號登錄 ==="
+  echo "INFO：post_install 腳本執行完成，GITEA 已建立，請執行帳號登錄"
 }
 
 main
