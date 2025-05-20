@@ -20,6 +20,8 @@ while IFS= read -r line || [[ -n "$line" ]]; do
   declare -- "$key=$value"
 done < "$config_file"
 
+echo "INFO：post_install.conf 配置檔確認完畢，開始執行 post_install.sh"
+
 # 主程式
 main(){
   approve_csr
@@ -32,7 +34,10 @@ main(){
 
 # 驗證通過 CSR
 approve_csr(){
-  KUBECONFIG=/root/ocp4/auth/kubeconfig
+  echo "INFO：開始執行 approve_csr..."
+
+  export KUBECONFIG=/root/ocp4/auth/kubeconfig
+  export YAML_DIR="/root/OpenShift-Automation/yaml"
 
   TARGET_READY_COUNT=${TOTAL_NODE_NUMBER}
   CHECK_INTERVAL=$((5 * 60)) # 每 5 分鐘檢查一次
@@ -52,8 +57,8 @@ approve_csr(){
         jq '[.items[] | select(.status.conditions[] | select(.reason == "KubeletReady" and .status == "True"))] | length')
     
     if [ "$CURRENT_READY" -eq "$TARGET_READY_COUNT" ]; then
-        echo "$(date): 所有節點就緒"
-        exit 0
+        echo "$(date): INFO：所有節點就緒"
+        break
     fi
     
     # 執行 CSR 核准
@@ -62,10 +67,14 @@ approve_csr(){
     
     sleep $CHECK_INTERVAL
   done
+
+  echo "INFO：approve_csr 執行完成"
 }
 
 # 配置 mirror 來源
 mirror_source_config(){
+  echo "INFO：開始執行 mirror_source_config..."
+
   # 關閉預設 catalog source
   oc patch OperatorHub cluster --type json -p '[{"op": "add", "path": "/spec/disableAllDefaultSources", "value": true}]'
 
@@ -83,61 +92,74 @@ mirror_source_config(){
 
   # 將 CatalogSource apply 
   oc apply -f $redhat_operator_cs
+
+  echo "INFO：mirror_source_config 執行完成"
 }
 
 # 建立 OCP 的認證機制
 ocp_authentication(){
+  echo "INFO：開始執行 ocp_authentication..."
+
   # 建立一個名為 htpass-secret 的 Secret 來儲存 htpasswd 檔案，帳密為ocpadmin P@ssw0rdocp
-  oc apply -f yaml/authentication/secret_htpasswd.yaml
+  oc apply -f ${YAML_DIR}/authentication/secret_htpasswd.yaml
  
   # 將資源套用至預設 OAuth 配置以新增identity provider。
-  oc apply -f yaml/authentication/oauth.yaml
+  oc apply -f ${YAML_DIR}/authentication/oauth.yaml
 
   # 賦予 ocpadmin 帳號 cluster-admin role
   oc adm policy add-cluster-role-to-user cluster-admin ocpadmin
 
   # 檢查 htpasswd Secret 是否存在
   if oc get secret htpass-secret -n openshift-config > /dev/null 2>&1; then
-    echo "Secret [htpass-secret] 已存在，刪除 kubeadmin。"
+    echo "INFO：Secret [htpass-secret] 已存在，刪除 kubeadmin。"
 
     # 刪除 kubeadmin 
     oc delete secret kubeadmin -n kube-system
   else
-    echo "Secret [htpass-secret] 不存在，請確認是否建立 Secert。"
+    echo "ERROR：Secret [htpass-secret] 不存在，請確認是否建立 Secert。"
     exit 1
   fi
+
+  echo "INFO：ocp_authentication 執行完成"
 }
 
 # 安裝 CSI 及創建預設 storageclass
 csi_installation(){
+  echo "INFO：開始執行 csi_installation..."
 
   export OCP_DOMAIN=$(oc get ingress.config.openshift.io cluster --template={{.spec.domain}} | sed -e "s/^apps.//")
   export OCP_VERSION=418
-  export YAML_DIR="/root/OpenShift-Automation/yaml"
-
+  
   ./install_csi.sh $CSI_MODULE
 
   wait
-  echo "CSI 及預設 storageclass 安裝完成"
 
+  # 檢查 StorageClass 是否創建成功
+  if oc get storageclass ${TRIDENT_STORAGE_CLASS_NAME} &> /dev/null; then
+    echo "INFO：${TRIDENT_STORAGE_CLASS_NAME} 配置完成！CSI 及預設 storageclass 安裝完成！"
+  else
+    echo "ERROR：StorageClass 創建失敗！"
+    exit 1
+  fi
+
+  echo "INFO：csi_installation 執行完成"
 }
 
 # 配置 infra 節點
 infra_node_setup(){
-  if [ "$2" == "standard" ]; then
+  echo "INFO：開始執行 infra_node_setup..."
+
+  if [ "${INSTALL_MODE}}" == "standard" ]; then
     # standard mode 時執行以下動作
 
     # 設定infra node mcp
-    oc apply -f /root/OpenShift-Automation/yaml/infra/mcp_infra.yaml
-
-    # 設定 OCP FQDN
-    DOMAIN=$(oc get ingress.config.openshift.io cluster --template={{.spec.domain}} | sed -e "s/^apps.//")
+    oc apply -f ${YAML_DIR}/infra/mcp_infra.yaml
 
     # 將 infra node role 改為 infra
     for i in {01..03}; do
-      oc label nodes infra$i.${DOMAIN} node-role.kubernetes.io/infra='';
-      oc label nodes infra$i.${DOMAIN} node-role.kubernetes.io/worker-;
-      oc adm taint node infra$i.${DOMAIN} \
+      oc label nodes infra$i.${OCP_DOMAIN} node-role.kubernetes.io/infra='';
+      oc label nodes infra$i.${OCP_DOMAIN} node-role.kubernetes.io/worker-;
+      oc adm taint node infra$i.${OCP_DOMAIN} \
       node-role.kubernetes.io/infra:NoSchedule \
       node-role.kubernetes.io/infra:NoExecute;
     done
@@ -146,38 +168,43 @@ infra_node_setup(){
     oc patch ingresscontroller/default -n openshift-ingress-operator --type=merge -p '{"spec":{"replicas":3,"nodePlacement": {"nodeSelector": {"matchLabels": {"node-role.kubernetes.io/infra": ""}},"tolerations": [{"key": "node-role.kubernetes.io/infra","operator": "Exists"}]}}}'
 
     # Moving monitoring components to infra node 並設定 PV
-    oc apply -f yaml/infra/cm_cluster-monitoring-config-${INSTALL_MODE}.yaml
+    oc apply -f ${YAML_DIR}/infra/cm_cluster-monitoring-config-${INSTALL_MODE}.yaml
 
-  elif [ "$2" == "compact" ]; then
+  elif [ "${INSTALL_MODE}" == "compact" ]; then
     # compact mode 時執行以下動作
 
     # monitoring components 設定 PV
-    oc apply -f yaml/infra/cm_cluster-monitoring-config-${INSTALL_MODE}.yaml
+    oc apply -f ${YAML_DIR}/infra/cm_cluster-monitoring-config-${INSTALL_MODE}.yaml
   else
-    echo "模式配置錯誤"
+    echo "ERROR：模式配置錯誤"
     exit 1
   fi
+
+  echo "INFO：infra_node_setup 執行完成"
 }
 
 # 創建 gitea server
 create_gitea(){ 
+  echo "INFO：開始執行 create_gitea..."
+
   # 檢查 gitea pod 是否存在
   GITEA_STATUS=$(oc get pod -l app=gitea -n gitea -ojsonpath='{.items[0].status.containerStatuses[0].ready}')
 
   if [ $GITEA_STATUS == "true"]; then
-    echo "=== GITEA 已建立，請執行帳號登錄 ==="
+    echo "INFO：GITEA 已建立，請執行帳號登錄"
     exit 1
   fi
   
   # 配置鏡像參數
-  envsubst < /root/OpenShift-Automation/yaml/gitea/create-gitea.yaml |oc apply -f -
-  envsubst < /root/OpenShift-Automation/yaml/gitea/postgresql.yaml |oc apply -f -
+  envsubst < ${YAML_DIR}gitea/create-gitea.yaml |oc apply -f -
+  envsubst < ${YAML_DIR}/gitea/postgresql.yaml |oc apply -f -
 
   # 建立 gitea 權限
   oc create sa gitea-sa
   oc adm policy add-scc-to-user anyuid -z gitea-sa
 
-  echo "=== GITEA 已建立，請執行帳號登錄 ==="
+  echo "INFO：create_gitea 執行完成"
+  echo "INFO：post_install 腳本執行完成，GITEA 已建立，請執行帳號登錄 ==="
 }
 
 main

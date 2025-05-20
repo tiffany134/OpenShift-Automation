@@ -331,7 +331,7 @@ untar_oc_mirror(){
   cp /root/OpenShift-Automation/yaml/imageset-config.yaml /root/install/ocp418
 
   echo "INFO：untar_oc_mirror 執行完成"
-  echo "=== prep_script 腳本執行完成，請調整 /root/install/ocp418/imageset-config.yaml 配置後執行下個步驟 ==="
+  echo "INFO：prep_script 腳本執行完成，請調整 /root/install/ocp418/imageset-config.yaml 配置後執行下個步驟"
 }
 
 main
