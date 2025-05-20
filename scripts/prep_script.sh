@@ -19,6 +19,8 @@ while IFS= read -r line || [[ -n "$line" ]]; do
   declare -- "$key=$value"
 done < "$config_file"
 
+echo "INFO：prep_script.conf 配置檔確認完畢，開始執行 prep_script.sh"
+
 # 主程式
 main(){
   backup_local_yum
@@ -35,6 +37,7 @@ main(){
 
 # 確保本地 yum 源
 backup_local_yum() {
+  echo "INFO：開始執行 backup_local_yum..."
     
   export REPO_DIR="/etc/yum.repos.d"
   export BAK_DIR="$REPO_DIR/bak"
@@ -43,10 +46,12 @@ backup_local_yum() {
   mkdir -p "$BAK_DIR"
   mv "$REPO_DIR"/*.repo "$BAK_DIR"/ 2>/dev/null
 
+  echo "INFO：backup_local_yum 執行完成"
 }
 
 # 準備基本環境資訊
 env_prep(){
+  echo "INFO：開始執行 env_prep..."
 
   # 定義需要檢查/創建的目錄列表（可以自行替換或擴展）
   CREATE_DIRS=(
@@ -58,15 +63,15 @@ env_prep(){
   # 使用迴圈創建所有目錄
   for dir in "${CREATE_DIRS[@]}"; do
     if [ -d "$dir" ]; then
-        echo "目錄 $dir 已存在，跳過創建"
+        echo "INFO：目錄 $dir 已存在，跳過創建"
     else
-        echo "目錄 $dir 不存在，正在創建..."
+        echo "INFO：目錄 $dir 不存在，正在創建..."
         mkdir -p "$dir"
         # 檢查 mkdir 是否成功
         if [ $? -eq 0 ]; then
-            echo "創建成功"
+            echo "INFO：創建成功"
         else
-            echo "創建失敗" >&2  # 將錯誤輸出到 stderr
+            echo "ERROR：創建失敗" >&2  # 將錯誤輸出到 stderr
             exit 1                # 失敗時退出腳本
         fi
     fi
@@ -74,69 +79,80 @@ env_prep(){
     
   # 將 pull-secret 匯到 config.json
   cat /root/pull-secret | jq > /root/.docker/config.json
+
+  echo "INFO：env_prep 執行完成"
 }
 
 # 拉取自動化所需 repo
 git_clone(){
+  echo "INFO：開始執行 git_clone..."
 
   git clone https://github.com/CCChou/ocp_bastion_installer.git ${OCP_INSTALLER_DIR}
 
   git clone https://github.com/CCChou/OpenShift-EaaS-Practice.git /root/OpenShift-EaaS-Practice
   tar cvf /root/install_source/gitops.tar /root/OpenShift-EaaS-Practice
 
+  echo "INFO：git_clone 執行完成"
 }
 
 # 創建自動化的 ee 鏡像並封裝成 tar 檔
 build_ee_image(){
+  echo "INFO：開始執行 build_ee_image..."
+
   # 拉取 ee 鏡像
   podman pull quay.io/rhtw/ee-bas-auto:v1.0
     
   # 將 ee 鏡像包成 tar 檔
   podman save -o /root/install_source/${EE_IMAGE_NAME}-v1.tar ee-bas-auto:v1.0
+
+  echo "INFO：build_ee_image 執行完成"
 }
 
 # 下載 Ansible naigator 所需 rpm
 download_ansible(){
+  echo "INFO：開始執行 download_ansible..."
   
   # 檢查 tar 檔是否存在
   if [ ! -f "ansible-navigator-rpm-${RHEL_MINOR_VERSION}.tar" ]; then
-    echo "文件 ansible-navigator-rpm-${RHEL_MINOR_VERSION}.tar 不存在，開始執行操作..."
+    echo "INFO：文件 ansible-navigator-rpm-${RHEL_MINOR_VERSION}.tar 不存在，開始執行操作..."
 
     dnf repolist
     # 下載 AAP rpm
-    echo "開始下載 AAP rpm..."
+    echo "INFO：開始下載 AAP rpm..."
     dnf install --enablerepo="${AAP_REPO}" --downloadonly --installroot="${AAP_DIR}/rootdir" --downloaddir="${AAP_DIR}/ansible-navigator-rpm-${RHEL_MINOR_VERSION}" --releasever="${RHEL_MINOR_VERSION}" ansible-navigator -y
 
     # 將 AAP RPM 包打包成 tar 檔
     tar cvf /root/install_source/ansible-navigator-rpm-${RHEL_MINOR_VERSION}.tar -C ${AAP_DIR} "ansible-navigator-rpm-${RHEL_MINOR_VERSION}"
   else
-    echo "文件 ansible-navigator-rpm-${RHEL_MINOR_VERSION}.tar 已存在，跳過操作。"
-  fi 
+    echo "INFO：文件 ansible-navigator-rpm-${RHEL_MINOR_VERSION}.tar 已存在，跳過操作。"
+  fi
+
+  echo "INFO：download_ansible 執行完成"
 }
 
 # 下載安裝所需工具
 get_tools(){
-  echo "下載安裝工具..."
+  echo "INFO：開始執行 get_tools，下載安裝工具..."
 
   # 下載 openshift client
   wget https://mirror.openshift.com/pub/openshift-v4/clients/ocp/${OCP_RELEASE}/openshift-client-linux-${ARCHITECTURE}-${RHEL_VERSION}-${OCP_RELEASE}.tar.gz -P /root/install_source
-  echo "oc client 下載完成"
+  echo "INFO：oc client 下載完成"
 
   # 下載 openshift install
   wget https://mirror.openshift.com/pub/openshift-v4/clients/ocp/${OCP_RELEASE}/openshift-install-${RHEL_VERSION}-${ARCHITECTURE}.tar.gz -P /root/install_source
-  echo "oc install 下載完成"
+  echo "INFO：oc install 下載完成"
 
   # 下載 oc mirror
   wget https://mirror.openshift.com/pub/openshift-v4/clients/ocp/${OCP_RELEASE}/oc-mirror.${RHEL_VERSION}.tar.gz -P /root/install_source
-  echo "oc mirror 下載完成"
+  echo "INFO：oc mirror 下載完成"
 
   # 下載 butane
   wget https://mirror.openshift.com/pub/openshift-v4/clients/butane/latest/butane-${ARCHITECTURE} -P /root/install_source
-  echo "butane 下載完成"
+  echo "INFO：butane 下載完成"
 
   # 下載 latest helm
   wget https://developers.redhat.com/content-gateway/file/pub/openshift-v4/clients/helm/${HELM_VERSION}/helm-linux-${ARCHITECTURE}.tar.gz -P /root/install_source
-  echo "butane 下載完成"
+  echo "INFO：helm 下載完成"
 
   # 下載 latest mirror registry
   wget https://developers.redhat.com/content-gateway/file/pub/openshift-v4/clients/mirror-registry/${MIRROR_REGISTRY_VERSION}/mirror-registry.tar.gz -P /root/install_source
@@ -147,21 +163,27 @@ get_tools(){
     wget https://github.com/NetApp/trident/releases/download/v${TRIDENT_INSTALLER}/trident-installer-${TRIDENT_INSTALLER}.tar.gz -P /root/install_source
     echo "trident installer 下載完成"
   fi
-
+  
+  echo "INFO：get_tools 執行完成"
 }
 
 # 配置 AAP inventory 資訊
 configre_aap_config(){
+  echo "INFO：開始執行 configre_aap_config..."
 
 # 設定 app inventory
 cat << EOF > ${OCP_INSTALLER_DIR}/../inventory
 bastion.${CLUSTER_DOMAIN}.${BASE_DOMAIN} ansible_host=${BASTION_IP}
 EOF
 
+  echo "INFO：configre_aap_config 執行完成"
+
 }
 
 # 配置 AAP main.yaml
 configure_aap_main(){
+  echo "INFO：開始執行 configure_aap_main..."
+
   cp ${OCP_INSTALLER_DIR}/defaults/main.yml ${OCP_INSTALLER_DIR}/defaults/main.yml.bak
 
 cat << EOF > ${OCP_INSTALLER_DIR}/defaults/main.yml
@@ -250,15 +272,15 @@ worker:
 - name: worker03
   ip: ${WORKER03_IP}
 EOF
+
+  echo "INFO：configure_aap_main 執行完成"
 }
 
 # 修改 imageset-config.yaml
 patch_imageset_config(){
+  echo "INFO：開始執行 patch_imageset_config..."
   
   # 下載 yq 套件
-  #dnf install yq -y
-  #sudo yum install python3-pip -y
-  #pip3 install yq
   curl -L https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -o /usr/local/bin/yq
   chmod +x /usr/local/bin/yq
 
@@ -289,15 +311,17 @@ patch_imageset_config(){
     ]' /root/OpenShift-Automation/yaml/imageset-config.yaml -i     
     ;;
   *)
-    echo "用法: 請選擇正確的 CSI_TYPE"
+    echo "ERROR：請選擇正確的 CSI_TYPE"
     exit 1
     ;;
   esac
 
+  echo "INFO：patch_imageset_config 執行完成"
 }
 
 # 解開 oc mirror 指令
 untar_oc_mirror(){
+  echo "INFO：開始執行 untar_oc_mirror..."
 
   # 將 oc-mirror 指令解開使用
   tar -zxvf /root/install_source/oc-mirror.rhel9.tar.gz -C /usr/bin/
@@ -306,6 +330,7 @@ untar_oc_mirror(){
 
   cp /root/OpenShift-Automation/yaml/imageset-config.yaml /root/install/ocp418
 
+  echo "INFO：untar_oc_mirror 執行完成"
   echo "=== prep_script 腳本執行完成，請調整 /root/install/ocp418/imageset-config.yaml 配置後執行下個步驟 ==="
 }
 
