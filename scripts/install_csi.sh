@@ -1,7 +1,8 @@
 #!/bin/bash
 
-# nfs-csi
+# nfs_csi
 nfs_csi(){
+    echo "INFO：開始執行 nfs_csi..."
 
     # 配置NFS
     NFS_SC_DIR="/mnt/nfs"    
@@ -17,7 +18,7 @@ nfs_csi(){
     echo ${CSI_TYPE}
     
     # 創建 nfs namespace
-    echo "創建 ${NFS_NAMESPACE}..."
+    echo "INFO：創建 ${NFS_NAMESPACE}..."
     oc create namespace "${NFS_NAMESPACE}" || echo " ${NFS_NAMESPACE} 已存在。"
 
     # 創建 ServiceAccount 和 RBAC 權限
@@ -28,14 +29,14 @@ nfs_csi(){
     
     # 部署 NFS Controller
     if oc get deployment csi-nfs-controller -n "{$NFS_NAMESPACE}" &> /dev/null; then
-        echo "NFS Controller 已存在，跳過部署。"
+        echo "INFO：NFS Controller 已存在，跳過部署。"
     else
       envsubst < ${YAML_DIR}/${CSI_TYPE}/deployment.yaml |oc apply -f -
     fi
 
     # 部署 NFS Node
     if oc get daemontset csi-nfs-node -n "{$NFS_NAMESPACE}" &> /dev/null; then
-        echo "NFS Node Daemon 已存在，跳過部署。"
+        echo "INFO：NFS Node Daemon 已存在，跳過部署。"
     else
       envsubst < ${YAML_DIR}/${CSI_TYPE}/daemonset.yaml |oc apply -f -
     fi
@@ -45,10 +46,13 @@ nfs_csi(){
 
     # 設置預設 StorageClass
     oc patch storageclass ${NFS_STORAGE_CLASS_NAME} -p '{"metadata": {"annotations": {"storageclass.kubernetes.io/is-default-class": "true"}}}'
+
+    echo "INFO：nfs_csi 執行完成"
 }
 
 # trident csi
 trident(){
+  echo "INFO：開始執行 trident..."
   
   CSI_TYPE=$1
 
@@ -57,9 +61,9 @@ trident(){
 
   # 檢查文件是否存在，存在便解 tar
   if [ -f "$TRIDENT_TAR_FILE" ]; then
-    echo "檢查到文件存在，開始解 tar..."
+    echo "INFO：檢查到文件存在，開始解 tar..."
     tar -zxvf "$TRIDENT_TAR_FILE" -C "$TRIDENT_TARGET_DIR"
-    echo "解 tar 完成！"
+    echo "INFO：解 tar 完成！"
   else
     echo "ERROR：文件 $TRIDENT_TAR_FILE 不存在。"
     exit 1 
@@ -69,19 +73,19 @@ trident(){
   envsubst < ${YAML_DIR}/$CSI_TYPE/tridentorchestrators-crd.yaml |oc apply -f -
 
   # 創建 trident namespace
-  echo "創建 ${TRIDENT_NAMESPACE}..."
+  echo "INFO：創建 ${TRIDENT_NAMESPACE}..."
   envsubst < ${YAML_DIR}/$CSI_TYPE/namespace.yaml |oc apply -f -
 
   # 創建部署 bundle
   if oc get deployment trident-operator -n "{$NFS_NAMESPACE}" &> /dev/null; then
-      echo "trident operator 已存在，跳過部署。"
+      echo "INFO：trident operator 已存在，跳過部署。"
   else
     envsubst < ${YAML_DIR}/$CSI_TYPE/deploy-bundle.yaml |oc apply -f -
   fi
   
   # 創建 trident orchestrator
   if oc get tridentorchestrator trident -n "{$NFS_NAMESPACE}" &> /dev/null; then
-      echo "tridentorchestrator 已存在，跳過部署。"
+      echo "INFO：tridentorchestrator 已存在，跳過部署。"
   else
     envsubst < ${YAML_DIR}/$CSI_TYPE/tridentorchestrator.yaml |oc apply -f -
   fi
@@ -99,18 +103,19 @@ trident(){
   # 創建 volumesnapshotclass
   oc apply -f ${YAML_DIR}/$CSI_TYPE/volumesnapshotclass.yaml
 
+  echo "INFO：trident 執行完成"
 }
 
 # 主程式入口
 case "$1" in
-  nfs_csi)
+  nfs-csi)
     nfs_csi
     ;;
   trident)
     trident
     ;;
   *)
-    echo "用法: $0 {nfs-nsi|trident} [目錄]"
+    echo "INFO：用法: $0 {nfs-nsi|trident} [目錄]"
     exit 1
     ;;
 esac
