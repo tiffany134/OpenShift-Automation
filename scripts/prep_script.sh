@@ -294,7 +294,8 @@ patch_imageset_config(){
       {"name": "registry.k8s.io/sig-storage/csi-snapshotter:v8.2.0"},
       {"name": "registry.k8s.io/sig-storage/livenessprobe:v2.15.0"},
       {"name": "registry.k8s.io/sig-storage/nfsplugin:v4.11.0"},
-      {"name": "registry.k8s.io/sig-storage/snapshot-controller:v8.2.0"}
+      {"name": "registry.k8s.io/sig-storage/snapshot-controller:v8.2.0"},
+      {"name": "registry.k8s.io/sig-storage/csi-node-driver-registrar:v2.13.0"}
     ]' /root/OpenShift-Automation/yaml/imageset-config.yaml -i    
     ;;
   trident)
@@ -306,7 +307,7 @@ patch_imageset_config(){
       {"name": "registry.k8s.io/sig-storage/csi-attacher:v4.8.0"},
       {"name": "registry.k8s.io/sig-storage/csi-resizer:v1.13.1"},
       {"name": "registry.k8s.io/sig-storage/csi-snapshotter:v8.2.0"},
-      {"name": "registry.k8s.io/sig-storage/csi-node-driver-registrar"},
+      {"name": "registry.k8s.io/sig-storage/csi-node-driver-registrar:v2.13.0""},
       {"name": "docker.io/netapp/trident-operator:25.02.1"}
     ]' /root/OpenShift-Automation/yaml/imageset-config.yaml -i     
     ;;
