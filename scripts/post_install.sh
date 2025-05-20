@@ -100,14 +100,18 @@ mirror_source_config(){
 ocp_authentication(){
   echo "INFO：開始執行 ocp_authentication..."
 
-  # 建立一個名為 htpass-secret 的 Secret 來儲存 htpasswd 檔案，帳密為ocpadmin P@ssw0rdocp
-  oc apply -f ${YAML_DIR}/authentication/secret_htpasswd.yaml
- 
-  # 將資源套用至預設 OAuth 配置以新增identity provider。
-  oc apply -f ${YAML_DIR}/authentication/oauth.yaml
+  # 檢查 kubeadmin Secret 是否存在
+  if oc get secret kubeadmin -n kube-system > /dev/null 2>&1; then
 
-  # 賦予 ocpadmin 帳號 cluster-admin role
-  oc adm policy add-cluster-role-to-user cluster-admin ocpadmin
+    # 建立一個名為 htpass-secret 的 Secret 來儲存 htpasswd 檔案，帳密為ocpadmin P@ssw0rdocp
+    oc apply -f ${YAML_DIR}/authentication/secret_htpasswd.yaml
+ 
+    # 將資源套用至預設 OAuth 配置以新增identity provider。
+    oc apply -f ${YAML_DIR}/authentication/oauth.yaml
+
+    # 賦予 ocpadmin 帳號 cluster-admin role
+    oc adm policy add-cluster-role-to-user cluster-admin ocpadmin
+  fi
 
   # 檢查 htpasswd Secret 是否存在
   if oc get secret htpass-secret -n openshift-config > /dev/null 2>&1; then
