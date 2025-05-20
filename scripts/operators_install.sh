@@ -51,7 +51,7 @@ define_global_env(){
 create_git_repo(){
   echo "INFO：開始執行 create_git_repo..."
 
-  RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" -k GET "https://${GITEA_URL}/api/v1/repos/pocuser/OpenShift-EaaS-Practice")
+  RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" -k GET "https://${GITEA_URL}/api/v1/repos/${GITEA_ADMIN}/OpenShift-EaaS-Practice")
 
   if [ "${RESPONSE}" = "200" ]; then
     echo "INFO：程式庫已存在！"
@@ -59,7 +59,7 @@ create_git_repo(){
     echo "INFO：程式庫未找到。建立 OpenShift-EaaS-Practice 程式庫"
     
     # 使用 gitea api 創建 repo
-    curl -k -X POST "https://${GITEA_URL}/api/v1/admin/users/pocuser/repos" \
+    curl -k -X POST "https://${GITEA_URL}/api/v1/admin/users/${GITEA_ADMIN}/repos" \
        -H "Content-Type: application/json" \
        -d '{
          "name": "OpenShift-EaaS-Practice",
