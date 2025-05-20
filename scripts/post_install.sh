@@ -80,10 +80,15 @@ mirror_source_config(){
 
   # 查找 redhat operator catalogsource
   redhat_operator_cs=$(find /root/oc-mirror-workspace/ -maxdepth 2 -path "*/results-*" -type f -name "catalogSource-cs-redhat-operator-index.yaml")
+  icsp=$(find /root/oc-mirror-workspace/ -maxdepth 2 -path "*/results-*" -type f -name "imageContentSourcePolicy.yaml")
 
   # 檢查是否找到文件
   if [ -z "$redhat_operator_cs" ]; then
     echo "ERROR：未找到 catalogSource-cs-redhat-operator-index.yaml 文件"
+    exit 1
+  fi
+  if [ -z "$icsp" ]; then
+    echo "ERROR：未找到 imageContentSourcePolicy.yaml 文件"
     exit 1
   fi
 
@@ -92,6 +97,7 @@ mirror_source_config(){
 
   # 將 CatalogSource apply 
   oc apply -f $redhat_operator_cs
+  oc apply -f $icsp
 
   echo "INFO：mirror_source_config 執行完成"
 }
@@ -214,9 +220,9 @@ create_gitea(){
   export GITEA_VERSION=${GITEA_VERSION}
 
   # 檢查 gitea pod 是否存在
-  GITEA_STATUS=$(oc get pod -l app=gitea -n gitea -ojsonpath='{.items[0].status.containerStatuses[0].ready}' > /dev/null 2>&1;)
+  GITEA_STATUS=$(oc get pod -l app=gitea -n gitea -ojsonpath='{.items[0].status.containerStatuses[0].ready}' 2>/dev/null)
 
-  if [ $GITEA_STATUS == "true"]; then
+  if [ "${GITEA_STATUS}x" == "truex" ]; then
     echo "INFO：GITEA 已建立，請執行帳號登錄"
     exit 1
   fi
