@@ -14,27 +14,28 @@ nfs_csi(){
     systemctl restart nfs-server rpcbind
     systemctl enable nfs-server rpcbind nfs-mountd
 
-    echo ${CSI_MODULE}
-    
     # 創建 nfs namespace
-    echo "INFO：創建 ${NFS_NAMESPACE}..."
-    oc create namespace "${NFS_NAMESPACE}" || echo " ${NFS_NAMESPACE} 已存在。"
+    echo "INFO：創建 ${STORAGE_NAMESPACE}..."
+    oc create namespace "${STORAGE_NAMESPACE}" || echo " ${STORAGE_NAMESPACE} 已存在。"
 
     # 創建 ServiceAccount 和 RBAC 權限
     envsubst < ${YAML_DIR}/${CSI_MODULE}/rbac.yaml |oc apply -f -
+
+    oc adm policy add-scc-to-user anyuid -z csi-nfs-controller-sa -n ${STORAGE_NAMESPACE}
+    oc adm policy add-scc-to-user anyuid -z csi-nfs-node-sa -n ${STORAGE_NAMESPACE}
     
     # 創建 csi driver
     envsubst < ${YAML_DIR}/${CSI_MODULE}/csi-driver.yaml |oc apply -f -
     
     # 部署 NFS Controller
-    if oc get deployment csi-nfs-controller -n "${NFS_NAMESPACE}" &> /dev/null; then
+    if oc get deployment csi-nfs-controller -n "${STORAGE_NAMESPACE}" &> /dev/null; then
         echo "INFO：NFS Controller 已存在，跳過部署。"
     else
       envsubst < ${YAML_DIR}/${CSI_MODULE}/deployment.yaml |oc apply -f -
     fi
 
     # 部署 NFS Node
-    if oc get daemontset csi-nfs-node -n "${NFS_NAMESPACE}" &> /dev/null; then
+    if oc get daemontset csi-nfs-node -n "${STORAGE_NAMESPACE}" &> /dev/null; then
         echo "INFO：NFS Node Daemon 已存在，跳過部署。"
     else
       envsubst < ${YAML_DIR}/${CSI_MODULE}/daemonset.yaml |oc apply -f -
@@ -44,7 +45,7 @@ nfs_csi(){
     envsubst < ${YAML_DIR}/${CSI_MODULE}/storageclass.yaml |oc apply -f -
 
     # 設置預設 StorageClass
-    oc patch storageclass ${NFS_STORAGE_CLASS_NAME} -p '{"metadata": {"annotations": {"storageclass.kubernetes.io/is-default-class": "true"}}}'
+    oc patch storageclass ${STORAGE_CLASS_NAME} -p '{"metadata": {"annotations": {"storageclass.kubernetes.io/is-default-class": "true"}}}'
 
     echo "INFO：nfs_csi 執行完成"
 }
@@ -70,18 +71,18 @@ trident(){
   envsubst < ${YAML_DIR}/${CSI_MODULE}/tridentorchestrators-crd.yaml |oc apply -f -
 
   # 創建 trident namespace
-  echo "INFO：創建 ${TRIDENT_NAMESPACE}..."
+  echo "INFO：創建 ${STORAGE_NAMESPACE}..."
   envsubst < ${YAML_DIR}/${CSI_MODULE}/namespace.yaml |oc apply -f -
 
   # 創建部署 bundle
-  if oc get deployment trident-operator -n "${NFS_NAMESPACE}" &> /dev/null; then
+  if oc get deployment trident-operator -n "${STORAGE_NAMESPACE}" &> /dev/null; then
       echo "INFO：trident operator 已存在，跳過部署。"
   else
     envsubst < ${YAML_DIR}/${CSI_MODULE}/deploy-bundle.yaml |oc apply -f -
   fi
   
   # 創建 trident orchestrator
-  if oc get tridentorchestrator trident -n "${NFS_NAMESPACE}" &> /dev/null; then
+  if oc get tridentorchestrator trident -n "${STORAGE_NAMESPACE}" &> /dev/null; then
       echo "INFO：tridentorchestrator 已存在，跳過部署。"
   else
     envsubst < ${YAML_DIR}/${CSI_MODULE}/tridentorchestrator.yaml |oc apply -f -
@@ -92,7 +93,7 @@ trident(){
   chmod a+x /usr/bin/tridentctl
 
   # 創建 trident backend
-  tridentctl create backend -f ${YAML_DIR}/${CSI_MODULE}/backend.json -n ${$TRIDENT_NAMESPACE}
+  tridentctl create backend -f ${YAML_DIR}/${CSI_MODULE}/backend.json -n ${STORAGE_NAMESPACE}
 
   # 創建 StorageClass
   envsubst < ${YAML_DIR}/${CSI_MODULE}/storageclass.yaml |oc apply -f -
@@ -102,17 +103,3 @@ trident(){
 
   echo "INFO：trident 執行完成"
 }
-
-# # 主程式入口
-# case "$1" in
-#   nfs-csi)
-#     nfs_csi
-#     ;;
-#   trident)
-#     trident
-#     ;;
-#   *)
-#     echo "INFO：用法: $0 {nfs-nsi|trident} [目錄]"
-#     exit 1
-#     ;;
-# esac

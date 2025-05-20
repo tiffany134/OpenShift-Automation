@@ -133,17 +133,19 @@ csi_installation(){
 
   export OCP_DOMAIN=$(oc get ingress.config.openshift.io cluster --template={{.spec.domain}} | sed -e "s/^apps.//")
   export OCP_VERSION=418
-  
+    
   source /root/OpenShift-Automation/scripts/install_csi.sh
 
   # 主程式入口
   case "$CSI_MODULE" in
     nfs-csi)
       export STORAGE_CLASS_NAME=${NFS_STORAGE_CLASS_NAME}
+      export STORAGE_NAMESPACE=${NFS_NAMESPACE}
       nfs_csi
       ;;
     trident)
       export STORAGE_CLASS_NAME=${TRIDENT_STORAGE_CLASS_NAME}
+      export STORAGE_NAMESPACE=${TRIDENT_NAMESPACE}
       trident
       ;;
     *)
@@ -209,21 +211,23 @@ infra_node_setup(){
 create_gitea(){ 
   echo "INFO：開始執行 create_gitea..."
 
+  export GITEA_VERSION=${GITEA_VERSION}
+
   # 檢查 gitea pod 是否存在
-  GITEA_STATUS=$(oc get pod -l app=gitea -n gitea -ojsonpath='{.items[0].status.containerStatuses[0].ready}')
+  GITEA_STATUS=$(oc get pod -l app=gitea -n gitea -ojsonpath='{.items[0].status.containerStatuses[0].ready}' > /dev/null 2>&1;)
 
   if [ $GITEA_STATUS == "true"]; then
     echo "INFO：GITEA 已建立，請執行帳號登錄"
     exit 1
   fi
-  
-  # 配置鏡像參數
-  envsubst < ${YAML_DIR}gitea/create-gitea.yaml |oc apply -f -
-  envsubst < ${YAML_DIR}/gitea/postgresql.yaml |oc apply -f -
 
   # 建立 gitea 權限
-  oc create sa gitea-sa
-  oc adm policy add-scc-to-user anyuid -z gitea-sa
+  oc create sa gitea-sa -n gitea
+  oc adm policy add-scc-to-user anyuid -z gitea-sa -n gitea
+  
+  # 配置鏡像參數
+  envsubst < ${YAML_DIR}/gitea/create-gitea.yaml |oc apply -f -
+  envsubst < ${YAML_DIR}/gitea/postgresql.yaml |oc apply -f -
 
   echo "INFO：create_gitea 執行完成"
   echo "INFO：post_install 腳本執行完成，GITEA 已建立，請執行帳號登錄"

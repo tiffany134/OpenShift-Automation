@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: postgresql-db
-          image: ${REGISTRY}/library/postgres
+          image: bastion.${OCP_DOMAIN}:8443/ocp${OCP_VERSION}/library/postgres
           volumeMounts:
             - mountPath: /data
               name: cache-volume
@@ -43,5 +43,5 @@ spec:
     app: postgresql-db
   type: ClusterIP
   ports:
-  - port: 5432
-    targetPort: 5432
+    - port: 5432
+      targetPort: 5432

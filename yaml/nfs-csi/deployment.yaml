@@ -38,7 +38,7 @@ spec:
           effect: "NoSchedule"
       containers:
         - name: csi-provisioner
-          image: bastion.${OCP_DOMAIN}/ocp${OCP_VERSION}/sig-storage/csi-provisioner:v5.2.0
+          image: bastion.${OCP_DOMAIN}:8443/ocp${OCP_VERSION}/sig-storage/csi-provisioner:v5.2.0
           args:
             - "-v=2"
             - "--csi-address=$(ADDRESS)"
@@ -65,7 +65,7 @@ spec:
               drop:
                 - ALL
         - name: csi-resizer
-          image: bastion.${OCP_DOMAIN}/ocp${OCP_VERSION}/sig-storage/csi-resizer:v1.13.1
+          image: bastion.${OCP_DOMAIN}:8443/ocp${OCP_VERSION}/sig-storage/csi-resizer:v1.13.1
           args:
             - "-csi-address=$(ADDRESS)"
             - "-v=2"
@@ -89,7 +89,7 @@ spec:
               drop:
                 - ALL
         - name: csi-snapshotter
-          image: bastion.${OCP_DOMAIN}/ocp${OCP_VERSION}/sig-storage/csi-snapshotter:v8.2.0
+          image: bastion.${OCP_DOMAIN}:8443/ocp${OCP_VERSION}/sig-storage/csi-snapshotter:v8.2.0
           args:
             - "--v=2"
             - "--csi-address=$(ADDRESS)"
@@ -115,7 +115,7 @@ spec:
               drop:
                 - ALL
         - name: liveness-probe
-          image: bastion.${OCP_DOMAIN}/ocp${OCP_VERSION}/sig-storage/livenessprobe:v2.15.0
+          image: bastion.${OCP_DOMAIN}:8443/ocp${OCP_VERSION}/sig-storage/livenessprobe:v2.15.0
           args:
             - --csi-address=/csi/csi.sock
             - --probe-timeout=3s
@@ -135,7 +135,7 @@ spec:
               drop:
                 - ALL
         - name: nfs
-          image: bastion.${OCP_DOMAIN}/ocp${OCP_VERSION}/sig-storage/nfsplugin:v4.11.0
+          image: bastion.${OCP_DOMAIN}:8443/ocp${OCP_VERSION}/sig-storage/nfsplugin:v4.11.0
           securityContext:
             privileged: true
             capabilities:
