@@ -75,8 +75,6 @@ create_git_repo(){
 # 更新 gitops repo 內的參數
 update_gitops_content(){
   echo "INFO：開始執行 update_gitops_content..."
-  
-  tar xzvf /root/install_source/gitops.tar -C /root
     
   # 將 git repo 替換成 gitea repo
   grep -rl --null 'github.com\/CCChou' OpenShift-EaaS-Practice/ | \
