@@ -165,7 +165,7 @@ csi_installation(){
 infra_node_setup(){
   echo "INFO：開始執行 infra_node_setup..."
 
-  if [ "${INSTALL_MODE}}" == "standard" ]; then
+  if [ "${INSTALL_MODE}" == "standard" ]; then
     # standard mode 時執行以下動作
     echo "INFO：配置 standard 模式"
 
