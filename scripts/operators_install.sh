@@ -36,9 +36,11 @@ define_global_env(){
 
   # OCP FQDN
   export OCP_DOMAIN=$(oc get ingress.config.openshift.io cluster --template={{.spec.domain}} | sed -e "s/^apps.//")
+  export ENCODED_PASSWORD=$(jq -rn --arg v "${GITEA_PASSWORD}" '$v|@uri')
+  export REGISTRY_URL="bastion.${OCP_DOMAIN}:8443/ocp418"
 
   # gitea route url 及帳號密碼
-  export GITEA_URL=${GITEA_ADMIN}:${GITEA_PASSWORD}@gitea-gitea.apps.${OCP_DOMAIN}
+  export GITEA_URL=${GITEA_ADMIN}:${ENCODED_PASSWORD}@gitea-gitea.apps.${OCP_DOMAIN}
   export GITEA_REPO=gitea-gitea.apps.${OCP_DOMAIN}/${GITEA_ADMIN}
 
   # 預設 storageclass

@@ -83,12 +83,8 @@ mirror_source_config(){
   icsp=$(find /root/oc-mirror-workspace/ -maxdepth 2 -path "*/results-*" -type f -name "imageContentSourcePolicy.yaml")
 
   # 檢查是否找到文件
-  if [ -z "$redhat_operator_cs" ]; then
-    echo "ERROR：未找到 catalogSource-cs-redhat-operator-index.yaml 文件"
-    exit 1
-  fi
-  if [ -z "$icsp" ]; then
-    echo "ERROR：未找到 imageContentSourcePolicy.yaml 文件"
+  if [ -z "$redhat_operator_cs" && "$icsp" ]; then
+    echo "ERROR：未找到 catalogSource-cs-redhat-operator-index.yaml 和 imageContentSourcePolicy.yaml 文件"
     exit 1
   fi
 
@@ -106,26 +102,29 @@ mirror_source_config(){
 ocp_authentication(){
   echo "INFO：開始執行 ocp_authentication..."
 
-  # 檢查 kubeadmin Secret 是否存在
-  if oc get secret kubeadmin -n kube-system > /dev/null 2>&1; then
-
-    # 建立一個名為 htpass-secret 的 Secret 來儲存 htpasswd 檔案，帳密為ocpadmin P@ssw0rdocp
-    oc apply -f ${YAML_DIR}/authentication/secret_htpasswd.yaml
+  # 建立一個名為 htpass-secret 的 Secret 來儲存 htpasswd 檔案，帳密為ocpadmin P@ssw0rdocp
+  oc apply -f ${YAML_DIR}/authentication/secret_htpasswd.yaml
  
-    # 將資源套用至預設 OAuth 配置以新增identity provider。
-    oc apply -f ${YAML_DIR}/authentication/oauth.yaml
+  # 將資源套用至預設 OAuth 配置以新增identity provider。
+  oc apply -f ${YAML_DIR}/authentication/oauth.yaml
 
-    # 賦予 ocpadmin 帳號 cluster-admin role
-    oc adm policy add-cluster-role-to-user cluster-admin ocpadmin
-  fi
+  # 賦予 ocpadmin 帳號 cluster-admin role
+  oc adm policy add-cluster-role-to-user cluster-admin ocpadmin
+  
+  oc get secret htpass-secret -n openshift-config > /dev/null 2>&1
+  htpass_secret_status=$?
+  oc get secret kubeadmin -n kube-system > /dev/null 2>&1
+  kubeadmin_secret_status=$?
 
-  # 檢查 htpasswd Secret 是否存在
-  if oc get secret htpass-secret -n openshift-config > /dev/null 2>&1; then
+  # 檢查 htpasswd Secret 和 kubeadmin secret 是否存在
+  if [ $htpass_secret_status -eq 0 ] && [ $kubeadmin_secret_status -eq 0 ]; then
     echo "INFO：Secret [htpass-secret] 已存在，刪除 kubeadmin。"
 
     # 刪除 kubeadmin 
     oc delete secret kubeadmin -n kube-system
-  else
+
+  # 檢查 htpasswd Secret 是否存在
+  elif [ $htpass_secret_status -eq 1 ]; then
     echo "ERROR：Secret [htpass-secret] 不存在，請確認是否建立 Secert。"
     exit 1
   fi

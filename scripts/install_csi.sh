@@ -11,9 +11,11 @@ nfs_csi(){
     mkdir -p $NFS_SC_DIR
     chmod 777 $NFS_SC_DIR
     echo "$NFS_SC_DIR $NFS_CIDR(rw,sync,no_root_squash,no_subtree_check,no_wdelay)" | tee /etc/exports
-    systemctl restart nfs-server rpcbind
-    systemctl enable nfs-server rpcbind nfs-mountd
 
+    dnf install nfs-utils -y
+    systemctl restart nfs-server rpcbind
+    systemctl enable --now nfs-server rpcbind nfs-mountd
+ 
     # 創建 nfs namespace
     echo "INFO：創建 ${STORAGE_NAMESPACE}..."
     oc create namespace "${STORAGE_NAMESPACE}" || echo " ${STORAGE_NAMESPACE} 已存在。"
