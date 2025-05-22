@@ -124,7 +124,7 @@ ocp_authentication(){
     oc delete secret kubeadmin -n kube-system
 
   # 檢查 htpasswd Secret 是否存在
-  elif [ $htpass_secret_status -eq 1 ]; then
+  elif [ $htpass_secret_status -ne 0 ]; then
     echo "ERROR：Secret [htpass-secret] 不存在，請確認是否建立 Secert。"
     exit 1
   fi
@@ -226,9 +226,16 @@ create_gitea(){
     exit 1
   fi
 
+  oc get sa gitea-sa -n gitea > /dev/null 2>&1
+  gitea_sa_status=$?
+
   # 建立 gitea 權限
-  oc create sa gitea-sa -n gitea
-  oc adm policy add-scc-to-user anyuid -z gitea-sa -n gitea
+  if [ $gitea_sa_status -eq 0 ]; then
+    echo "INFO：ServiceAccount [gitea-sa] 已存在"
+  else
+    oc create sa gitea-sa -n gitea
+    oc adm policy add-scc-to-user anyuid -z gitea-sa -n gitea
+  fi
   
   # 配置鏡像參數
   envsubst < ${YAML_DIR}/gitea/create-gitea.yaml |oc apply -f -

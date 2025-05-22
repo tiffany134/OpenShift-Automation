@@ -72,7 +72,7 @@ env_prep(){
             echo "INFO：創建成功"
         else
             echo "ERROR：創建失敗" >&2  # 將錯誤輸出到 stderr
-            exit 1                # 失敗時退出腳本
+            exit 1                     # 失敗時退出腳本
         fi
     fi
   done
