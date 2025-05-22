@@ -74,22 +74,67 @@ create_git_repo(){
   echo "INFO：create_git_repo 執行完成"
 }
 
+# 搜尋 EaaS 內要替換的文件
+collect_eaas_target_files(){
+  local tmpfile=$(mktemp)
+
+  # pattern 內條件 1 & 2：在目標目錄中搜索
+  for pattern in "${REPLACE_PATTERNS[@]:0:2}"; do
+    grep -rl --null "$pattern" "${OCP_EAAS_DIR}/" >> "$tmpfile"
+  done
+  
+  # pattern 內條件 3：單獨處理特殊文件
+  if [[ -f "$LOKI_KUSTOMIZATION_FILE" ]] && grep -q 'gp3-csi' "$LOKI_KUSTOMIZATION_FILE"; then
+    printf "%s\0" "$LOKI_KUSTOMIZATION_FILE" >> "$tmpfile"
+  fi
+  
+  # 去重並返回結果
+  sort -zu "$tmpfile" | uniq -z
+  rm "$tmpfile"  
+}
+
 # 更新 gitops repo 內的參數
 update_gitops_content(){
   echo "INFO：開始執行 update_gitops_content..."
-    
-  # 將 git repo 替換成 gitea repo
-  grep -rl --null 'github.com\/CCChou' OpenShift-EaaS-Practice/ | \
-    xargs -0 sed -i "s#github.com/CCChou#${GITEA_REPO}#g"
 
-  # 將 quay.io 替換成 mirror quay
-  grep -rl --null 'quay.io' OpenShift-EaaS-Practice/ | \
-    xargs -0 sed -i "s#quay.io#${REGISTRY_URL}#g"
-  
-  # 變更預設 storageclass
-  grep -rl --null 'gp3-csi' /root/OpenShift-EaaS-Practice/clusters/${GITOPS_CLUSTER_TYPE}/overlays/loki-configuration/kustomization.yaml | \
-    xargs -0 sed -i "s#gp3-csi#${DEFAULT_SC}#g"
+  OCP_EAAS_DIR="/root/OpenShift-EaaS-Practice"
+  BACKUP_EAAS_DIR="/tmp/ocp-eaas-backup"
 
+  REPLACE_PATTERNS=(
+    'github.com\/CCChou'
+    'quay.io'
+    'gp3-csi'
+  )
+
+  LOKI_KUSTOMIZATION_FILE="${OCP_EAAS_DIR}/clusters/${GITOPS_CLUSTER_TYPE}/overlays/loki-configuration/kustomization.yaml"
+
+  if [[ ! -d "$BACKUP_EAAS_DIR" ]]; then
+    echo "INFO：初始化備份目錄: $BACKUP_EAAS_DIR"
+    mkdir -p "$BACKUP_EAAS_DIR"
+
+    # 蒐集文件並備份（保留目錄結構）
+    collect_eaas_target_files | xargs -0 -I {} cp --parents -v {} "$BACKUP_EAAS_DIR"
+  fi
+
+  # 每次執行前：從備份還原文件
+  echo "INFO：還原備份文件..."
+  rsync -a --delete --quiet "$BACKUP_EAAS_DIR/" "$OCP_EAAS_DIR/"
+
+  # 執行替換文件內容操作
+  echo "INFO：開始替換操作..."
+
+  # 替換條件 1：github.com/CCChou -> gitea repo
+  collect_eaas_target_files | xargs -0 sed -i "s#github.com/CCChou#${GITEA_REPO}#g"
+
+  # 替換條件 2：quay.io -> mirror quay
+  collect_eaas_target_files | xargs -0 sed -i "s#quay.io#${REGISTRY_URL}#g"
+
+  # 替換條件 3：gp3-csi -> 預設 storageclass
+  if [[ -f "$LOKI_KUSTOMIZATION_FILE" ]]; then
+    sed -i "s#gp3-csi#${DEFAULT_SC}#g" "$LOKI_KUSTOMIZATION_FILE"
+  fi
+
+  echo "替換操作完成！備份文件保存在: $BACKUP_EAAS_DIR"
   echo "INFO：update_gitops_content 執行完成"
 }
 
