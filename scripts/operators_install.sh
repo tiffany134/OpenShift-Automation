@@ -76,6 +76,8 @@ create_git_repo(){
 
 # 搜尋 EaaS 內要替換的文件
 collect_eaas_target_files(){
+  echo "INFO：開始執行 collect_eaas_target_files..."
+
   local tmpfile=$(mktemp)
 
   # pattern 內條件 1 & 2：在目標目錄中搜索
@@ -134,7 +136,7 @@ update_gitops_content(){
     sed -i "s#gp3-csi#${DEFAULT_SC}#g" "$LOKI_KUSTOMIZATION_FILE"
   fi
 
-  echo "替換操作完成！備份文件保存在: $BACKUP_EAAS_DIR"
+  echo "INFO：替換操作完成！備份文件保存在: $BACKUP_EAAS_DIR"
   echo "INFO：update_gitops_content 執行完成"
 }
 
