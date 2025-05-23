@@ -103,35 +103,60 @@ update_gitops_content(){
   BACKUP_EAAS_DIR="/tmp/ocp-eaas-backup"
 
   REPLACE_PATTERNS=(
-    'github.com\/CCChou'
+    'github.com/CCChou'
     'quay.io'
     'gp3-csi'
   )
 
   LOKI_KUSTOMIZATION_FILE="${OCP_EAAS_DIR}/clusters/${GITOPS_CLUSTER_TYPE}/overlays/loki-configuration/kustomization.yaml"
 
+  # 子函數：搜尋要被替換的目標檔案
+  collect_eaas_target_files() {
+    local tmpfile=$(mktemp)
+
+    # 搜尋 pattern 1、2
+    for pattern in "${REPLACE_PATTERNS[@]:0:2}"; do
+      grep -rlZ "$pattern" "${OCP_EAAS_DIR}/" >> "$tmpfile"
+    done
+
+    # 加入特殊 Loki 檔案
+    if [[ -f "$LOKI_KUSTOMIZATION_FILE" ]] && grep -q 'gp3-csi' "$LOKI_KUSTOMIZATION_FILE"; then
+      printf "%s\0" "$LOKI_KUSTOMIZATION_FILE" >> "$tmpfile"
+    fi
+
+    sort -zu "$tmpfile"
+    rm -f "$tmpfile"
+  }
+
+  # 檢查 .bootstrap 是否存在
+  if [[ ! -d "${OCP_EAAS_DIR}/.bootstrap" ]]; then
+    echo "ERROR：找不到 .bootstrap 目錄，請確認該資料夾存在！"
+    exit 1
+  fi
+
+  # 建立備份（首次才備份）
   if [[ ! -d "$BACKUP_EAAS_DIR" ]]; then
     echo "INFO：初始化備份目錄: $BACKUP_EAAS_DIR"
     mkdir -p "$BACKUP_EAAS_DIR"
 
-    # 蒐集文件並備份（保留目錄結構）
-    collect_eaas_target_files | xargs -0 -I {} cp --parents -v {} "$BACKUP_EAAS_DIR"
+    collect_eaas_target_files | while IFS= read -r -d '' file; do
+      rel_path="${file#$OCP_EAAS_DIR/}"
+      dest_path="$BACKUP_EAAS_DIR/$rel_path"
+      mkdir -p "$(dirname "$dest_path")"
+      cp -v "$file" "$dest_path"
+    done
   fi
 
-  # 每次執行前：從備份還原文件
+  # 還原備份
   echo "INFO：還原備份文件..."
-  rsync -a --delete --quiet "$BACKUP_EAAS_DIR/" "$OCP_EAAS_DIR/"
+  rsync -a --exclude=".git" "$BACKUP_EAAS_DIR/" "$OCP_EAAS_DIR/"
 
-  # 執行替換文件內容操作
+  # 開始替換操作
   echo "INFO：開始替換操作..."
 
-  # 替換條件 1：github.com/CCChou -> gitea repo
   collect_eaas_target_files | xargs -0 sed -i "s#github.com/CCChou#${GITEA_REPO}#g"
-
-  # 替換條件 2：quay.io -> mirror quay
   collect_eaas_target_files | xargs -0 sed -i "s#quay.io#${REGISTRY_URL}#g"
 
-  # 替換條件 3：gp3-csi -> 預設 storageclass
   if [[ -f "$LOKI_KUSTOMIZATION_FILE" ]]; then
     sed -i "s#gp3-csi#${DEFAULT_SC}#g" "$LOKI_KUSTOMIZATION_FILE"
   fi
