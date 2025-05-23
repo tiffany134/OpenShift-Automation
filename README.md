@@ -299,93 +299,7 @@
         ···
         ```
 
-7. 依客戶環境需求修改 OpenShift Automation 內的配置 (調整 /root/OpenShift-Automation/role/ocp_bastion_installer/defaults/main.yml 內的配置)
-    ```yaml
-    ---
-    online: false
-
-    # compact or standard mode
-    mode: compact
-
-    # 依個人需求啟動或關閉防火牆與 SELinux 等服務與功能
-    firewalld_disable: true
-    selinux_disable: true 
-    
-    # 啟用或停用 DNS配置、網卡(NIC)名稱、DNS 上游伺服器位址
-    dns_configure: true
-    interface: ens33
-    dns_upstream: 8.8.8.8
-    
-    # 是否 DNS 檢查
-    dns_check: true
-    dns_ip: 172.20.11.50
-    
-    # 是否啟用負載平衡配置
-    haproxy_configure: true
-    
-    # 鏡像庫配置
-    registry_configure: true
-    mirrorRegistryDir: /root/install_source/mirror-registry.tar.gz
-    quayRoot: /mirror-registry
-    quayStorage: /mirror-registry/storage
-    registryPassword: P@ssw0rd
-
-    # NTP server
-    ntp_server_configure: true
-    # NTP client
-    ntp_server_ip: 172.20.11.50
-    
-    # OCP 相關配置
-    ocp_configure: true
-    # 定義叢集名稱
-    clusterName: ocp4
-    # 定義叢集基礎域名
-    baseDomain: demo.lab
-    # 定義資源檔案之絕對路徑: 如公鑰、OCP 所需指令壓縮檔位置等
-    sshKeyDir: /root/.ssh/id_rsa.pub
-    ocpInstallDir: /root/install_source/openshift-install-rhel9-amd64.tar.gz
-    ocpClientDir: /root/install_source/openshift-client-linux-amd64-rhel9-4.18.7.tar.gz
-    # 連線安裝所需之 pull-secret 位置
-    pullSecretDir: /root/install_source/pull-secret.txt
-    
-    # 從磁碟到鏡像的同步
-    mirror: true
-    ocmirrorSource: /root/install_source/oc-mirror.rhel9.tar.gz
-    imageSetFile: /root/install_source/mirror
-    reponame: ocp418
-    
-    # 節點的基本設定 (將不需要的節點註解掉)
-    bastion:
-      name: bastion
-      ip: 172.20.11.50
-    bootstrap:
-      name: bootstrap
-      ip: 172.20.11.60
-    master:
-    - name: master01
-      ip: 172.20.11.51
-    - name: master02
-      ip: 172.20.11.52
-    - name: master03
-      ip: 172.20.11.53
-    # standard mode nodes
-    infra:
-    - name: infra01
-      ip: 172.20.11.54
-    - name: infra02
-      ip: 172.20.11.55
-    - name: infra03
-      ip: 172.20.11.56
-    worker: 
-    - name: worker01
-      ip: 172.20.11.57
-    - name: worker02
-      ip: 172.20.11.58
-    - name: worker03
-      ip: 172.20.11.59
-    ```
-
-8. 將所有準備好的資源都 tar 起來準備放入客戶離線環境
+7. 將所有準備好的資源都 tar 起來準備放入客戶離線環境
    - 將 OpenShift Automation 目錄打包成 tar 檔
      ```bash
      tar czvf /root/openshift-automation.tar.gz -C /root OpenShift-Automation install_source OpenShift-EaaS-Practice
@@ -417,7 +331,7 @@
         - mirror registry for Red Hat OpenShift (mirror-registry)
         - OpenShift Client (oc) mirror plugin (oc-mirror)
 
-10. (optional)若需要自行研究更新維護，可將自動化相關 github repo fork 到自己的 repo 中
+8. (optional)若需要自行研究更新維護，可將自動化相關 github repo fork 到自己的 repo 中
    - 連線至 [OpenShift-Automation Repo](https://github.com/CCChou/OCP-Automation.git)，並點選 fork
    ![Fork01](https://github.com/CCChou/OpenShift-Automation/blob/main/images/fork01.png?raw=true)
 
@@ -527,12 +441,98 @@
    sh /root/OpenShift-Automation/scripts/checkmd5_verify.sh check /root/install_source/mirror
    ```
 
-5. 執行 configure_and_run.sh 腳本
+5. 依客戶環境需求修改 OpenShift Automation 內的配置 (調整 /root/OpenShift-Automation/roles/ocp_bastion_installer/defaults/main.yml 內的配置)
+    ```yaml
+    ---
+    online: false
+
+    # compact or standard mode
+    mode: compact
+
+    # 依個人需求啟動或關閉防火牆與 SELinux 等服務與功能
+    firewalld_disable: true
+    selinux_disable: true 
+    
+    # 啟用或停用 DNS配置、網卡(NIC)名稱、DNS 上游伺服器位址
+    dns_configure: true
+    interface: ens33
+    dns_upstream: 8.8.8.8
+    
+    # 是否 DNS 檢查
+    dns_check: true
+    dns_ip: 172.20.11.50
+    
+    # 是否啟用負載平衡配置
+    haproxy_configure: true
+    
+    # 鏡像庫配置
+    registry_configure: true
+    mirrorRegistryDir: /root/install_source/mirror-registry.tar.gz
+    quayRoot: /mirror-registry
+    quayStorage: /mirror-registry/storage
+    registryPassword: P@ssw0rd
+
+    # NTP server
+    ntp_server_configure: true
+    # NTP client
+    ntp_server_ip: 172.20.11.50
+    
+    # OCP 相關配置
+    ocp_configure: true
+    # 定義叢集名稱
+    clusterName: ocp4
+    # 定義叢集基礎域名
+    baseDomain: demo.lab
+    # 定義資源檔案之絕對路徑: 如公鑰、OCP 所需指令壓縮檔位置等
+    sshKeyDir: /root/.ssh/id_rsa.pub
+    ocpInstallDir: /root/install_source/openshift-install-rhel9-amd64.tar.gz
+    ocpClientDir: /root/install_source/openshift-client-linux-amd64-rhel9-4.18.7.tar.gz
+    # 連線安裝所需之 pull-secret 位置
+    pullSecretDir: /root/install_source/pull-secret.txt
+    
+    # 從磁碟到鏡像的同步
+    mirror: true
+    ocmirrorSource: /root/install_source/oc-mirror.rhel9.tar.gz
+    imageSetFile: /root/install_source/mirror
+    reponame: ocp418
+    
+    # 節點的基本設定 (將不需要的節點註解掉)
+    bastion:
+      name: bastion
+      ip: 172.20.11.50
+    bootstrap:
+      name: bootstrap
+      ip: 172.20.11.60
+    master:
+    - name: master01
+      ip: 172.20.11.51
+    - name: master02
+      ip: 172.20.11.52
+    - name: master03
+      ip: 172.20.11.53
+    # standard mode nodes
+    infra:
+    - name: infra01
+      ip: 172.20.11.54
+    - name: infra02
+      ip: 172.20.11.55
+    - name: infra03
+      ip: 172.20.11.56
+    worker: 
+    - name: worker01
+      ip: 172.20.11.57
+    - name: worker02
+      ip: 172.20.11.58
+    - name: worker03
+      ip: 172.20.11.59
+    ```
+
+6. 執行 configure_and_run.sh 腳本
    ```bash
    sh /root/OpenShift-Automation/scripts/configure_and_run.sh
    ```
 
-6. 設定節點網路連線
+7. 設定節點網路連線
     1. 請於重新開機後，執行下列指令以 root 身分進行設定
        ```
        sudo -i
@@ -562,7 +562,7 @@
        ```
        ![解析檢查](https://github.com/CCChou/OpenShift-Automation/blob/56c6724fc10b6b1d468fef64973b09d0d49e2bbf/images/7-check_hostname.png)
 
-7. 透過 curl 的方式呼叫 coreos-installer 執行 coreos install 指令
+8. 透過 curl 的方式呼叫 coreos-installer 執行 coreos install 指令
     - 在各個主機內執行 coreos-installer 腳本，執行順序 bootstrap > master > worker
       ```bash
       # 以下指令在 curl 執行後會自行執行，role 包含 bootstrap, master, worker
