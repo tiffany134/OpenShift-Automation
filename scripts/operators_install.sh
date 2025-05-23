@@ -150,6 +150,7 @@ push_git(){
   git config --global user.email "${GITEA_ADMIN}@example.com"
   git config --global user.name "${GITEA_ADMIN}"
 
+  git commit -a -m 'update'
   git remote set-url origin https://${GITEA_URL}/${GITEA_ADMIN}/OpenShift-EaaS-Practice.git
   git push origin --all
 
