@@ -8,8 +8,8 @@ mirror:
   platform:
     channels:
       - name: stable-4.18
-        minVersion: 4.18.6
-        maxVersion: 4.18.8
+        minVersion: 4.18.8
+        maxVersion: 4.18.9
   operators:
     - catalog: registry.redhat.io/redhat/redhat-operator-index:v4.18
       packages:
@@ -108,8 +108,8 @@ mirror:
     - name: quay.io/containerdisks/centos:7-2009
     - name: quay.io/containerdisks/centos-stream:8
     - name: quay.io/containerdisks/centos-stream:9
-    - name: docker.io/library/postgres:latest
-    - name: docker.io/gitea/gitea:1.21.7
+    - name: quay.io/rhtw/postgres:17.5
+    - name: quay.io/rhtw/gitea:1.21.7
     - name: quay.io/minio/minio:latest
     - name: quay.io/rhtw/tools
     - name: quay.io/rhtw/gitops-envsub
