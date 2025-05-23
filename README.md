@@ -529,7 +529,7 @@
 
 5. 執行 configure_and_run.sh 腳本
    ```bash
-   sh /root/OpenShift-Automation/scripts/bastion/configure_and_run.sh
+   sh /root/OpenShift-Automation/scripts/configure_and_run.sh
    ```
 
 6. 設定節點網路連線
