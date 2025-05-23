@@ -524,7 +524,7 @@
 
 4. 檢查鏡像檔的md5是否一致
    ```bash
-   sh /root/OpenShift-Automation/scripts/checkmd5_verify.sh check
+   sh /root/OpenShift-Automation/scripts/checkmd5_verify.sh check /root/install_source/mirror
    ```
 
 5. 執行 configure_and_run.sh 腳本
