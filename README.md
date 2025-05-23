@@ -38,7 +38,7 @@
 2. 安裝 git 並使用 git clone 將你自動化相關的 git repo 拉取下來
    - 安裝 git repo
      ```bash
-     dnf install git
+     dnf install git -y
      ```
 
    - 拉取自動化 git repo
@@ -236,7 +236,7 @@
 
         oc-mirror --config=./imageset-config.yaml file://.
         ```
-      - 驗證是否已建鏡像 .tar 檔案
+      - 驗證是否已建立鏡像 .tar 檔案
         ```bash
         ls
 
@@ -277,13 +277,29 @@
        - quay.io/containerdisks/centos:7-2009
        - quay.io/containerdisks/centos-stream:8
        - quay.io/containerdisks/centos-stream:9
-       - docker.io/library/postgres:latest
-       - docker.io/gitea/gitea:1.21.7
+       - quay.io/rhtw/postgres:17.5
+       - quay.io/rhtw/gitea:1.21.7
        - quay.io/minio/minio:latest
        - quay.io/rhtw/tools
        - quay.io/rhtw/gitops-envsub
 
-7. 依客戶環境需求修改 OpenShift Automation 內的配置 (調整 role > ocp_bastion_installer > default > main.yml 內的配置)
+   4. 建立鏡像檔的md5檢查檔
+      - 建立md5檢查檔
+        ```bash
+        sh /root/OpenShift-Automation/scripts/checkmd5_verify.sh create
+        ```
+      - 驗證是否已建立md5檢查檔
+        ```bash
+        ls
+
+        mirror_seq1_000000.tar
+        mirror_seq1_000000.tar.md5
+        mirror_seq1_000001.tar
+        mirror_seq1_000001.tar.md5
+        ···
+        ```
+
+7. 依客戶環境需求修改 OpenShift Automation 內的配置 (調整 /root/OpenShift-Automation/role/ocp_bastion_installer/defaults/main.yml 內的配置)
     ```yaml
     ---
     online: false
