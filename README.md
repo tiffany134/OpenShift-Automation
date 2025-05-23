@@ -516,16 +516,23 @@
    ls -l /root/install_source/mirror
    
    mirror_seq1_000000.tar
+   mirror_seq1_000000.tar.md5
    mirror_seq1_000001.tar
+   mirror_seq1_000001.tar.md5
    ···
    ```
 
-4. 執行 configure_and_run.sh 腳本
+4. 檢查鏡像檔的md5是否一致
+   ```bash
+   sh /root/OpenShift-Automation/scripts/checkmd5_verify.sh check
+   ```
+
+5. 執行 configure_and_run.sh 腳本
    ```bash
    sh /root/OpenShift-Automation/scripts/bastion/configure_and_run.sh
    ```
 
-5. 設定節點網路連線
+6. 設定節點網路連線
     1. 請於重新開機後，執行下列指令以 root 身分進行設定
        ```
        sudo -i
@@ -555,7 +562,7 @@
        ```
        ![解析檢查](https://github.com/CCChou/OpenShift-Automation/blob/56c6724fc10b6b1d468fef64973b09d0d49e2bbf/images/7-check_hostname.png)
 
-6. 透過 curl 的方式呼叫 coreos-installer 執行 coreos install 指令
+7. 透過 curl 的方式呼叫 coreos-installer 執行 coreos install 指令
     - 在各個主機內執行 coreos-installer 腳本，執行順序 bootstrap > master > worker
       ```bash
       # 以下指令在 curl 執行後會自行執行，role 包含 bootstrap, master, worker
@@ -572,8 +579,6 @@
       > 若節點為虛擬機，請記得於開機前退出映像檔
 
 ### 安裝後配置流程
-
-0. 校時 (離線環境下)
 
 1. 配置 post_install.conf 內參數
    ```bash
