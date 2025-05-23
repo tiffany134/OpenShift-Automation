@@ -4,7 +4,7 @@ config_file="$SCRIPT_DIR/post_install.conf"
 
 
 # 檢查文件是否存在
-[[ ! -f "$config_file" ]] && { echo "ERROR：配置文件不存在"; exit 1; }
+[[ ! -f "$config_file" ]] && { echo -e "[$(date)] \e[31mERROR\e[0m：配置文件不存在"; exit 1; }
 
 # 逐行讀取並解析
 while IFS= read -r line || [[ -n "$line" ]]; do
@@ -20,7 +20,7 @@ while IFS= read -r line || [[ -n "$line" ]]; do
   declare -- "$key=$value"
 done < "$config_file"
 
-echo "INFO：post_install.conf 配置檔確認完畢，開始執行 post_install.sh"
+echo -e "[$(date)] \e[32mINFO\e[0m：post_install.conf 配置檔確認完畢，開始執行 post_install.sh"
 
 # 主程式
 main(){
@@ -34,7 +34,7 @@ main(){
 
 # 驗證通過 CSR
 approve_csr(){
-  echo "INFO：開始執行 approve_csr..."
+  echo -e "[$(date)] \e[32mINFO\e[0m：開始執行 approve_csr..."
 
   export KUBECONFIG=/root/ocp4/auth/kubeconfig
   export YAML_DIR="/root/OpenShift-Automation/yaml"
@@ -49,7 +49,7 @@ approve_csr(){
     ELAPSED_SECONDS=$((CURRENT_TIME - START_TIME))
     
     if [ "$ELAPSED_SECONDS" -ge "$MAX_WAIT_SECONDS" ]; then
-        echo "$(date): ERROR：等待超時（${MAX_WAIT_SECONDS}秒）"
+        echo -e "[$(date)] \e[31mERROR\e[0m：等待超時（${MAX_WAIT_SECONDS}秒）"
         exit 1
     fi
     
@@ -57,7 +57,7 @@ approve_csr(){
         jq '[.items[] | select(.status.conditions[] | select(.reason == "KubeletReady" and .status == "True"))] | length')
     
     if [ "$CURRENT_READY" -eq "$TARGET_READY_COUNT" ]; then
-        echo "$(date): INFO：所有節點就緒"
+        echo -e "$(date): \e[32mINFO\e[0m：所有節點就緒"
         break
     fi
     
@@ -68,12 +68,12 @@ approve_csr(){
     sleep $CHECK_INTERVAL
   done
 
-  echo "INFO：approve_csr 執行完成"
+  echo -e "[$(date)] \e[32mINFO\e[0m：approve_csr 執行完成"
 }
 
 # 配置 mirror 來源
 mirror_source_config(){
-  echo "INFO：開始執行 mirror_source_config..."
+  echo -e "[$(date)] \e[32mINFO\e[0m：開始執行 mirror_source_config..."
 
   # 關閉預設 catalog source
   oc patch OperatorHub cluster --type json -p '[{"op": "add", "path": "/spec/disableAllDefaultSources", "value": true}]'
@@ -84,7 +84,7 @@ mirror_source_config(){
 
   # 檢查是否找到文件
   if [ -z "$redhat_operator_cs" && "$icsp" ]; then
-    echo "ERROR：未找到 catalogSource-cs-redhat-operator-index.yaml 和 imageContentSourcePolicy.yaml 文件"
+    echo -e "[$(date)] \e[31mERROR\e[0m：未找到 catalogSource-cs-redhat-operator-index.yaml 和 imageContentSourcePolicy.yaml 文件"
     exit 1
   fi
 
@@ -95,12 +95,12 @@ mirror_source_config(){
   oc apply -f $redhat_operator_cs
   oc apply -f $icsp
 
-  echo "INFO：mirror_source_config 執行完成"
+  echo -e "[$(date)] \e[32mINFO\e[0m：mirror_source_config 執行完成"
 }
 
 # 建立 OCP 的認證機制
 ocp_authentication(){
-  echo "INFO：開始執行 ocp_authentication..."
+  echo -e "[$(date)] \e[32mINFO\e[0m：開始執行 ocp_authentication..."
 
   # 建立一個名為 htpass-secret 的 Secret 來儲存 htpasswd 檔案，帳密為ocpadmin P@ssw0rdocp
   oc apply -f ${YAML_DIR}/authentication/secret_htpasswd.yaml
@@ -118,23 +118,23 @@ ocp_authentication(){
 
   # 檢查 htpasswd Secret 和 kubeadmin secret 是否存在
   if [ $htpass_secret_status -eq 0 ] && [ $kubeadmin_secret_status -eq 0 ]; then
-    echo "INFO：Secret [htpass-secret] 已存在，刪除 kubeadmin。"
+    echo -e "[$(date)] \e[32mINFO\e[0m：Secret [htpass-secret] 已存在，刪除 kubeadmin。"
 
     # 刪除 kubeadmin 
     oc delete secret kubeadmin -n kube-system
 
   # 檢查 htpasswd Secret 是否存在
   elif [ $htpass_secret_status -ne 0 ]; then
-    echo "ERROR：Secret [htpass-secret] 不存在，請確認是否建立 Secert。"
+    echo -e "[$(date)] \e[31mERROR\e[0m：Secret [htpass-secret] 不存在，請確認是否建立 Secert。"
     exit 1
   fi
 
-  echo "INFO：ocp_authentication 執行完成"
+  echo -e "[$(date)] \e[32mINFO\e[0m：ocp_authentication 執行完成"
 }
 
 # 安裝 CSI 及創建預設 storageclass
 csi_installation(){
-  echo "INFO：開始執行 csi_installation..."
+  echo -e "[$(date)] \e[32mINFO\e[0m：開始執行 csi_installation..."
 
   export OCP_DOMAIN=$(oc get ingress.config.openshift.io cluster --template={{.spec.domain}} | sed -e "s/^apps.//")
   export OCP_VERSION=418
@@ -154,7 +154,7 @@ csi_installation(){
       trident
       ;;
     *)
-      echo "INFO：用法: $0 {nfs-nsi|trident} [目錄]"
+      echo -e "[$(date)] \e[32mINFO\e[0m：用法: $0 {nfs-nsi|trident} [目錄]"
       exit 1
       ;;
   esac
@@ -163,22 +163,22 @@ csi_installation(){
 
   # 檢查 StorageClass 是否創建成功
   if oc get storageclass ${STORAGE_CLASS_NAME} &> /dev/null; then
-    echo "INFO： ${STORAGE_CLASS_NAME} 配置完成！CSI 及預設 storageclass 安裝完成！"
+    echo -e "[$(date)] \e[32mINFO\e[0m： ${STORAGE_CLASS_NAME} 配置完成！CSI 及預設 storageclass 安裝完成！"
   else
-    echo "ERROR：CSI 及預設 StorageClass 創建失敗！"
+    echo -e "[$(date)] \e[31mERROR\e[0m：CSI 及預設 StorageClass 創建失敗！"
     exit 1
   fi
 
-  echo "INFO：csi_installation 執行完成"
+  echo -e "[$(date)] \e[32mINFO\e[0m：csi_installation 執行完成"
 }
 
 # 配置 infra 節點
 infra_node_setup(){
-  echo "INFO：開始執行 infra_node_setup..."
+  echo -e "[$(date)] \e[32mINFO\e[0m：開始執行 infra_node_setup..."
 
   if [ "${INSTALL_MODE}" == "standard" ]; then
     # standard mode 時執行以下動作
-    echo "INFO：配置 standard 模式"
+    echo -e "[$(date)] \e[32mINFO\e[0m：配置 standard 模式"
 
     # 設定infra node mcp
     oc apply -f ${YAML_DIR}/infra/mcp_infra.yaml
@@ -200,21 +200,21 @@ infra_node_setup(){
 
   elif [ "${INSTALL_MODE}" == "compact" ]; then
     # compact mode 時執行以下動作
-    echo "INFO：配置 compact 模式"
+    echo -e "[$(date)] \e[32mINFO\e[0m：配置 compact 模式"
 
     # monitoring components 設定 PV
     oc apply -f ${YAML_DIR}/infra/cm_cluster-monitoring-config-${INSTALL_MODE}.yaml
   else
-    echo "ERROR：模式配置錯誤"
+    echo -e "[$(date)] \e[31mERROR\e[0m：模式配置錯誤"
     exit 1
   fi
 
-  echo "INFO：infra_node_setup 執行完成"
+  echo -e "[$(date)] \e[32mINFO\e[0m：infra_node_setup 執行完成"
 }
 
 # 創建 gitea server
 create_gitea(){ 
-  echo "INFO：開始執行 create_gitea..."
+  echo -e "[$(date)] \e[32mINFO\e[0m：開始執行 create_gitea..."
 
   export GITEA_VERSION=${GITEA_VERSION}
 
@@ -222,7 +222,7 @@ create_gitea(){
   GITEA_STATUS=$(oc get pod -l app=gitea -n gitea -ojsonpath='{.items[0].status.containerStatuses[0].ready}' 2>/dev/null)
 
   if [ "${GITEA_STATUS}x" == "truex" ]; then
-    echo "INFO：GITEA 已建立，請執行帳號登錄"
+    echo -e "[$(date)] \e[32mINFO\e[0m：GITEA 已建立，請執行帳號登錄"
     exit 1
   fi
 
@@ -231,7 +231,7 @@ create_gitea(){
 
   # 建立 gitea 權限
   if [ $gitea_sa_status -eq 0 ]; then
-    echo "INFO：ServiceAccount [gitea-sa] 已存在"
+    echo -e "[$(date)] \e[32mINFO\e[0m：ServiceAccount [gitea-sa] 已存在"
   else
     oc create sa gitea-sa -n gitea
     oc adm policy add-scc-to-user anyuid -z gitea-sa -n gitea
@@ -241,8 +241,8 @@ create_gitea(){
   envsubst < ${YAML_DIR}/gitea/create-gitea.yaml |oc apply -f -
   envsubst < ${YAML_DIR}/gitea/postgresql.yaml |oc apply -f -
 
-  echo "INFO：create_gitea 執行完成"
-  echo "INFO：post_install 腳本執行完成，GITEA 已建立，請執行帳號登錄"
+  echo -e "[$(date)] \e[32mINFO\e[0m：create_gitea 執行完成"
+  echo -e "[$(date)] \e[32mINFO\e[0m：post_install 腳本執行完成，GITEA 已建立，請執行帳號登錄"
 }
 
 main

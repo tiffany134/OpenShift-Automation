@@ -16,36 +16,36 @@ LOG_FILE="checkmd5_verify.log"
 
 create() {
   if ! cd "$TARGET_DIR"; then
-    echo "目錄不存在：$TARGET_DIR"
+    echo -e "[$(date)] \e[31mERROR\e[0m：目錄不存在：$TARGET_DIR"
     exit 1
   fi
 
-  echo "建立 .md5 檔案中..."
+  echo -e "[$(date)] \e[32mINFO\e[0m：建立 .md5 檔案中..."
   for file in mirror*.tar; do
     md5sum "$file" > "${file}.md5"
-    echo "已建立：${file}.md5"
+    echo -e "[$(date)] \e[32mINFO\e[0m：已建立：${file}.md5"
   done
 }
 
 check() {
   if ! cd "$TARGET_DIR"; then
-    echo "目錄不存在：$TARGET_DIR"
+    echo -e "[$(date)] \e[31mERROR\e[0m：目錄不存在：$TARGET_DIR"
     exit 1
   fi
 
-  echo "驗證 MD5 中..."
+  echo -e "[$(date)] \e[32mINFO\e[0m：驗證 MD5 中..."
   > "$LOG_FILE"
 
   for file in mirror*.tar; do
     if ! md5sum -c "${file}.md5" >> "$LOG_FILE" 2>&1; then
-      echo "驗證失敗：$file，詳見 $LOG_FILE"
+      echo -e "[$(date)] \e[31mERROR\e[0m：驗證失敗：$file，詳見 $LOG_FILE"
       exit 1
     else
-      echo "驗證通過：$file"
+      echo -e "[$(date)] \e[32mINFO\e[0m：驗證通過：$file"
     fi
   done
 
-  echo "所有檔案驗證完成"
+  echo -e "[$(date)] \e[32mINFO\e[0m：所有檔案驗證完成"
 }
 
 # 主程式入口
