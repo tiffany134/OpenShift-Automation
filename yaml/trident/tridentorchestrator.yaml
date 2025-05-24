@@ -4,7 +4,7 @@ metadata:
   name: trident
 spec:
   debug: true
-  namespace: ${TRIDENT_NAMESPACE}
+  namespace: ${STORAGE_NAMESPACE}
   imagePullPolicy: IfNotPresent
   windows: false
   cloudProvider: ""

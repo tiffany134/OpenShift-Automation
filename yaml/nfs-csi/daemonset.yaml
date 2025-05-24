@@ -3,7 +3,7 @@ kind: DaemonSet
 apiVersion: apps/v1
 metadata:
   name: csi-nfs-node
-  namespace: ${NFS_NAMESPACE}
+  namespace: ${STORAGE_NAMESPACE}
 spec:
   updateStrategy:
     rollingUpdate:

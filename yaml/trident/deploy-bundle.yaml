@@ -4,7 +4,7 @@ metadata:
   labels:
     app: operator.trident.netapp.io
   name: trident-operator
-  namespace: ${TRIDENT_NAMESPACE}
+  namespace: ${STORAGE_NAMESPACE}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
@@ -425,7 +425,7 @@ roleRef:
 subjects:
   - kind: ServiceAccount
     name: trident-operator
-    namespace: ${TRIDENT_NAMESPACE}
+    namespace: ${STORAGE_NAMESPACE}
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -433,7 +433,7 @@ metadata:
   labels:
     app: operator.trident.netapp.io
   name: trident-operator
-  namespace: ${TRIDENT_NAMESPACE}
+  namespace: ${STORAGE_NAMESPACE}
 spec:
   replicas: 1
   selector:
