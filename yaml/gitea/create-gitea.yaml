@@ -1,10 +1,3 @@
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: gitea # Change this value if you want a different namespace name
-  labels:
-    name: gitea # Change this value to match metadata.name
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -23,7 +16,7 @@ spec:
       serviceAccountName: gitea-sa
       containers:
         - name: gitea
-          image: bastion.${OCP_DOMAIN}:8443/ocp${OCP_VERSION}/gitea/gitea:${GITEA_VERSION}
+          image: bastion.${OCP_DOMAIN}:8443/ocp${OCP_VERSION}/rhtw/gitea:${GITEA_VERSION}
           ports:
             - containerPort: 3000
               name: gitea

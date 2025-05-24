@@ -23,8 +23,8 @@ nfs_csi(){
     # 創建 ServiceAccount 和 RBAC 權限
     envsubst < ${YAML_DIR}/${CSI_MODULE}/rbac.yaml |oc apply -f -
 
-    oc adm policy add-scc-to-user anyuid -z csi-nfs-controller-sa -n ${STORAGE_NAMESPACE}
-    oc adm policy add-scc-to-user anyuid -z csi-nfs-node-sa -n ${STORAGE_NAMESPACE}
+    oc adm policy add-scc-to-user privileged -z csi-nfs-controller-sa -n ${STORAGE_NAMESPACE}
+    oc adm policy add-scc-to-user privileged -z csi-nfs-node-sa -n ${STORAGE_NAMESPACE}
     
     # 創建 csi driver
     envsubst < ${YAML_DIR}/${CSI_MODULE}/csi-driver.yaml |oc apply -f -

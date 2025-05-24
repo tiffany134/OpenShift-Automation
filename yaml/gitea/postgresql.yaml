@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: postgresql-db
-          image: bastion.${OCP_DOMAIN}:8443/ocp${OCP_VERSION}/library/postgres
+          image: bastion.${OCP_DOMAIN}:8443/ocp${OCP_VERSION}/rhtw/postgres:17.5
           volumeMounts:
             - mountPath: /data
               name: cache-volume
