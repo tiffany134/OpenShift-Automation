@@ -58,6 +58,7 @@ env_prep(){
     "/root/install_source"
     "/root/.docker"
     "/root/install/ocp418"
+    "/root/install_source/mirror"
   )
 
   # 使用迴圈創建所有目錄

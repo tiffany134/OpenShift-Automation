@@ -34,6 +34,8 @@ main(){
 define_global_env(){
   echo -e "[$(date)] \e[32mINFO\e[0m：開始執行 define_global_env..."
 
+  export KUBECONFIG=/root/ocp4/auth/kubeconfig
+
   # OCP FQDN
   export OCP_DOMAIN=$(oc get ingress.config.openshift.io cluster --template={{.spec.domain}} | sed -e "s/^apps.//")
   export ENCODED_PASSWORD=$(jq -rn --arg v "${GITEA_PASSWORD}" '$v|@uri')
@@ -168,7 +170,7 @@ execute_gitops(){
   cd /root/OpenShift-EaaS-Practice/
   
   # 執行 bootstrap_gitea.sh 腳本
-  .bootstrap/bootstrap_gitea.sh \
+  sh .bootstrap/bootstrap_gitea.sh \
     https://${GITEA_REPO}/OpenShift-EaaS-Practice.git \
     ${GITOPS_CLUSTER_TYPE}  \
     ${OCP_ADMIN} \

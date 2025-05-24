@@ -83,7 +83,7 @@ mirror_source_config(){
   icsp=$(find /root/oc-mirror-workspace/ -maxdepth 2 -path "*/results-*" -type f -name "imageContentSourcePolicy.yaml")
 
   # 檢查是否找到文件
-  if [ -z "$redhat_operator_cs" && "$icsp" ]; then
+  if [ ! -f "$redhat_operator_cs" ] || [ ! -f "$icsp" ]; then
     echo -e "[$(date)] \e[31mERROR\e[0m：未找到 catalogSource-cs-redhat-operator-index.yaml 和 imageContentSourcePolicy.yaml 文件"
     exit 1
   fi
@@ -233,6 +233,7 @@ create_gitea(){
   if [ $gitea_sa_status -eq 0 ]; then
     echo -e "[$(date)] \e[32mINFO\e[0m：ServiceAccount [gitea-sa] 已存在"
   else
+    envsubst < ${YAML_DIR}/gitea/ns-gitea.yaml |oc apply -f -
     oc create sa gitea-sa -n gitea
     oc adm policy add-scc-to-user anyuid -z gitea-sa -n gitea
   fi
