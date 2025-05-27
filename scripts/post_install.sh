@@ -233,7 +233,7 @@ create_gitea(){
   if [ $gitea_sa_status -eq 0 ]; then
     echo -e "[$(date)] \e[32mINFO\e[0m：ServiceAccount [gitea-sa] 已存在"
   else
-    envsubst < ${YAML_DIR}/gitea/ns-gitea.yaml |oc apply -f -
+    envsubst < ${YAML_DIR}/gitea/ns_gitea.yaml |oc apply -f -
     oc create sa gitea-sa -n gitea
     oc adm policy add-scc-to-user anyuid -z gitea-sa -n gitea
   fi
