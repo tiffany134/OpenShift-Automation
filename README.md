@@ -308,6 +308,7 @@
     * checkt list (不在openshift-automation.tar.gz內):
       - [x] mirror_seq
       - [x] qcow2
+      - [x] vddk image 
       - [x] ISO
         - RHEL OS
         - rhcos
