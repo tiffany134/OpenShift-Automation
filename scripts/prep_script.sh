@@ -308,7 +308,7 @@ patch_imageset_config(){
       {"name": "registry.k8s.io/sig-storage/csi-attacher:v4.8.0"},
       {"name": "registry.k8s.io/sig-storage/csi-resizer:v1.13.1"},
       {"name": "registry.k8s.io/sig-storage/csi-snapshotter:v8.2.0"},
-      {"name": "registry.k8s.io/sig-storage/csi-node-driver-registrar:v2.13.0""},
+      {"name": "registry.k8s.io/sig-storage/csi-node-driver-registrar:v2.13.0"},
       {"name": "docker.io/netapp/trident-operator:25.02.1"}
     ]' /root/OpenShift-Automation/yaml/imageset-config.yaml -i     
     ;;
