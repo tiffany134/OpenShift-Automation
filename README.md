@@ -624,7 +624,7 @@
    TODO: gitea 連線位置截圖
 
    進入 gitea 後註冊帳號
-   ![](https://github.com/CCChou/OpenShift-Automation/blob/main/images/P4-2-1%20Register%20Gitea%20account.png)
+   ![](https://github.com/CCChou/OpenShift-Automation/blob/main/images/P4-2%20Register%20Gitea%20account.png)
    ![](https://github.com/CCChou/OpenShift-Automation/blob/main/images/P4-2-1%20Register%20Gitea%20account.png)
    
 6. 配置 operators_install.conf 內參數
