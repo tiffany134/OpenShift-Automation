@@ -624,9 +624,10 @@
    TODO: gitea 連線位置截圖
 
    進入 gitea 後註冊帳號
-   TODO: gitea 帳號註冊截圖
-
-5. 配置 operators_install.conf 內參數
+   ![](https://github.com/CCChou/OpenShift-Automation/blob/main/images/P4-2-1%20Register%20Gitea%20account.png)
+   ![](https://github.com/CCChou/OpenShift-Automation/blob/main/images/P4-2-1%20Register%20Gitea%20account.png)
+   
+6. 配置 operators_install.conf 內參數
    ```bash
    # operators_install.conf
 
@@ -641,7 +642,7 @@
    ARGOCD_INSTALL_MODE=spoke # hub | spoke
    ```
 
-6. 執行 operators_install.sh 腳本
+7. 執行 operators_install.sh 腳本
    ```bash
    sh /root/OpenShift-Automation/scripts/operators_install.sh
    ```
