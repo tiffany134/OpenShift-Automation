@@ -55,7 +55,7 @@
    - 到 [Red Hat Hybrid Cloud Console](https://console.redhat.com/openshift/downloads) 下載 pull secret
      ![dowdload path](https://github.com/CCChou/OpenShift-Automation/blob/main/images/download_pullsecret.png)
 
-4. 配置 prep_script.conf 內參數
+4. 配置 prep_script.conf 內參數  (調整 /root/OpenShift-Automation/scripts/prep_script.conf 內的配置)
    - 使用 [Red Hat OpenShift Container Platform Update Graph](https://access.redhat.com/labs/ocpupgradegraph/update_path/) 查詢 OCP channel 及 version
 
    * 指令工具及系統檔案清單(以 4.18 stable 的 amd64 架構為範例):
