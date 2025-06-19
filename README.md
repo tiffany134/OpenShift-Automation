@@ -49,7 +49,7 @@
      cd /root
      ```
      ```bash
-     git clone https://github.com/CCChou/OpenShift-Automation.git
+     git clone https://github.com/CCChou/OpenShift-Automation.git --branch <branchname>
      ```
 
 3. 下載 pull-secret ，取名 pull-secret 並放到 /root 目錄下
