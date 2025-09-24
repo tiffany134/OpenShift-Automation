@@ -55,10 +55,10 @@ env_prep(){
 
   # 定義需要檢查/創建的目錄列表（可以自行替換或擴展）
   CREATE_DIRS=(
-    "/root/install_source"
+    "/root/install_source_v2"
     "/root/.docker"
     "/root/install/ocp418"
-    "/root/install_source/mirror"
+    "/root/install_source_v2/mirror"
   )
 
   # 使用迴圈創建所有目錄
@@ -91,7 +91,7 @@ git_clone(){
   git clone https://github.com/CCChou/ocp_bastion_installer.git ${OCP_INSTALLER_DIR}
 
   git clone https://github.com/CCChou/OpenShift-EaaS-Practice.git /root/OpenShift-EaaS-Practice
-  tar cvf /root/install_source/gitops.tar /root/OpenShift-EaaS-Practice
+  tar cvf /root/install_source_v2/gitops.tar /root/OpenShift-EaaS-Practice
 
   echo -e "[$(date)] \e[32mINFO\e[0m：git_clone 執行完成"
 }
@@ -104,7 +104,7 @@ build_ee_image(){
   podman pull quay.io/rhtw/ee-bas-auto:v1.0
     
   # 將 ee 鏡像包成 tar 檔
-  podman save -o /root/install_source/${EE_IMAGE_NAME}-v1.tar ee-bas-auto:v1.0
+  podman save -o /root/install_source_v2/${EE_IMAGE_NAME}-v1.tar ee-bas-auto:v1.0
 
   echo -e "[$(date)] \e[32mINFO\e[0m：build_ee_image 執行完成"
 }
@@ -123,7 +123,7 @@ download_ansible(){
     dnf install --enablerepo="${AAP_REPO}" --downloadonly --installroot="${AAP_DIR}/rootdir" --downloaddir="${AAP_DIR}/ansible-navigator-rpm-${RHEL_MINOR_VERSION}" --releasever="${RHEL_MINOR_VERSION}" ansible-navigator -y
 
     # 將 AAP RPM 包打包成 tar 檔
-    tar cvf /root/install_source/ansible-navigator-rpm-${RHEL_MINOR_VERSION}.tar -C ${AAP_DIR} "ansible-navigator-rpm-${RHEL_MINOR_VERSION}"
+    tar cvf /root/install_source_v2/ansible-navigator-rpm-${RHEL_MINOR_VERSION}.tar -C ${AAP_DIR} "ansible-navigator-rpm-${RHEL_MINOR_VERSION}"
   else
     echo -e "[$(date)] \e[32mINFO\e[0m：文件 ansible-navigator-rpm-${RHEL_MINOR_VERSION}.tar 已存在，跳過操作。"
   fi
@@ -136,32 +136,33 @@ get_tools(){
   echo -e "[$(date)] \e[32mINFO\e[0m：開始執行 get_tools，下載安裝工具..."
 
   # 下載 openshift client
-  wget https://mirror.openshift.com/pub/openshift-v4/clients/ocp/${OCP_RELEASE}/openshift-client-linux-${ARCHITECTURE}-${RHEL_VERSION}-${OCP_RELEASE}.tar.gz -P /root/install_source
+  wget https://mirror.openshift.com/pub/openshift-v4/clients/ocp/${OCP_RELEASE}/openshift-client-linux-${ARCHITECTURE}-${RHEL_VERSION}-${OCP_RELEASE}.tar.gz -P /root/install_source_v2
   echo -e "[$(date)] \e[32mINFO\e[0m：oc client 下載完成"
 
   # 下載 openshift install
-  wget https://mirror.openshift.com/pub/openshift-v4/clients/ocp/${OCP_RELEASE}/openshift-install-${RHEL_VERSION}-${ARCHITECTURE}.tar.gz -P /root/install_source
+  wget https://mirror.openshift.com/pub/openshift-v4/clients/ocp/${OCP_RELEASE}/openshift-install-${RHEL_VERSION}-${ARCHITECTURE}.tar.gz -P /root/install_source_v2
   echo -e "[$(date)] \e[32mINFO\e[0m：oc install 下載完成"
-
+#   https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.18.8/openshift-install-rhel9-amd64.tar.gz
+# https://mirror.openshift.com/pub/openshift-v4/amd64/clients/ocp/4.18.8/openshift-install-rhel9-amd64.tar.gz
   # 下載 oc mirror
-  wget https://mirror.openshift.com/pub/openshift-v4/clients/ocp/${OCP_RELEASE}/oc-mirror.${RHEL_VERSION}.tar.gz -P /root/install_source
+  wget https://mirror.openshift.com/pub/openshift-v4/clients/ocp/${OCP_RELEASE}/oc-mirror.${RHEL_VERSION}.tar.gz -P /root/install_source_v2
   echo -e "[$(date)] \e[32mINFO\e[0m：oc mirror 下載完成"
 
   # 下載 butane
-  wget https://mirror.openshift.com/pub/openshift-v4/clients/butane/latest/butane-${ARCHITECTURE} -P /root/install_source
+  wget https://mirror.openshift.com/pub/openshift-v4/clients/butane/latest/butane-${ARCHITECTURE} -P /root/install_source_v2
   echo -e "[$(date)] \e[32mINFO\e[0m：butane 下載完成"
 
   # 下載 latest helm
-  wget https://developers.redhat.com/content-gateway/file/pub/openshift-v4/clients/helm/${HELM_VERSION}/helm-linux-${ARCHITECTURE}.tar.gz -P /root/install_source
+  wget https://developers.redhat.com/content-gateway/file/pub/openshift-v4/clients/helm/${HELM_VERSION}/helm-linux-${ARCHITECTURE}.tar.gz -P /root/install_source_v2
   echo -e "[$(date)] \e[32mINFO\e[0m：helm 下載完成"
 
   # 下載 latest mirror registry
-  wget https://developers.redhat.com/content-gateway/file/pub/openshift-v4/clients/mirror-registry/${MIRROR_REGISTRY_VERSION}/mirror-registry.tar.gz -P /root/install_source
+  wget https://developers.redhat.com/content-gateway/file/pub/openshift-v4/clients/mirror-registry/${MIRROR_REGISTRY_VERSION}/mirror-registry.tar.gz -P /root/install_source_v2
   echo -e "[$(date)] \e[32mINFO\e[0m：mirror registry 下載完成"
 
   # 下載 trident installer
   if [ "${CSI_TYPE}" == "trident" ]; then
-    wget https://github.com/NetApp/trident/releases/download/v${TRIDENT_INSTALLER}/trident-installer-${TRIDENT_INSTALLER}.tar.gz -P /root/install_source
+    wget https://github.com/NetApp/trident/releases/download/v${TRIDENT_INSTALLER}/trident-installer-${TRIDENT_INSTALLER}.tar.gz -P /root/install_source_v2
     echo -e "[$(date)] \e[32mINFO\e[0m：trident installer 下載完成"
   fi
   
@@ -187,7 +188,7 @@ configure_aap_main(){
 
   cp ${OCP_INSTALLER_DIR}/defaults/main.yml ${OCP_INSTALLER_DIR}/defaults/main.yml.bak
 
-cat << EOF > ${OCP_INSTALLER_DIR}/defaults/main.yml
+cat << EOF > ${OCP_INSTALLER_DIR}/defa是否啟用負載平衡配置ults/main.yml
 ---
 online: false
 
@@ -212,7 +213,7 @@ haproxy_configure: true
 
 # 鏡像庫配置
 registry_configure: true
-mirrorRegistryDir: /root/install_source/mirror-registry.tar.gz
+mirrorRegistryDir: /root/install_source_v2/mirror-registry.tar.gz
 quayRoot: /mirror-registry
 quayStorage: /mirror-registry/storage
 registryPassword: ${REGISTRY_PASSWORD}
@@ -222,7 +223,7 @@ ntp_server_configure: true
 # NTP client
 ntp_client_configure: true
 ntp_server_ip: ${BASTION_IP}
-butaneDir: /root/install_source/butane-amd64
+butaneDir: /root/install_source_v2/butane-amd64
 
 # OCP 相關配置
 ocp_configure: true
@@ -232,15 +233,15 @@ clusterName: ${CLUSTER_DOMAIN}
 baseDomain: ${BASE_DOMAIN}
 # 定義資源檔案之絕對路徑: 如公鑰、OCP 所需指令壓縮檔位置等
 sshKeyDir: /root/.ssh/id_rsa.pub
-ocpInstallDir: /root/install_source/openshift-install-${RHEL_VERSION}-${ARCHITECTURE}.tar.gz
-ocpClientDir: /root/install_source/openshift-client-linux-${ARCHITECTURE}-${RHEL_VERSION}-${OCP_RELEASE}.tar.gz
+ocpInstallDir: /root/install_source_v2/openshift-install-${RHEL_VERSION}-${ARCHITECTURE}.tar.gz
+ocpClientDir: /root/install_source_v2/openshift-client-linux-${ARCHITECTURE}-${RHEL_VERSION}-${OCP_RELEASE}.tar.gz
 # 連線安裝所需之 pull-secret 位置
-pullSecretDir: /root/install_source/pull-secret.txt
+pullSecretDir: /root/install_source_v2/pull-secret.txt
 
 # 從磁碟到鏡像的同步
 mirror: true
-ocmirrorSource: /root/install_source/oc-mirror.${RHEL_VERSION}.tar.gz
-imageSetFile: /root/install_source/mirror
+ocmirrorSource: /root/install_source_v2/oc-mirror.${RHEL_VERSION}.tar.gz
+imageSetFile: /root/install_source_v2/mirror
 reponame: ocp418
 
 # 節點的基本設定 (將不需要的節點註解掉)
@@ -294,7 +295,7 @@ patch_imageset_config(){
       {"name": "registry.k8s.io/sig-storage/csi-provisioner:v5.2.0"},
       {"name": "registry.k8s.io/sig-storage/csi-snapshotter:v8.2.0"},
       {"name": "registry.k8s.io/sig-storage/livenessprobe:v2.15.0"},
-      {"name": "registry.k8s.io/sig-storage/nfsplugin:v4.11.0"},
+      {"name": "registry.k8s.io/sig-storage/nfsplugin:v4.110"},
       {"name": "registry.k8s.io/sig-storage/snapshot-controller:v8.2.0"},
       {"name": "registry.k8s.io/sig-storage/csi-node-driver-registrar:v2.13.0"}
     ]' /root/OpenShift-Automation/yaml/imageset-config.yaml -i    
@@ -326,7 +327,7 @@ untar_oc_mirror(){
   echo -e "[$(date)] \e[32mINFO\e[0m：開始執行 untar_oc_mirror..."
 
   # 將 oc-mirror 指令解開使用
-  tar -zxvf /root/install_source/oc-mirror.rhel9.tar.gz -C /usr/bin/
+  tar -zxvf /root/install_source_v2/oc-mirror.rhel9.tar.gz -C /usr/bin/
 
   chmod a+x /usr/bin/oc-mirror
 

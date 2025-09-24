@@ -48,6 +48,6 @@ fi
 podman load -i ${EE_IMAGE_TAR}
 
 # 使用 ansible 運行自動化設定配置腳本
-ansible-navigator run --eei ${EE_IMAGE_NAME} --pp missing -i /root/OpenShift-Automation/roles/inventory -m stdout /root/OpenShift-Automation/roles/install.yml
+ansible-navigator run --eei ${EE_IMAGE_NAME} --pp missing -i /root/OpenShift-Automation/roles/inventory -m stdout /root/OpenShift-Automation/roles/install.yml -vvv
 
 echo -e "[$(date)] \e[32mINFO\e[0m： configure_and_run 執行完成"

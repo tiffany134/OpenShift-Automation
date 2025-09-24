@@ -1,6 +1,7 @@
 #!/bin/bash
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 config_file="$SCRIPT_DIR/post_install.conf"
+YAML_DIR=/root/OpenShift-Automation/yaml
 
 
 # 檢查文件是否存在
@@ -24,12 +25,14 @@ echo -e "[$(date)] \e[32mINFO\e[0m：post_install.conf 配置檔確認完畢，�
 
 # 主程式
 main(){
-  approve_csr
-  mirror_source_config
-  ocp_authentication
+#  approve_csr
+ # mirror_source_config_v2
+  #mirror_source_config
+  #ocp_authentication
   csi_installation
-  infra_node_setup
-  create_gitea
+  #infra_node_setup
+  #create_gitea
+ 
 }
 
 # 驗證通過 CSR
@@ -37,7 +40,7 @@ approve_csr(){
   echo -e "[$(date)] \e[32mINFO\e[0m：開始執行 approve_csr..."
 
   export KUBECONFIG=/root/ocp4/auth/kubeconfig
-  export YAML_DIR="/root/OpenShift-Automation/yaml"
+  # export YAML_DIR=/root/OpenShift-Automation/yaml
 
   TARGET_READY_COUNT=${TOTAL_NODE_NUMBER}
   CHECK_INTERVAL=$((5 * 60)) # 每 5 分鐘檢查一次
@@ -71,33 +74,114 @@ approve_csr(){
   echo -e "[$(date)] \e[32mINFO\e[0m：approve_csr 執行完成"
 }
 
-# 配置 mirror 來源
-mirror_source_config(){
-  echo -e "[$(date)] \e[32mINFO\e[0m：開始執行 mirror_source_config..."
+#配置 mirror 來源
+# mirror_source_config(){
+#   echo -e "[$(date)] \e[32mINFO\e[0m：開始執行 mirror_source_config..."
 
-  # 關閉預設 catalog source
-  oc patch OperatorHub cluster --type json -p '[{"op": "add", "path": "/spec/disableAllDefaultSources", "value": true}]'
+#   # 關閉預設 catalog source
+#   oc patch OperatorHub cluster --type json -p '[{"op": "add", "path": "/spec/disableAllDefaultSources", "value": true}]'
 
-  # 查找 redhat operator catalogsource
-  redhat_operator_cs=$(find /root/oc-mirror-workspace/ -maxdepth 2 -path "*/results-*" -type f -name "catalogSource-cs-redhat-operator-index.yaml")
-  icsp=$(find /root/oc-mirror-workspace/ -maxdepth 2 -path "*/results-*" -type f -name "imageContentSourcePolicy.yaml")
+#   # 查找 redhat operator catalogsource
+#   redhat_operator_cs=$(find /root/oc-mirror-workspace/ -maxdepth 2 -path "*/results-*" -type f -name "catalogSource-cs-redhat-operator-index.yaml")
+#   icsp=$(find /root/oc-mirror-workspace/ -maxdepth 2 -path "*/results-*" -type f -name "imageContentSourcePolicy.yaml")
 
-  # 檢查是否找到文件
-  if [ ! -f "$redhat_operator_cs" ] || [ ! -f "$icsp" ]; then
-    echo -e "[$(date)] \e[31mERROR\e[0m：未找到 catalogSource-cs-redhat-operator-index.yaml 和 imageContentSourcePolicy.yaml 文件"
-    exit 1
+#   # 檢查是否找到文件
+#   if [ ! -f "$redhat_operator_cs" ] || [ ! -f "$icsp" ]; then
+#     echo -e "[$(date)] \e[31mERROR\e[0m：未找到 catalogSource-cs-redhat-operator-index.yaml 和 imageContentSourcePolicy.yaml 文件"
+#     exit 1
+#   fi
+
+#   # 找到文件後將 name 替換成 redhat-operators
+#   sed -i.bak '/^ *name: /s/cs-redhat-operator-index/redhat-operators/' $redhat_operator_cs
+
+#   # 將 CatalogSource apply 
+#   oc apply -f $redhat_operator_cs
+#   oc apply -f $icsp
+
+#   echo -e "[$(date)] \e[32mINFO\e[0m：mirror_source_config 執行完成"
+# }
+#-----------------------------------------------------------------------
+# 配置 mirror 來源 (適用於 oc mirror --v2)
+_apply_single_mirror_config(){
+  local root_dir="$1" # 使用更簡潔的變數名
+
+  echo -e "[$(date)] \e[32mINFO\e[0m：處理目錄: \e[1m$root_dir\e[0m"
+
+  local config_path="${root_dir}/cluster-resources"
+  [[ ! -d "$config_path" ]] && { echo -e "[$(date)] \e[31mERROR\e[0m：未找到 'cluster-resources' 目錄於 '$root_dir'。"; return 1; }
+
+  echo -e "[$(date)] \e[32mINFO\e[0m：在 \e[1m$config_path\e[0m 中尋找配置文件..."
+
+  # 查找並應用 ImageContentSourcePolicy (ICSP)
+  # 使用陣列收集，並循環應用
+  local -a icsp_files=()
+  [[ -f "${config_path}/idms-oc-mirror.yaml" ]] && icsp_files+=("${config_path}/idms-oc-mirror.yaml")
+  [[ -f "${config_path}/itms-oc-mirror.yaml" ]] && icsp_files+=("${config_path}/itms-oc-mirror.yaml")
+
+  if (( ${#icsp_files[@]} == 0 )); then
+    echo -e "[$(date)] \e[31mERROR\e[0m：未找到任何 ImageContentSourcePolicy 文件 (idms-oc-mirror.yaml 或 itms-oc-mirror.yaml)。"
+    return 1
   fi
 
-  # 找到文件後將 name 替換成 redhat-operators
-  sed -i.bak '/^ *name: /s/cs-redhat-operator-index/redhat-operators/' $redhat_operator_cs
+  echo -e "[$(date)] \e[32mINFO\e[0m：找到並應用 ImageContentSourcePolicy 文件："
+  printf "%s\n" "${icsp_files[@]}"
+  for file in "${icsp_files[@]}"; do
+    oc apply -f "$file"
+  done
 
-  # 將 CatalogSource apply 
-  oc apply -f $redhat_operator_cs
-  oc apply -f $icsp
+  # 查找並應用 CatalogSource (CS)
+  local -a cs_files=()
+  while IFS= read -r -d $'\0' file; do
+    cs_files+=("$file")
+  done < <(find "$config_path" -maxdepth 1 -type f \( -name "cc-redhat-operator-index-v*.yaml" -o -name "cs-redhat-operator-index-v*.yaml" \) -print0)
 
-  echo -e "[$(date)] \e[32mINFO\e[0m：mirror_source_config 執行完成"
+  if (( ${#cs_files[@]} == 0 )); then
+    echo -e "[$(date)] \e[31mERROR\e[0m：未找到任何 CatalogSource 文件 (cc-redhat-operator-index-v*.yaml 或 cs-redhat-operator-index-v*.yaml)。"
+    return 1
+  fi
+
+  echo -e "[$(date)] \e[32mINFO\e[0m：找到並應用 CatalogSource 文件："
+  printf "%s\n" "${cs_files[@]}"
+  for file in "${cs_files[@]}"; do
+    oc apply -f "$file"
+  done
+
+  echo -e "[$(date)] \e[32mINFO\e[0m：成功處理目錄: \e[1m$root_dir\e[0m"
+  return 0
 }
 
+
+# 函數：處理多個 oc mirror 工作目錄的配置應用 (供 main() 調用)
+mirror_source_config_v2(){
+  echo -e "[$(date)] \e[32mINFO\e[0m：啟動離線鏡像來源配置..."
+
+  # 關閉預設 OperatorHub 來源 (這一步只執行一次)
+  echo -e "[$(date)] \e[32mINFO\e[0m：關閉預設 OperatorHub 來源..."
+  oc patch OperatorHub cluster --type json -p '[{"op": "add", "path": "/spec/disableAllDefaultSources", "value": true}]' \
+    || { echo -e "[$(date)] \e[31mERROR\e[0m：關閉預設 OperatorHub 來源失敗。"; exit 1; }
+
+  # 定義 oc mirror 工作目錄 (請替換為你的實際路徑)
+  local -a OCMIRROR_WORKSPACES=(
+    "/root/install_source/mirror/generated/working-dir" # 範例路徑
+  
+  )
+
+  # 迴圈處理每個工作目錄
+  for path in "${OCMIRROR_WORKSPACES[@]}"; do
+    echo -e "\n------------------------------------------------------------"
+    echo -e "[$(date)] \e[34m處理中: $path\e[0m"
+    
+    _apply_single_mirror_config "$path" || {
+      echo -e "[$(date)] \e[31mFATAL ERROR\e[0m：處理目錄 '$path' 失敗，終止操作。"
+      exit 1
+    }
+    
+    echo -e "------------------------------------------------------------"
+  done
+
+  echo -e "[$(date)] \e[32mINFO\e[0m：所有指定目錄處理完成。"
+}
+#-----------------------------------------------------------------------
 # 建立 OCP 的認證機制
 ocp_authentication(){
   echo -e "[$(date)] \e[32mINFO\e[0m：開始執行 ocp_authentication..."
@@ -136,7 +220,8 @@ ocp_authentication(){
 csi_installation(){
   echo -e "[$(date)] \e[32mINFO\e[0m：開始執行 csi_installation..."
 
-  export OCP_DOMAIN=$(oc get ingress.config.openshift.io cluster --template={{.spec.domain}} | sed -e "s/^apps.//")
+  # export OCP_DOMAIN=$(oc get ingress.config.openshift.io cluster --template={{.spec.domain}} | sed -e "s/^apps.//")
+  export OCP_DOMAIN=ocp4.example.com
   export OCP_VERSION=418
     
   source /root/OpenShift-Automation/scripts/install_csi.sh
@@ -184,7 +269,9 @@ infra_node_setup(){
     oc apply -f ${YAML_DIR}/infra/mcp_infra.yaml
 
     # 將 infra node role 改為 infra
-    for i in {01..03}; do
+    # for i in {01..03}; do
+      for i in {1..3}; do
+
       oc label nodes infra$i.${OCP_DOMAIN} node-role.kubernetes.io/infra='';
       oc label nodes infra$i.${OCP_DOMAIN} node-role.kubernetes.io/worker-;
       oc adm taint node infra$i.${OCP_DOMAIN} \
@@ -215,14 +302,14 @@ infra_node_setup(){
 # 創建 gitea server
 create_gitea(){ 
   echo -e "[$(date)] \e[32mINFO\e[0m：開始執行 create_gitea..."
-
+  export OCP_DOMAIN=ocp4.example.com
   export GITEA_VERSION=${GITEA_VERSION}
-
+  export OCP_VERSION=418
   # 檢查 gitea pod 是否存在
   GITEA_STATUS=$(oc get pod -l app=gitea -n gitea -ojsonpath='{.items[0].status.containerStatuses[0].ready}' 2>/dev/null)
 
   if [ "${GITEA_STATUS}x" == "truex" ]; then
-    echo -e "[$(date)] \e[32mINFO\e[0m：GITEA 已建立，請執行帳號登錄"
+    echo -e "[$(date)] \e[32mINFO\e[0m：GITEA 已建立，請執行帳號登錄"OCP_VERSION
     exit 1
   fi
 
