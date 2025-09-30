@@ -88,7 +88,7 @@ env_prep(){
 git_clone(){
   echo -e "[$(date)] \e[32mINFO\e[0m：開始執行 git_clone..."
 
-  git clone https://github.com/CCChou/ocp_bastion_installer.git ${OCP_INSTALLER_DIR}
+  git clone https://github.com/tiffany134/OpenShift-Automation.git ${OCP_INSTALLER_DIR}
 
   git clone https://github.com/CCChou/OpenShift-EaaS-Practice.git /root/OpenShift-EaaS-Practice
   tar cvf /root/install_source_v2/gitops.tar /root/OpenShift-EaaS-Practice
@@ -142,8 +142,7 @@ get_tools(){
   # 下載 openshift install
   wget https://mirror.openshift.com/pub/openshift-v4/clients/ocp/${OCP_RELEASE}/openshift-install-${RHEL_VERSION}-${ARCHITECTURE}.tar.gz -P /root/install_source_v2
   echo -e "[$(date)] \e[32mINFO\e[0m：oc install 下載完成"
-#   https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.18.8/openshift-install-rhel9-amd64.tar.gz
-# https://mirror.openshift.com/pub/openshift-v4/amd64/clients/ocp/4.18.8/openshift-install-rhel9-amd64.tar.gz
+
   # 下載 oc mirror
   wget https://mirror.openshift.com/pub/openshift-v4/clients/ocp/${OCP_RELEASE}/oc-mirror.${RHEL_VERSION}.tar.gz -P /root/install_source_v2
   echo -e "[$(date)] \e[32mINFO\e[0m：oc mirror 下載完成"
@@ -156,9 +155,16 @@ get_tools(){
   wget https://developers.redhat.com/content-gateway/file/pub/openshift-v4/clients/helm/${HELM_VERSION}/helm-linux-${ARCHITECTURE}.tar.gz -P /root/install_source_v2
   echo -e "[$(date)] \e[32mINFO\e[0m：helm 下載完成"
 
+  # # 下載 latest mirror registry
+  # wget https://developers.redhat.com/content-gateway/file/pub/openshift-v4/clients/mirror-registry/${MIRROR_REGISTRY_VERSION}/mirror-registry.tar.gz -P /root/install_source_v2
+  # echo -e "[$(date)] \e[32mINFO\e[0m：mirror registry 下載完成"
+
+
+
   # 下載 latest mirror registry
-  wget https://developers.redhat.com/content-gateway/file/pub/openshift-v4/clients/mirror-registry/${MIRROR_REGISTRY_VERSION}/mirror-registry.tar.gz -P /root/install_source_v2
+  wget https://mirror.openshift.com/pub/cgw/mirror-registry/latest/mirror-registry-amd64.tar.gz -P /root/install_source_v2
   echo -e "[$(date)] \e[32mINFO\e[0m：mirror registry 下載完成"
+
 
   # 下載 trident installer
   if [ "${CSI_TYPE}" == "trident" ]; then
@@ -188,7 +194,7 @@ configure_aap_main(){
 
   cp ${OCP_INSTALLER_DIR}/defaults/main.yml ${OCP_INSTALLER_DIR}/defaults/main.yml.bak
 
-cat << EOF > ${OCP_INSTALLER_DIR}/defa是否啟用負載平衡配置ults/main.yml
+cat << EOF > ${OCP_INSTALLER_DIR}/defaults/main.yml
 ---
 online: false
 
