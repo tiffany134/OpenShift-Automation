@@ -26,9 +26,9 @@ main(){
  # backup_local_yum
  # env_prep
   git_clone
-  build_ee_image
+ # build_ee_image
  # download_ansible
- # get_tools
+  get_tools
   configre_aap_config
   configure_aap_main
   patch_imageset_config
@@ -144,7 +144,8 @@ get_tools(){
   echo -e "[$(date)] \e[32mINFO\e[0m：oc install 下載完成"
 
   # 下載 oc mirror
-  wget https://mirror.openshift.com/pub/openshift-v4/clients/ocp/${OCP_RELEASE}/oc-mirror.${RHEL_VERSION}.tar.gz -P /root/install_source_v2
+  wget https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/latest/oc-mirror.rhel9.tar.gz -P /root/install_source_v2
+ # wget https://mirror.openshift.com/pub/openshift-v4/clients/ocp/${OCP_RELEASE}/oc-mirror.${RHEL_VERSION}.tar.gz -P /root/install_source_v2
   echo -e "[$(date)] \e[32mINFO\e[0m：oc mirror 下載完成"
 
   # 下載 butane
@@ -155,15 +156,15 @@ get_tools(){
   wget https://developers.redhat.com/content-gateway/file/pub/openshift-v4/clients/helm/${HELM_VERSION}/helm-linux-${ARCHITECTURE}.tar.gz -P /root/install_source_v2
   echo -e "[$(date)] \e[32mINFO\e[0m：helm 下載完成"
 
-  # # 下載 latest mirror registry
-  # wget https://developers.redhat.com/content-gateway/file/pub/openshift-v4/clients/mirror-registry/${MIRROR_REGISTRY_VERSION}/mirror-registry.tar.gz -P /root/install_source_v2
-  # echo -e "[$(date)] \e[32mINFO\e[0m：mirror registry 下載完成"
-
-
-
   # 下載 latest mirror registry
-  wget https://mirror.openshift.com/pub/cgw/mirror-registry/latest/mirror-registry-amd64.tar.gz -P /root/install_source_v2
+  wget https://developers.redhat.com/content-gateway/file/pub/openshift-v4/clients/mirror-registry/${MIRROR_REGISTRY_VERSION}/mirror-registry.tar.gz -P /root/install_source_v2
   echo -e "[$(date)] \e[32mINFO\e[0m：mirror registry 下載完成"
+
+
+
+  # # 下載 latest mirror registry
+  # wget https://mirror.openshift.com/pub/cgw/mirror-registry/latest/mirror-registry-amd64.tar.gz -P /root/install_source_v2
+  # echo -e "[$(date)] \e[32mINFO\e[0m：mirror registry 下載完成"
 
 
   # 下載 trident installer

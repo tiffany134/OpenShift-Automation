@@ -1,0 +1,2 @@
+WARNING: This version information is deprecated and will be replaced with the output from --short. Use --output=yaml|json to get the full version.
+Client Version: version.Info{Major:"", Minor:"", GitVersion:"4.19.0-202509230411.p2.g0a5c2ac.assembly.stream.el9-0a5c2ac", GitCommit:"0a5c2ac69d378c382456569a876bbc31923c8409", GitTreeState:"clean", BuildDate:"2025-09-23T13:46:20Z", GoVersion:"go1.23.9 (Red Hat 1.23.9-1.el9_6) X:strictfipsruntime", Compiler:"gc", Platform:"linux/amd64"}
