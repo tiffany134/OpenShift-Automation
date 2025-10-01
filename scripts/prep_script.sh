@@ -23,12 +23,12 @@ echo -e "[$(date)] \e[32mINFO\e[0m：prep_script.conf 配置檔確認完畢，�
 
 # 主程式
 main(){
-  backup_local_yum
-  env_prep
+ # backup_local_yum
+ # env_prep
   git_clone
   build_ee_image
-  download_ansible
-  get_tools
+ # download_ansible
+ # get_tools
   configre_aap_config
   configure_aap_main
   patch_imageset_config
@@ -88,7 +88,7 @@ env_prep(){
 git_clone(){
   echo -e "[$(date)] \e[32mINFO\e[0m：開始執行 git_clone..."
 
-  git clone https://github.com/tiffany134/OpenShift-Automation.git ${OCP_INSTALLER_DIR}
+  git clone https://github.com/tiffany134/ocp_bastion_installer.git ${OCP_INSTALLER_DIR} 
 
   git clone https://github.com/CCChou/OpenShift-EaaS-Practice.git /root/OpenShift-EaaS-Practice
   tar cvf /root/install_source_v2/gitops.tar /root/OpenShift-EaaS-Practice
